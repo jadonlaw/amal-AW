@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amal Airways — Flight Management System</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{
+    --blue:#0b2f6b; --blue2:#12489f; --sky:#2f7be0;
+    --gold:#c9a54a; --gold2:#e6c66e;
+    --ink:#12233f; --line:#e3e8f0; --bg:#f4f7fc; --white:#fff;
+    --card:#ffffff; --sub:#5b6b84; --th:#0b2f6b;
+    --alertbg:#ffffff;
+  }
+  body.dark{
+    --blue:#12489f; --blue2:#0b2f6b;
+    --ink:#e8eef7; --line:#26344a; --bg:#0c1420; --white:#141e2d;
+    --card:#141e2d; --sub:#9fb0c8; --th:#0a1220;
+    --alertbg:#0c1420;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(90deg,var(--blue),var(--blue2));color:#fff;display:flex;align-items:center;gap:16px;padding:10px 18px;border-bottom:3px solid var(--gold)}
+  header .logo{width:38px;height:38px;border-radius:8px;background:var(--gold);color:var(--blue);display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+  header h1{font-size:17px;margin:0;letter-spacing:.3px;font-weight:700}
+  header h1 small{display:block;font-size:11px;font-weight:500;opacity:.8;letter-spacing:2px}
+  nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+  nav button{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+  nav button:hover{background:rgba(255,255,255,.18)}
+  nav button.active{background:var(--gold);color:var(--blue);border-color:var(--gold)}
+  .stat{display:flex;gap:22px;padding:10px 18px;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .stat .kpi{display:flex;flex-direction:column}
+  .stat .kpi b{font-size:19px;color:var(--blue)}
+  .stat .kpi span{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#7387a4;font-weight:700}
+  main{position:relative}
+  .view{display:none}.view.on{display:block}
+  #map{height:calc(100vh - 118px);width:100%}
+  .leaflet-tooltip.acft{background:var(--blue);color:#fff;border:1px solid var(--gold);border-radius:8px;font-size:12px;padding:8px 10px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+  .leaflet-tooltip.acft b{color:var(--gold2)}
+  .leaflet-tooltip.acft .row{display:flex;justify-content:space-between;gap:14px;margin-top:2px}
+  .leaflet-tooltip.acft .row span{opacity:.75}
+  .plane{color:var(--gold);filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+  .panel{padding:22px;max-width:1150px;margin:0 auto}
+  .panel h2{color:var(--blue);border-bottom:2px solid var(--gold);padding-bottom:8px;font-size:20px;display:flex;align-items:center;gap:10px}
+  .panel .sub{color:var(--sub);font-size:13px;margin:6px 0 4px;line-height:1.5;max-width:720px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(12,35,63,.05);display:flex;flex-direction:column}
+  .card h3{margin:0 0 6px;color:var(--blue);font-size:15px}
+  .card p{margin:0;font-size:13px;color:var(--sub);line-height:1.5;flex:1}
+  .card .type{font-size:11px;color:#8496b0;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+  .buy{margin-top:12px;background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+  .buy:hover{background:var(--blue2)}
+  .buy.owned{background:#e8edf6;color:#8496b0;cursor:default}
+  table{width:100%;border-collapse:collapse;margin-top:14px;background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(12,35,63,.05)}
+  th{background:var(--blue);color:#fff;text-align:left;padding:10px 12px;font-size:12px;letter-spacing:.5px}
+  td{padding:10px 12px;border-bottom:1px solid var(--line);font-size:13px}
+  tr:hover td{background:#f7f9fd}
+  .badge{display:inline-block;background:#e6f6ec;color:#1a8a4a;font-weight:700;font-size:11px;padding:2px 8px;border-radius:20px}
+  .badge.due{background:#fdeaea;color:#c33}
+  .empty{color:#8496b0;font-style:italic;padding:28px;text-align:center}
+  .bar{position:absolute;top:8px;left:8px;z-index:500;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;box-shadow:0 2px 8px rgba(12,35,63,.12);font-size:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25)}
+  .cfg{display:flex;gap:6px;align-items:center}
+  .cfg input{border:1px solid var(--line);border-radius:6px;padding:5px 8px;font-size:12px;width:70px}
+  .cfg button{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer}
+  .featnote{background:var(--card);border-left:3px solid var(--gold);padding:12px 14px;margin-top:16px;font-size:13px;color:var(--sub);border-radius:0 8px 8px 0}
+
+  /* ---- login ---- */
+  #login{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,var(--blue),#071d43);display:grid;place-items:center}
+  #login .box{background:#fff;border-radius:16px;border-top:5px solid var(--gold);box-shadow:0 20px 60px rgba(0,0,0,.4);padding:32px 30px;width:340px;max-width:92vw}
+  #login .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  #login .brand .logo{width:44px;height:44px;border-radius:10px;background:var(--gold);color:var(--blue);display:grid;place-items:center;font-weight:800;font-size:20px}
+  #login .brand b{color:var(--blue);font-size:18px;line-height:1.1}
+  #login .brand small{display:block;color:#8496b0;font-size:10px;letter-spacing:2px;font-weight:700}
+  #login h3{margin:20px 0 4px;color:var(--ink);font-size:15px}
+  #login label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin:12px 0 4px}
+  #login select,#login input{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px 12px;font-size:14px;background:#fbfcfe}
+  #login input:focus,#login select:focus{outline:2px solid var(--sky);border-color:var(--sky)}
+  #login button{width:100%;margin-top:20px;background:var(--blue);color:#fff;border:0;border-radius:9px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;transition:.15s}
+  #login button:hover{background:var(--blue2)}
+  #login .err{color:#c33;font-size:12px;margin-top:10px;min-height:16px;text-align:center}
+  #whoami{margin-left:14px;font-size:12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:5px 12px;border-radius:20px;font-weight:600}
+  #logout{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;margin-left:8px}
+  #logout:hover{background:rgba(255,255,255,.18)}
+  #challenge-banner{position:absolute;top:8px;right:8px;z-index:500;max-width:340px;
+    background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--blue);
+    border-radius:12px;padding:12px 16px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+  #challenge-banner .ct{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.75}
+  #challenge-banner h4{margin:2px 0 4px;font-size:16px;font-weight:800}
+  #challenge-banner p{margin:0;font-size:12px;line-height:1.4;font-weight:600}
+  #challenge-banner .rw{margin-top:6px;font-size:11px;font-weight:700;opacity:.85}
+  #darkbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:6px 11px;font-size:14px;cursor:pointer;margin-left:8px}
+  #darkbtn:hover{background:rgba(255,255,255,.18)}
+  /* in-app SOP alert box — about the size of the sign-in box */
+  #alertbox{position:fixed;right:18px;bottom:18px;z-index:6000;width:320px;min-height:96px;
+    background:var(--alertbg);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.28);padding:16px 18px;display:none;flex-direction:column;gap:6px}
+  #alertbox.show{display:flex}
+  #alert-head{font-size:11px;letter-spacing:2px;font-weight:800;color:var(--sub);text-transform:uppercase}
+  #alert-msg{font-size:18px;font-weight:800;line-height:1.25;color:#1a8a4a}      /* green default */
+  #alertbox.minor  #alert-msg{color:#e0930f}   /* orange */
+  #alertbox.major  #alert-msg{color:#d84a2a}   /* red-orange */
+  #alertbox.critical #alert-msg{color:#c1121f} /* red */
+  #alertbox.clear  #alert-msg{color:#1a8a4a}   /* green */
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="box">
+    <div class="brand">
+      <div class="logo">AA</div>
+      <div><b>Amal Airways</b><small>FLIGHT MANAGEMENT SYSTEM</small></div>
+    </div>
+    <h3>Crew sign in</h3>
+    <label>Role</label>
+    <select id="l-role">
+      <option value="">Select role…</option>
+      <option value="ceo">CEO</option>
+      <option value="fleet_manager">Fleet Manager</option>
+      <option value="pilot">Pilot</option>
+    </select>
+    <label>Username</label>
+    <input id="l-user" placeholder="e.g. ALA001" autocomplete="off">
+    <label>Passcode</label>
+    <input id="l-pass" type="password" placeholder="6-character code" autocomplete="off">
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:600;color:var(--ink);margin-top:12px;cursor:pointer">
+      <input type="checkbox" id="l-remember" style="width:auto;margin:0"> Keep me signed in
+    </label>
+    <button onclick="doLogin()">Sign in</button>
+    <div class="err" id="l-err"></div>
+  </div>
+</div>
+<header>
+  <div class="logo">AA</div>
+  <h1>Amal Airways<small>FLIGHT MANAGEMENT SYSTEM</small></h1>
+  <nav>
+    <button class="active" data-view="mapview">Live Map</button>
+    <button data-view="create" data-pilot="1">Create Flight</button>
+    <button data-view="fleet">Fleet &amp; Maintenance</button>
+    <button data-view="shop">Fleet Shop</button>
+    <button data-view="routes">Routes &amp; Hubs</button>
+    <button data-view="scoring">Scoring &amp; PIREPs</button>
+    <button data-view="roster">Pilots</button>
+  </nav>
+  <span id="whoami"></span>
+  <button id="darkbtn" onclick="toggleDark()" title="Toggle light/dark">☾</button>
+  <button id="logout" onclick="doLogout()">Sign out</button>
+</header>
+
+<!-- in-app violation alert box (fed live by the ACARS bridge) -->
+<div id="alertbox">
+  <div id="alert-head">SOP MONITOR</div>
+  <div id="alert-msg">All clear</div>
+</div>
+
+<div class="stat">
+  <div class="kpi"><b id="k-online">0</b><span>Pilots Online</span></div>
+  <div class="kpi"><b id="k-air">0</b><span>Airborne</span></div>
+  <div class="kpi"><b id="k-fleet">0</b><span>Aircraft Owned</span></div>
+</div>
+
+<main>
+  <!-- LIVE MAP / ACARS -->
+  <section class="view on" id="mapview">
+    <div class="bar">
+      <span class="dot"></span><span id="status">Connecting to VATSIM…</span>
+      <span class="cfg">| Callsign prefix
+        <input id="prefix" value="ALA" maxlength="5">
+        <button onclick="setPrefix()">Track</button>
+      </span>
+    </div>
+    <div id="map"></div>
+    <div id="challenge-banner"></div>
+  </section>
+
+  <!-- CREATE FLIGHT -->
+  <section class="view" id="create">
+    <div class="panel">
+      <h2>Create Flight <span id="ptype-badge" class="badge" style="font-size:12px"></span></h2>
+      <p class="sub" id="create-sub">Book your next flight. The options shown match your pilot type.</p>
+
+      <!-- temporary pilot-type tester (assigned per pilot in a future update) -->
+      <div class="featnote" id="ptype-tester">
+        <b>Testing:</b> pick a pilot type to preview its Create Flight flow:
+        <select id="ptype-sel" onchange="setPilotType(this.value)" style="margin-left:8px;padding:6px 8px;border:1px solid var(--line);border-radius:7px">
+          <option value="commercial">Commercial</option>
+          <option value="cargo">Cargo</option>
+          <option value="charter">Charter</option>
+          <option value="tour">Tour</option>
+        </select>
+      </div>
+
+      <div id="create-form" style="margin-top:18px"></div>
+    </div>
+  </section>
+
+  <!-- FLEET & MAINTENANCE -->
+  <section class="view" id="fleet">
+    <div class="panel">
+      <h2>Fleet &amp; Maintenance Control</h2>
+      <p class="sub">Track status, location, health, and maintenance so dispatch eligibility matches your operational realism. Add aircraft from the Fleet Shop.</p>
+      <table><thead><tr><th>Reg</th><th>Type</th><th>Location</th><th>Status</th><th>Hours</th><th>Maintenance</th></tr></thead>
+      <tbody id="fleet-body"></tbody></table>
+    </div>
+  </section>
+
+  <!-- FLEET SHOP -->
+  <section class="view" id="shop">
+    <div class="panel">
+      <h2>Fleet Shop</h2>
+      <p class="sub">Acquire aircraft for the airline. Pick a type and it joins your fleet, ready for dispatch. Used-marketplace and buyback workflows can layer on later.</p>
+      <div class="cards" id="shop-cards"></div>
+    </div>
+  </section>
+
+  <!-- ROUTES & HUBS -->
+  <section class="view" id="routes">
+    <div class="panel">
+      <h2>Route &amp; Hub Operations</h2>
+      <p class="sub">Build a network that makes sense. Manage hubs, routes, and eligibility rules so pilots always have a clear next leg.</p>
+      <table><thead><tr><th>Flight</th><th>From</th><th>To</th><th>Aircraft</th><th>Hub</th></tr></thead>
+      <tbody id="routes-body"></tbody></table>
+      <div class="featnote">Send me your real hubs and route list (or a SimBrief/CSV export) and I'll bulk-load them here with eligibility by aircraft type and rank.</div>
+    </div>
+  </section>
+
+  <!-- SCORING & PIREPS -->
+  <section class="view" id="scoring">
+    <div class="panel">
+      <h2>Scoring &amp; PIREP Review</h2>
+      <p class="sub">Turn flights into trusted records. Scoring goes beyond landing rate — procedure compliance and aircraft care count too. Owners get full insight into every flight.</p>
+      <table><thead><tr><th>#</th><th>Callsign</th><th>Route</th><th>Aircraft</th><th>Dist</th><th>Landing</th><th>Score</th></tr></thead>
+      <tbody id="pirep-body"><tr><td colspan="7" class="empty">No PIREPs filed yet. Completed flights from the Live Map tracker will appear here.</td></tr></tbody></table>
+      <div class="featnote">Precise landing metrics (touchdown FPM, centreline offset, touchdown-zone distance) come from the SimConnect bridge — this table is ready to receive them.</div>
+    </div>
+  </section>
+
+  <!-- PILOTS / ROSTER -->
+  <section class="view" id="roster">
+    <div class="panel">
+      <h2>Pilots</h2>
+      <p class="sub">Full airline roster — every pilot, their type, and their logged activity. Flight totals build up automatically as pilots complete flights.</p>
+      <table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Type</th><th>Flights</th><th>Hours</th></tr></thead>
+      <tbody id="roster-body"><tr><td colspan="6" class="empty">Loading roster…</td></tr></tbody></table>
+    </div>
+  </section>
+</main>
+
+<script>
+const CREDS = {"CEO01": {"pass": "DAL6CH", "role": "ceo"}, "FM01": {"pass": "NLN873", "role": "fleet_manager"}, "FM02": {"pass": "TKQJCP", "role": "fleet_manager"}, "FM03": {"pass": "SJN677", "role": "fleet_manager"}, "FM04": {"pass": "CUCLY4", "role": "fleet_manager"}, "FM05": {"pass": "YTB7WW", "role": "fleet_manager"}, "FM06": {"pass": "3YVFTH", "role": "fleet_manager"}, "FM07": {"pass": "JJ8JWB", "role": "fleet_manager"}, "FM08": {"pass": "7PWN3H", "role": "fleet_manager"}, "FM09": {"pass": "JGRVY7", "role": "fleet_manager"}, "FM10": {"pass": "HKZVJA", "role": "fleet_manager"}, "FM11": {"pass": "549GLX", "role": "fleet_manager"}, "FM12": {"pass": "H9VZGE", "role": "fleet_manager"}, "FM13": {"pass": "YBG9PQ", "role": "fleet_manager"}, "FM14": {"pass": "EN2VZY", "role": "fleet_manager"}, "FM15": {"pass": "TVV3HF", "role": "fleet_manager"}, "FM16": {"pass": "A7E253", "role": "fleet_manager"}, "FM17": {"pass": "PH8SH6", "role": "fleet_manager"}, "FM18": {"pass": "PSU4XM", "role": "fleet_manager"}, "FM19": {"pass": "H6AES5", "role": "fleet_manager"}, "FM20": {"pass": "VH96VN", "role": "fleet_manager"}, "FM21": {"pass": "X3ZYYG", "role": "fleet_manager"}, "FM22": {"pass": "VRWXNJ", "role": "fleet_manager"}, "FM23": {"pass": "UVS6TW", "role": "fleet_manager"}, "FM24": {"pass": "TY2YDE", "role": "fleet_manager"}, "FM25": {"pass": "MSGRYV", "role": "fleet_manager"}, "FM26": {"pass": "FLSJLY", "role": "fleet_manager"}, "FM27": {"pass": "HPELAR", "role": "fleet_manager"}, "FM28": {"pass": "3BWKDA", "role": "fleet_manager"}, "FM29": {"pass": "T7Q9WC", "role": "fleet_manager"}, "FM30": {"pass": "TPD4GT", "role": "fleet_manager"}, "ALA001": {"pass": "EV2HEX", "role": "pilot"}, "ALA002": {"pass": "HCGYHN", "role": "pilot"}, "ALA003": {"pass": "YZ7ERQ", "role": "pilot"}, "ALA004": {"pass": "R52LU6", "role": "pilot"}, "ALA005": {"pass": "DK7WPV", "role": "pilot"}, "ALA006": {"pass": "KVDN47", "role": "pilot"}, "ALA007": {"pass": "V5AXBT", "role": "pilot"}, "ALA008": {"pass": "HL4FZW", "role": "pilot"}, "ALA009": {"pass": "EPMHMB", "role": "pilot"}, "ALA010": {"pass": "4RE6RX", "role": "pilot"}, "ALA011": {"pass": "TSTDQM", "role": "pilot"}, "ALA012": {"pass": "A7GQEB", "role": "pilot"}, "ALA013": {"pass": "8PFA72", "role": "pilot"}, "ALA014": {"pass": "H6K75N", "role": "pilot"}, "ALA015": {"pass": "8QLALL", "role": "pilot"}, "ALA016": {"pass": "CK3GB7", "role": "pilot"}, "ALA017": {"pass": "V8KDLU", "role": "pilot"}, "ALA018": {"pass": "FU9RAF", "role": "pilot"}, "ALA019": {"pass": "HMQW3V", "role": "pilot"}, "ALA020": {"pass": "HV54RK", "role": "pilot"}, "ALA021": {"pass": "L39MG9", "role": "pilot"}, "ALA022": {"pass": "CMJELQ", "role": "pilot"}, "ALA023": {"pass": "98Q3YH", "role": "pilot"}, "ALA024": {"pass": "9WNTV5", "role": "pilot"}, "ALA025": {"pass": "ZJPAXV", "role": "pilot"}, "ALA026": {"pass": "V5UV9J", "role": "pilot"}, "ALA027": {"pass": "Z2XKTS", "role": "pilot"}, "ALA028": {"pass": "CCXF57", "role": "pilot"}, "ALA029": {"pass": "CP33CP", "role": "pilot"}, "ALA030": {"pass": "558CZK", "role": "pilot"}, "ALA031": {"pass": "WPLENH", "role": "pilot"}, "ALA032": {"pass": "U4TAQJ", "role": "pilot"}, "ALA033": {"pass": "AKVMY8", "role": "pilot"}, "ALA034": {"pass": "T4RJK9", "role": "pilot"}, "ALA035": {"pass": "6D2QVK", "role": "pilot"}, "ALA036": {"pass": "M8BF2Q", "role": "pilot"}, "ALA037": {"pass": "XWDPUD", "role": "pilot"}, "ALA038": {"pass": "F25UM5", "role": "pilot"}, "ALA039": {"pass": "AFJHHM", "role": "pilot"}, "ALA040": {"pass": "627BDV", "role": "pilot"}, "ALA041": {"pass": "TJWNN6", "role": "pilot"}, "ALA042": {"pass": "SPPQLU", "role": "pilot"}, "ALA043": {"pass": "UPJJX9", "role": "pilot"}, "ALA044": {"pass": "2PYN8T", "role": "pilot"}, "ALA045": {"pass": "RKWDGC", "role": "pilot"}, "ALA046": {"pass": "ZXL243", "role": "pilot"}, "ALA047": {"pass": "QC223K", "role": "pilot"}, "ALA048": {"pass": "HR4K52", "role": "pilot"}, "ALA049": {"pass": "TR9BLV", "role": "pilot"}, "ALA050": {"pass": "CTGQBX", "role": "pilot"}, "ALA051": {"pass": "AQYE6J", "role": "pilot"}, "ALA052": {"pass": "K4AEDU", "role": "pilot"}, "ALA053": {"pass": "JCBXQ5", "role": "pilot"}, "ALA054": {"pass": "V3UYYF", "role": "pilot"}, "ALA055": {"pass": "8GPCBV", "role": "pilot"}, "ALA056": {"pass": "LPRDGT", "role": "pilot"}, "ALA057": {"pass": "WZ5CCH", "role": "pilot"}, "ALA058": {"pass": "HF6A2F", "role": "pilot"}, "ALA059": {"pass": "DRQDA9", "role": "pilot"}, "ALA060": {"pass": "6KR9BX", "role": "pilot"}, "ALA061": {"pass": "HBX2HN", "role": "pilot"}, "ALA062": {"pass": "QDDHKC", "role": "pilot"}, "ALA063": {"pass": "85U5FA", "role": "pilot"}, "ALA064": {"pass": "MCRJYC", "role": "pilot"}, "ALA065": {"pass": "758V22", "role": "pilot"}, "ALA066": {"pass": "ZSFKG7", "role": "pilot"}, "ALA067": {"pass": "QHCA37", "role": "pilot"}, "ALA068": {"pass": "L8DGQG", "role": "pilot"}, "ALA069": {"pass": "W23NBC", "role": "pilot"}, "ALA070": {"pass": "TEV8KQ", "role": "pilot"}, "ALA071": {"pass": "LJJXHN", "role": "pilot"}, "ALA072": {"pass": "87QTB3", "role": "pilot"}, "ALA073": {"pass": "9SL5LL", "role": "pilot"}, "ALA074": {"pass": "GJ9BJQ", "role": "pilot"}, "ALA075": {"pass": "FBU69M", "role": "pilot"}, "ALA076": {"pass": "YBXEFJ", "role": "pilot"}, "ALA077": {"pass": "4MMH2G", "role": "pilot"}, "ALA078": {"pass": "4QC3SH", "role": "pilot"}, "ALA079": {"pass": "G4GLQP", "role": "pilot"}, "ALA080": {"pass": "J6C3UJ", "role": "pilot"}, "ALA081": {"pass": "WMB27H", "role": "pilot"}, "ALA082": {"pass": "338ZJY", "role": "pilot"}, "ALA083": {"pass": "HD5RFY", "role": "pilot"}, "ALA084": {"pass": "7ASLX6", "role": "pilot"}, "ALA085": {"pass": "54SCAA", "role": "pilot"}, "ALA086": {"pass": "5V5LKH", "role": "pilot"}, "ALA087": {"pass": "LYR38R", "role": "pilot"}, "ALA088": {"pass": "3ZPC39", "role": "pilot"}, "ALA089": {"pass": "N53HX7", "role": "pilot"}, "ALA090": {"pass": "BP8BDK", "role": "pilot"}, "ALA091": {"pass": "NDYAXV", "role": "pilot"}, "ALA092": {"pass": "ZHMXQU", "role": "pilot"}, "ALA093": {"pass": "99FDWC", "role": "pilot"}, "ALA094": {"pass": "U5EC5X", "role": "pilot"}, "ALA095": {"pass": "KTK75Z", "role": "pilot"}, "ALA096": {"pass": "BWT3SA", "role": "pilot"}, "ALA097": {"pass": "CCNNXU", "role": "pilot"}, "ALA098": {"pass": "ER8HXB", "role": "pilot"}, "ALA099": {"pass": "N7VXDJ", "role": "pilot"}, "ALA100": {"pass": "WBT65J", "role": "pilot"}, "ALA101": {"pass": "UTJQFY", "role": "pilot"}, "ALA102": {"pass": "V7L8FS", "role": "pilot"}, "ALA103": {"pass": "K23LPW", "role": "pilot"}, "ALA104": {"pass": "V6B25A", "role": "pilot"}, "ALA105": {"pass": "NB89UU", "role": "pilot"}, "ALA106": {"pass": "6TEEA4", "role": "pilot"}, "ALA107": {"pass": "QA5SZ9", "role": "pilot"}, "ALA108": {"pass": "JUJZX6", "role": "pilot"}, "ALA109": {"pass": "ZQADJ6", "role": "pilot"}, "ALA110": {"pass": "YBJBDG", "role": "pilot"}, "ALA111": {"pass": "ZMLSYN", "role": "pilot"}, "ALA112": {"pass": "SLDT2W", "role": "pilot"}, "ALA113": {"pass": "ECWM8Z", "role": "pilot"}, "ALA114": {"pass": "F6M2PQ", "role": "pilot"}, "ALA115": {"pass": "CWT865", "role": "pilot"}, "ALA116": {"pass": "5JYNHC", "role": "pilot"}, "ALA117": {"pass": "GT7STD", "role": "pilot"}, "ALA118": {"pass": "JQ2XCY", "role": "pilot"}, "ALA119": {"pass": "M2BNSL", "role": "pilot"}, "ALA120": {"pass": "Z8Z8HZ", "role": "pilot"}, "ALA121": {"pass": "QJ2GAY", "role": "pilot"}, "ALA122": {"pass": "6ZSF96", "role": "pilot"}, "ALA123": {"pass": "TSFQNJ", "role": "pilot"}, "ALA124": {"pass": "ACNVXJ", "role": "pilot"}, "ALA125": {"pass": "BH73ZM", "role": "pilot"}, "ALA126": {"pass": "YT4QML", "role": "pilot"}, "ALA127": {"pass": "27ARQ5", "role": "pilot"}, "ALA128": {"pass": "EY3ZYF", "role": "pilot"}, "ALA129": {"pass": "7HQU4E", "role": "pilot"}, "ALA130": {"pass": "ZE8N9U", "role": "pilot"}, "ALA131": {"pass": "6ZHDKD", "role": "pilot"}, "ALA132": {"pass": "EMF9C3", "role": "pilot"}, "ALA133": {"pass": "BGHLUQ", "role": "pilot"}, "ALA134": {"pass": "UYRC8J", "role": "pilot"}, "ALA135": {"pass": "XZ6N83", "role": "pilot"}, "ALA136": {"pass": "ECCZW9", "role": "pilot"}, "ALA137": {"pass": "YWXFET", "role": "pilot"}, "ALA138": {"pass": "L3LMWC", "role": "pilot"}, "ALA139": {"pass": "UH6KDT", "role": "pilot"}, "ALA140": {"pass": "QXZSPQ", "role": "pilot"}, "ALA141": {"pass": "CZUWML", "role": "pilot"}, "ALA142": {"pass": "Y5ZEMV", "role": "pilot"}, "ALA143": {"pass": "PY2UQR", "role": "pilot"}, "ALA144": {"pass": "C87USU", "role": "pilot"}, "ALA145": {"pass": "RFXZAX", "role": "pilot"}, "ALA146": {"pass": "E6Q233", "role": "pilot"}, "ALA147": {"pass": "YZ2EJF", "role": "pilot"}, "ALA148": {"pass": "BUKFR9", "role": "pilot"}, "ALA149": {"pass": "JL7PEF", "role": "pilot"}, "ALA150": {"pass": "TLR6UJ", "role": "pilot"}};
+let SESSION = null;
+function doLogin(){
+  const role = document.getElementById('l-role').value;
+  const user = (document.getElementById('l-user').value||'').trim().toUpperCase();
+  const pass = (document.getElementById('l-pass').value||'').trim().toUpperCase();
+  const err = document.getElementById('l-err');
+  if(!role){ err.textContent='Please select a role.'; return; }
+  const acct = CREDS[user];
+  if(!acct || acct.pass.toUpperCase()!==pass){ err.textContent='Username or passcode is incorrect.'; return; }
+  if(acct.role!==role){ const nm={ceo:'CEO',fleet_manager:'Fleet Manager',pilot:'Pilot'}; err.textContent='That account is a '+(nm[acct.role]||acct.role)+', not a '+(nm[role]||role)+'.'; return; }
+  // "Keep me signed in" — remember this session
+  if(document.getElementById('l-remember').checked){
+    try{ localStorage.setItem('ala_session', JSON.stringify({user, role})); }catch(e){}
+  }
+  enterApp(user, role);
+}
+function enterApp(user, role){
+  SESSION = {user, role};
+  document.getElementById('login').style.display='none';
+  document.getElementById('whoami').textContent = user+' · '+({ceo:'CEO',fleet_manager:'FLEET MANAGER',pilot:'PILOT'}[role]||role.toUpperCase());
+  applyRole(role);
+  if(map) setTimeout(()=>map.invalidateSize(),80);
+}
+function tryAutoLogin(){
+  try{
+    const saved = JSON.parse(localStorage.getItem('ala_session')||'null');
+    if(saved && saved.user && CREDS[saved.user] && CREDS[saved.user].role===saved.role){
+      enterApp(saved.user, saved.role);
+    }
+  }catch(e){}
+}
+function doLogout(){ try{ localStorage.removeItem('ala_session'); }catch(e){} location.reload(); }
+function applyRole(role){
+  const staff = (role==='ceo'||role==='fleet_manager');
+  // Pilots can ONLY fly: they see Live Map + Create Flight, everything else hidden.
+  document.querySelector('nav button[data-view="shop"]').style.display    = staff?'':'none';
+  document.querySelector('nav button[data-view="routes"]').style.display  = staff?'':'none';
+  document.querySelector('nav button[data-view="fleet"]').style.display   = staff?'':'none';
+  document.querySelector('nav button[data-view="scoring"]').style.display = staff?'':'none';
+  document.querySelector('nav button[data-view="roster"]').style.display = staff?'':'none';
+  // Create Flight is for pilots (staff can view it too)
+  document.querySelector('nav button[data-view="create"]').style.display  = '';
+  if(!staff){
+    // land pilots straight on Create Flight
+    renderCreate();
+  }
+}
+
+// ---- pilot type + Create Flight ----
+let PILOT_TYPE = 'commercial';   // pilot type (set per pilot in a future update)
+const TYPE_LABEL = {commercial:'Commercial', cargo:'Cargo', charter:'Charter', tour:'Tour'};
+
+// sample scheduled routes by type (staff will manage the real lists)
+const SCHED = {
+  commercial: [
+    {no:'ALA101', dep:'KATL', arr:'KMCO', ac:'B738'},
+    {no:'ALA220', dep:'KORD', arr:'KLGA', ac:'A320'},
+    {no:'ALA455', dep:'KATL', arr:'KBOS', ac:'E175'}
+  ],
+  cargo: [
+    {no:'ALA901F', dep:'KMEM', arr:'KATL', ac:'B77W'},
+    {no:'ALA915F', dep:'KIND', arr:'KORD', ac:'B788'}
+  ],
+  tour: [
+    {tour:'Coastal Hopper', leg:1, dep:'KBOS', arr:'KJFK', ac:'E175'},
+    {tour:'Coastal Hopper', leg:2, dep:'KJFK', arr:'KDCA', ac:'E175'},
+    {tour:'Island Runner', leg:1, dep:'KMIA', arr:'TJSJ', ac:'A320'}
+  ]
+};
+
+function setPilotType(t){ PILOT_TYPE = t; renderCreate(); }
+
+function renderCreate(){
+  const t = PILOT_TYPE;
+  // staff and pilots can preview each type here
+  document.getElementById('ptype-badge').textContent = TYPE_LABEL[t]+' Pilot';
+  const box = document.getElementById('create-form');
+  const own = fleet.map(a=>`<option>${a.reg} (${a.type})</option>`).join('') || '<option disabled>No aircraft owned yet</option>';
+
+  if(t==='charter'){
+    document.getElementById('create-sub').textContent = 'Charter: fly any city pair you choose. Pick your airports and aircraft.';
+    box.innerHTML = `
+      ${field('Departure (ICAO)', `<input id="c-dep" maxlength="4" placeholder="KATL" style="text-transform:uppercase">`)}
+      ${field('Arrival (ICAO)',   `<input id="c-arr" maxlength="4" placeholder="KMCO" style="text-transform:uppercase">`)}
+      ${field('Aircraft',         `<select id="c-ac">${own}</select>`)}
+      <button class="buy" style="max-width:220px" onclick="fileFlight()">Create charter flight</button>
+      <div id="c-out"></div>`;
+  } else if(t==='tour'){
+    document.getElementById('create-sub').textContent = 'Tour: fly the next leg of an official tour. Pick a leg below.';
+    const legs = SCHED.tour.map((l,i)=>`<option value="${i}">${l.tour} — Leg ${l.leg}: ${l.dep} → ${l.arr} (${l.ac})</option>`).join('');
+    box.innerHTML = `
+      ${field('Tour leg', `<select id="c-leg">${legs}</select>`)}
+      ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
+      <button class="buy" style="max-width:220px" onclick="fileFlight()">Create tour flight</button>
+      <div id="c-out"></div>`;
+  } else {
+    // commercial or cargo: pick a scheduled route
+    const label = t==='cargo' ? 'Cargo route' : 'Scheduled route';
+    const rows = SCHED[t].map((r,i)=>`<option value="${i}">${r.no} — ${r.dep} → ${r.arr} (${r.ac})</option>`).join('');
+    document.getElementById('create-sub').textContent =
+      t==='cargo' ? 'Cargo: fly an assigned freight route.' : 'Commercial: fly a scheduled passenger route.';
+    box.innerHTML = `
+      ${field(label, `<select id="c-route">${rows}</select>`)}
+      ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
+      <button class="buy" style="max-width:220px" onclick="fileFlight()">Create ${t} flight</button>
+      <div id="c-out"></div>`;
+  }
+}
+function field(label, control){
+  return `<div style="margin-bottom:12px;max-width:420px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:4px">${label}</div>
+    ${control}</div>`.replace('<input','<input style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px"')
+    .replace('<select','<select style="width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff"');
+}
+function fileFlight(){
+  const t = PILOT_TYPE; let dep,arr,no,ac=document.getElementById('c-ac')?.value||'—';
+  if(t==='charter'){
+    dep=(document.getElementById('c-dep').value||'').toUpperCase();
+    arr=(document.getElementById('c-arr').value||'').toUpperCase();
+    if(dep.length!==4||arr.length!==4){ document.getElementById('c-out').innerHTML='<p style="color:#c33">Enter valid 4-letter ICAO codes.</p>'; return; }
+    no='ALA'+Math.floor(100+Math.random()*899);
+  } else if(t==='tour'){
+    const l=SCHED.tour[document.getElementById('c-leg').value]; dep=l.dep; arr=l.arr; no='ALA'+l.tour.replace(/[^A-Z]/gi,'').slice(0,2).toUpperCase()+l.leg;
+  } else {
+    const r=SCHED[t][document.getElementById('c-route').value]; dep=r.dep; arr=r.arr; no=r.no;
+  }
+  document.getElementById('c-out').innerHTML =
+    `<div class="featnote" style="border-left-color:#1a8a4a;margin-top:16px">
+      <b>Flight created ✓</b><br>${no} · ${dep} → ${arr} · ${ac}<br>
+      <span style="color:var(--sub);font-size:12px">Start your sim and connect the ACARS client — this flight will track live and file a PIREP on arrival.</span>
+      <div style="margin-top:10px">
+        <button class="buy" style="max-width:220px" onclick="startAcars('${no}','${dep}','${arr}')">Start ACARS &amp; fly</button>
+      </div>
+    </div>`;
+}
+
+// launch the SimConnect ACARS engine (only works inside the fused app window)
+function startAcars(no, dep, arr){
+  if(window.pywebview && window.pywebview.api){
+    window.pywebview.api.start_flight(no, dep, arr);
+    const box=document.getElementById('alertbox');
+    box.classList.remove('minor','major','critical'); box.classList.add('clear','show');
+    document.getElementById('alert-msg').textContent='ACARS armed — complete preflight in the sim';
+  } else {
+    alert("Start ACARS works inside the Amal Airways app window.\nIf you're viewing this in a browser, run the app (AmalAirways.exe) instead.");
+  }
+}
+
+const PLANE = `<svg width="26" height="26" viewBox="0 0 24 24" class="plane"><path fill="currentColor" d="M12 2c-.6 0-1 .9-1 2v5.6L3 14v1.6l8-2.2V19l-2 1.2v1.3l3-.8 3 .8v-1.3L15 19v-5.6l8 2.2V14l-8-4.4V4c0-1.1-.4-2-1-2z"/></svg>`;
+let map, layer, prefix = "ALA";
+
+// ===================================================================
+// SHARED BRIDGE URL — this is what makes every active flight show for
+// EVERYONE (VATSIM or not). Leave as localhost for solo/testing.
+// When you host bridge_server.py online, put its address here, e.g.
+//   const BRIDGE_URL = "https://amal-bridge.onrender.com";
+// Every pilot using this same URL will see every other active flight.
+// ===================================================================
+const BRIDGE_URL = "http://localhost:8770";
+
+// ===================================================================
+// WEEKLY CHALLENGE — edit this each week. The whole crew sees it on
+// the Live Map. Change the three lines below, save, done.
+// ===================================================================
+const WEEKLY_CHALLENGE = {
+  title: "Butter Week",
+  detail: "Grease it in. Log the most Butter-rated landings (0 to \u201160 FPM) this week. Every butter counts \u2014 smoothest crew wins.",
+  reward: "Butter Week Champion role in Discord"
+};
+// ===================================================================
+
+// ---- fleet + shop state (in-memory; persists in this session) ----
+const CATALOG = [
+  {type:"A320",  name:"Airbus A320",      cat:"Narrow-body", desc:"Workhorse single-aisle for short and medium haul."},
+  {type:"A321",  name:"Airbus A321neo",   cat:"Narrow-body", desc:"Stretched A320 family, great range and capacity."},
+  {type:"B738",  name:"Boeing 737-800",   cat:"Narrow-body", desc:"The backbone of most short-haul networks."},
+  {type:"B39M",  name:"Boeing 737 MAX 9", cat:"Narrow-body", desc:"Modern MAX efficiency for busy trunk routes."},
+  {type:"E175",  name:"Embraer E175",     cat:"Regional",    desc:"Regional jet ideal for hub feeder legs."},
+  {type:"CRJ7",  name:"Bombardier CRJ700","cat":"Regional",  desc:"Nimble regional jet for thinner routes."},
+  {type:"B788",  name:"Boeing 787-8",     cat:"Wide-body",   desc:"Long-haul Dreamliner for intercontinental ops."},
+  {type:"A359",  name:"Airbus A350-900",  cat:"Wide-body",   desc:"Flagship long-haul, quiet and efficient."},
+  {type:"B77W",  name:"Boeing 777-300ER", cat:"Wide-body",   desc:"High-capacity long-haul heavy."},
+  {type:"C172",  name:"Cessna 172",       cat:"GA",          desc:"Light trainer for GA and short hops."}
+];
+let fleet = [];  // starts empty — add from Fleet Shop
+const HUBS = ["KATL","KORD"];
+const MAINT_INTERVAL = 100;
+
+function initMap(){
+  map = L.map('map',{worldCopyJump:true}).setView([33.5,-84.4],4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:12}).addTo(map);
+  layer = L.layerGroup().addTo(map);
+}
+function planeIcon(hdg){
+  return L.divIcon({className:'',html:`<div style="transform:rotate(${hdg}deg)">${PLANE}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
+}
+
+async function refresh(){
+  const st = document.getElementById('status');
+  let mine = [];
+  // 1) VATSIM online pilots
+  try{
+    const r = await fetch('https://data.vatsim.net/v3/vatsim-data.json',{cache:'no-store'});
+    const data = await r.json();
+    mine = (data.pilots||[]).filter(p => (p.callsign||'').toUpperCase().startsWith(prefix));
+  }catch(e){ /* offline or blocked — bridge may still have flights */ }
+
+  // 2) local ACARS bridge (offline flights + your own flight)
+  try{
+    const br = await fetch(`${BRIDGE_URL}/live`,{cache:'no-store'});
+    const bd = await br.json();
+    (bd.flights||[]).forEach(f=>{
+      if(f.lat==null||f.lon==null) return;
+      mine.push({
+        callsign:f.callsign, latitude:f.lat, longitude:f.lon,
+        altitude:f.altitude, groundspeed:f.groundspeed, heading:f.heading||0,
+        flight_plan:{departure:f.dep, arrival:f.arr, aircraft_short:f.aircraft},
+        _acars:true
+      });
+    });
+  }catch(e){ /* bridge not running — that's fine */ }
+
+  layer.clearLayers();
+  let airborne = 0;
+  mine.forEach(p=>{
+    const fp = p.flight_plan||{};
+    const gs = p.groundspeed||0, alt = p.altitude||0;
+    if(gs>50 && alt>1000) airborne++;
+    const m = L.marker([p.latitude,p.longitude],{icon:planeIcon(p.heading||0)}).addTo(layer);
+    m.bindTooltip(
+      `<b>${p.callsign}${p._acars?' · ACARS':''}</b>`+
+      `<div class="row"><span>Route</span> ${fp.departure||'—'} → ${fp.arrival||'—'}</div>`+
+      `<div class="row"><span>Aircraft</span> ${fp.aircraft_short||'—'}</div>`+
+      `<div class="row"><span>Altitude</span> ${alt.toLocaleString()} ft</div>`+
+      `<div class="row"><span>Ground spd</span> ${gs} kt</div>`+
+      `<div class="row"><span>Heading</span> ${p.heading||0}°</div>`,
+      {className:'acft',direction:'top',offset:[0,-10]});
+  });
+  document.getElementById('k-online').textContent = mine.length;
+  document.getElementById('k-air').textContent = airborne;
+  st.textContent = `Live · ${mine.length} flight(s) tracked · updated ${new Date().toLocaleTimeString()}`;
+}
+function setPrefix(){
+  prefix = (document.getElementById('prefix').value||'ALA').toUpperCase();
+  refresh();
+}
+
+// ---- fleet render ----
+function renderFleet(){
+  const b = document.getElementById('fleet-body');
+  if(!fleet.length){ b.innerHTML='<tr><td colspan="6" class="empty">No aircraft yet — add some from the Fleet Shop.</td></tr>'; }
+  else{
+    b.innerHTML = fleet.map(a=>{
+      const due = a.maint>=MAINT_INTERVAL;
+      return `<tr><td><b>${a.reg}</b></td><td>${a.type}</td><td>${a.loc}</td>
+        <td><span class="badge">${a.status}</span></td><td>${a.hours.toFixed(1)}</td>
+        <td>${due?'<span class="badge due">Check due</span>':'<span class="badge">OK</span>'}</td></tr>`;
+    }).join('');
+  }
+  document.getElementById('k-fleet').textContent = fleet.length;
+}
+
+// ---- shop render ----
+function renderShop(){
+  document.getElementById('shop-cards').innerHTML = CATALOG.map((a,i)=>`
+    <div class="card">
+      <div class="type">${a.cat}</div>
+      <h3>${a.name}</h3>
+      <p>${a.desc}</p>
+      <button class="buy" onclick="buy(${i})">Add to fleet</button>
+    </div>`).join('');
+}
+function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function randLetters(n){ const A="ABCDEFGHJKLMNPQRSTUVWXYZ"; let s=""; for(let k=0;k<n;k++) s+=A[Math.floor(Math.random()*A.length)]; return s; }
+function makeReg(ac){
+  const name = (ac.name||"").toLowerCase();
+  let reg, tries=0;
+  do{
+    if(name.includes("cessna")){
+      reg = "N" + rnd(100,999) + randLetters(2);   // November tail, e.g. N482KM
+    } else {
+      reg = "LA-" + rnd(100,999);                    // house reg for Boeing & other jets, e.g. LA-204
+    }
+    tries++;
+  } while(fleet.some(f=>f.reg===reg) && tries<80);
+  return reg;
+}
+function buy(i){
+  const a = CATALOG[i];
+  const reg = makeReg(a);
+  const ac = {reg, type:a.type, loc:HUBS[0], status:"Available", hours:0, maint:0};
+  fleet.push(ac);
+  renderFleet();
+  saveToBridge('/buy', ac);   // persist so everyone sees it and it survives restart
+  document.querySelector('nav button[data-view="fleet"]').click();
+}
+
+// ---- persistence: talk to the shared bridge ----
+async function saveToBridge(path, obj){
+  try{
+    await fetch(`${BRIDGE_URL}${path}`, {method:'POST',
+      headers:{'Content-Type':'application/json'}, body:JSON.stringify(obj)});
+  }catch(e){ /* offline: stays in memory this session */ }
+}
+async function loadState(){
+  try{
+    const r = await fetch(`${BRIDGE_URL}/state`,{cache:'no-store'});
+    const s = await r.json();
+    if(s.fleet && s.fleet.length){ fleet = s.fleet; renderFleet(); }
+    if(s.pilots){ window.PILOTS = s.pilots; }
+    if(s.flights){ window.FLIGHTS = s.flights; }
+    renderRoster();
+  }catch(e){ /* bridge not running yet */ }
+}
+
+const REAL_ROSTER = {"CEO01": {"name": "Amal N.", "role": "CEO", "type": "—", "flights": 0, "hours": 0}, "FM01": {"name": "jadon l.", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "FM02": {"name": "Angus P.", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "ALA001": {"name": "Fmendes_13", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA002": {"name": "Duckyboy", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA003": {"name": "Benny L.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA004": {"name": "Dillon M.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA005": {"name": "Tyshaun S.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA006": {"name": "oscar f.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA007": {"name": "Joshua S.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA008": {"name": "Luko the pilot", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA009": {"name": "Jace C.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA010": {"name": "Matthew A.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA011": {"name": "Conner M.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA012": {"name": "Braycen S.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA013": {"name": "Logan Nomad", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA014": {"name": "Will D.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA015": {"name": "Ace P.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA016": {"name": "Joel R.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}};
+// real airline roster (names loaded from Amal Airways)
+function baseRoster(){ return JSON.parse(JSON.stringify(REAL_ROSTER)); }
+function renderRoster(){
+  const body = document.getElementById('roster-body');
+  if(!body) return;
+  const merged = {...baseRoster(), ...(window.PILOTS||{})};
+  const rows = Object.keys(merged).sort().map(u=>{
+    const p = merged[u];
+    return `<tr><td><b>${u}</b></td><td>${p.name||u}</td><td>${p.role||'Pilot'}</td>
+      <td>${p.type||'—'}</td><td>${p.flights||0}</td><td>${(p.hours||0).toFixed? (p.hours||0).toFixed(1):p.hours||0}</td></tr>`;
+  }).join('');
+  body.innerHTML = rows || '<tr><td colspan="6" class="empty">No pilots yet.</td></tr>';
+}
+
+// ---- routes render ----
+function renderRoutes(){
+  const sample = [
+    {f:"ALA101", d:"KATL", a:"KMCO", ac:"B738", h:"KATL"},
+    {f:"ALA220", d:"KORD", a:"KLGA", ac:"A320", h:"KORD"},
+    {f:"ALA455", d:"KATL", a:"KBOS", ac:"E175", h:"KATL"}
+  ];
+  document.getElementById('routes-body').innerHTML = sample.map(r=>
+    `<tr><td><b>${r.f}</b></td><td>${r.d}</td><td>${r.a}</td><td>${r.ac}</td><td>${r.h}</td></tr>`).join('');
+}
+
+// ---- nav ----
+document.querySelectorAll('nav button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.view).classList.add('on');
+    if(b.dataset.view==='mapview' && map) setTimeout(()=>map.invalidateSize(),50);
+    if(b.dataset.view==='create') renderCreate();
+    if(b.dataset.view==='roster') renderRoster();
+  };
+});
+
+function toggleDark(){
+  document.body.classList.toggle('dark');
+  const dark = document.body.classList.contains('dark');
+  document.getElementById('darkbtn').textContent = dark ? '☀' : '☾';
+  if(map) setTimeout(()=>map.invalidateSize(),60);
+}
+
+// ---- SOP alert box (fed by the ACARS bridge) ----
+let lastAlertTs = 0;
+function beep(){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='sine'; o.frequency.value=880; o.connect(g); g.connect(ac.destination);
+    g.gain.setValueAtTime(0.15, ac.currentTime);
+    o.start(); o.stop(ac.currentTime+0.12);
+  }catch(e){}
+}
+async function pollAlerts(){
+  try{
+    const r = await fetch(`${BRIDGE_URL}/alerts`,{cache:'no-store'});
+    const a = await r.json();
+    const box = document.getElementById('alertbox');
+    box.classList.remove('minor','major','critical','clear');
+    box.classList.add(a.level||'clear');
+    document.getElementById('alert-msg').textContent = a.msg || 'All clear';
+    box.classList.add('show');
+    // beep only on a NEW non-clear alert
+    if(a.ts && a.ts!==lastAlertTs && a.level && a.level!=='clear'){ beep(); }
+    lastAlertTs = a.ts||0;
+  }catch(e){ /* bridge not running: hide box */
+    document.getElementById('alertbox').classList.remove('show');
+  }
+}
+setInterval(pollAlerts, 1500);
+
+initMap();
+loadState();
+renderChallenge();
+tryAutoLogin();
+
+function renderChallenge(){
+  const b = document.getElementById('challenge-banner');
+  if(!b) return;
+  const c = WEEKLY_CHALLENGE;
+  if(!c || !c.title || c.title==="PUT_TITLE_HERE"){ b.style.display='none'; return; }
+  b.innerHTML = `<div class="ct">\u2605 Weekly Challenge</div>
+    <h4>${c.title}</h4><p>${c.detail}</p>` +
+    (c.reward ? `<div class="rw">\ud83c\udfc6 ${c.reward}</div>` : '');
+}
+renderFleet();
+renderShop();
+renderRoutes();
+refresh();
+setInterval(refresh, 20000);
+</script>
+</body>
+</html>

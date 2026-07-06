@@ -1,0 +1,48 @@
+DEPLOY THE BRIDGE TO RENDER (so the whole airline can access it)
+================================================================
+
+You need a GitHub account first (free). Render pulls the code from GitHub.
+
+STEP 1 — Put these files in a GitHub repo
+-----------------------------------------
+Upload ONLY these to a new GitHub repository (github.com -> New repository ->
+then "uploading an existing file"):
+    bridge_server.py
+    AmalAirways.html
+    airline_state.json
+    requirements.txt
+    render.yaml
+    Procfile
+
+STEP 2 — Create the Web Service on Render
+-----------------------------------------
+1. Render -> New -> Web Service
+2. Connect your GitHub, pick the repo you just made
+3. Render reads render.yaml automatically. If it asks, set:
+     - Runtime: Python
+     - Start Command:  python bridge_server.py
+     - Plan: Free
+4. Click Create Web Service. Wait for it to build and go live.
+
+STEP 3 — Get your public address
+--------------------------------
+Render gives you a URL like:  https://amal-airways-bridge.onrender.com
+That is the shared bridge the whole airline uses.
+
+STEP 4 — Point the app at it
+----------------------------
+In AmalAirways.html, change this line near the top:
+    const BRIDGE_URL = "http://localhost:8770";
+to your Render URL:
+    const BRIDGE_URL = "https://amal-airways-bridge.onrender.com";
+Save. Now every copy of the app talks to the shared online bridge.
+
+STEP 5 — Share the app
+----------------------
+Build the .exe (see BUILD_AND_RELEASE.txt) with the updated BRIDGE_URL baked in,
+and share it. Or host AmalAirways.html itself and give pilots the link.
+
+NOTE ON FREE TIER
+-----------------
+Render's free tier sleeps after ~15 min idle and takes ~30 sec to wake on the
+next visit. Fine for a VA. The $7/month tier stays always-on if you want no wait.

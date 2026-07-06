@@ -1,0 +1,60 @@
+AMAL AIRWAYS — FLIGHT MANAGEMENT SYSTEM
+Build & Release Guide
+=======================================
+
+WHAT YOU HAVE
+-------------
+AmalAirways.py     -> the fused app (native window + dashboard + bridge + ACARS)
+AmalAirways.html   -> the dashboard UI (must sit next to AmalAirways.py to build)
+acars_client.py    -> the SimConnect engine (imported by the app)
+bridge_server.py   -> standalone bridge (optional; the app has its own built in)
+vaops.py           -> VATSIM tracker / PIREP tool (optional server-side)
+CREDENTIALS.txt    -> all logins (1 CEO, 30 Fleet Managers, 150 pilots)
+
+
+RUN IT RIGHT NOW (no build)
+---------------------------
+    cd D:\Downloads
+    python AmalAirways.py
+
+A native window opens with the dashboard. To see a flight without MSFS, open
+the browser dev version and use the demo, or just fly for real once SimConnect
+is installed (pip install SimConnect).
+
+
+BUILD THE .EXE TO SHARE WITH PILOTS
+---------------------------------
+1. Make sure these two files are in the same folder:
+       AmalAirways.py
+       AmalAirways.html
+   (also acars_client.py, so the engine gets bundled)
+
+2. Run this ONE command (copy the whole thing):
+
+    python -m PyInstaller --onefile --windowed --name AmalAirways --add-data "AmalAirways.html;." --add-data "acars_client.py;." AmalAirways.py
+
+   (The ^ line-continuation isn't needed if you paste it all on one line.)
+
+3. Wait for it to finish. Your app appears at:
+       D:\Downloads\dist\AmalAirways.exe
+
+4. Share dist\AmalAirways.exe with pilots. They download and double-click it.
+   No Python, no browser, no terminal — opens like a normal desktop app.
+
+
+ADD AN ICON (optional)
+----------------------
+If you have an .ico file (e.g. amal.ico), add:  --icon amal.ico
+Full command:
+    python -m PyInstaller --onefile --windowed --name AmalAirways --icon amal.ico --add-data "AmalAirways.html;." --add-data "acars_client.py;." AmalAirways.py
+
+
+HEADS-UP FOR PILOTS
+-------------------
+- First launch may show Windows SmartScreen ("unknown publisher"). Click
+  "More info" -> "Run anyway". This is normal for unsigned apps; getting rid
+  of it needs a paid code-signing certificate.
+- For the on-screen SOP warnings to overlay the sim, run MSFS in
+  BORDERLESS-WINDOWED mode. The siren fires either way.
+- Each pilot needs SimConnect for real flights:  pip install SimConnect
+  (only matters on the PC that's actually flying).

@@ -1,0 +1,140 @@
+{
+  "fleet": [],
+  "maintenance": [],
+  "flights": [],
+  "pilots": {
+    "CEO01": {
+      "name": "Amal N.",
+      "role": "CEO",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "FM01": {
+      "name": "jadon l.",
+      "role": "Fleet Manager",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "FM02": {
+      "name": "Angus P.",
+      "role": "Fleet Manager",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA001": {
+      "name": "Fmendes_13",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA002": {
+      "name": "Duckyboy",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA003": {
+      "name": "Benny L.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA004": {
+      "name": "Dillon M.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA005": {
+      "name": "Tyshaun S.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA006": {
+      "name": "oscar f.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA007": {
+      "name": "Joshua S.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA008": {
+      "name": "Luko the pilot",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA009": {
+      "name": "Jace C.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA010": {
+      "name": "Matthew A.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA011": {
+      "name": "Conner M.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA012": {
+      "name": "Braycen S.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA013": {
+      "name": "Logan Nomad",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA014": {
+      "name": "Will D.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA015": {
+      "name": "Ace P.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    },
+    "ALA016": {
+      "name": "Joel R.",
+      "role": "Pilot",
+      "type": "\u2014",
+      "flights": 0,
+      "hours": 0
+    }
+  }
+}
