@@ -171,10 +171,13 @@ ID_ROLE = _re.compile(r'^(CEO0?1|FM\d{1,2}|KLA\d{1,3})$', _re.IGNORECASE)
 @bot.tree.command(description="Get your Amal Airways sign-in code by DM")
 async def getcode(interaction: discord.Interaction):
     # find the role that matches a credential ID (e.g. FM01, KLA002, CEO01)
+    all_roles = [r.name for r in interaction.user.roles]
+    print(f"[getcode] {interaction.user} roles seen: {all_roles}")
     ids = [r.name.upper() for r in interaction.user.roles if ID_ROLE.match(r.name)]
     if not ids:
         await interaction.response.send_message(
-            "You don't have an ID role yet (like KLA002 or FM01) — ask a Fleet Manager to assign one.",
+            "You don't have an ID role yet (like KLA002 or FM01) — ask a Fleet Manager to assign one.\n"
+            f"(Roles I can see: {', '.join(all_roles) if all_roles else 'none'})",
             ephemeral=True); return
     # normalize CEO1 -> CEO01
     myid = ids[0]
