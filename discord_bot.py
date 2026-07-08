@@ -170,10 +170,18 @@ ID_ROLE = _re.compile(r'^(CEO0?1|FM\d{1,2}|KLA\d{1,3})$', _re.IGNORECASE)
 
 @bot.tree.command(description="Get your Amal Airways sign-in code by DM")
 async def getcode(interaction: discord.Interaction):
-    # find the role that matches a credential ID (e.g. FM01, KLA002, CEO01)
-    all_roles = [r.name for r in interaction.user.roles]
+    # get the full guild member (so roles are populated, not a bare User)
+    member = interaction.user
+    if interaction.guild and not isinstance(member, discord.Member):
+        member = interaction.guild.get_member(member.id) or member
+    if interaction.guild and (not getattr(member, "roles", None) or len(member.roles) <= 1):
+        try:
+            member = await interaction.guild.fetch_member(interaction.user.id)
+        except Exception as e:
+            print("fetch_member failed:", e)
+    all_roles = [r.name for r in getattr(member, "roles", [])]
     print(f"[getcode] {interaction.user} roles seen: {all_roles}")
-    ids = [r.name.upper() for r in interaction.user.roles if ID_ROLE.match(r.name)]
+    ids = [r.name.upper() for r in getattr(member, "roles", []) if ID_ROLE.match(r.name)]
     if not ids:
         await interaction.response.send_message(
             "You don't have an ID role yet (like KLA002 or FM01) — ask a Fleet Manager to assign one.\n"
@@ -198,8 +206,14 @@ async def getcode(interaction: discord.Interaction):
 @bot.tree.command(description="Apply Strike One (staff only)")
 @app_commands.describe(pilot="Pilot to strike", reason="Reason")
 async def strike(interaction: discord.Interaction, pilot: discord.Member, reason: str="SOP violation"):
-    rn = rolenames(interaction.user)
-    if not (ROLE_FM in rn or ROLE_CEO in rn):
+    member = interaction.user
+    if interaction.guild and (not getattr(member,"roles",None) or len(member.roles)<=1):
+        try: member = await interaction.guild.fetch_member(interaction.user.id)
+        except Exception: pass
+    rn = {r.name for r in getattr(member,"roles",[])}
+    STAFF = {ROLE_FM, ROLE_CEO, "COO", "Amal Airways | Fleet Manager", "CEO", "Fleet Manager"}
+    is_staff = bool(rn & STAFF) or any(r.name.upper() in ("CEO01","FM01","FM02") for r in getattr(member,"roles",[]))
+    if not is_staff:
         await interaction.response.send_message("Only staff can strike.", ephemeral=True); return
     role = discord.utils.get(interaction.guild.roles, name=ROLE_STRIKE)
     if not role:
