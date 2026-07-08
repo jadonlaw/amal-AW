@@ -15,12 +15,12 @@ RUN (dev):
     pip install pywebview
     python AmalAirways.py
 
-BUILD THE .EXE (one line):
-    python -m PyInstaller --onefile --windowed --name AmalAirways ^
-        --add-data "AmalAirways.html;." AmalAirways.py
+BUILD THE STANDALONE .EXE (one line, all free):
+    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." AmalAirways.py
 
-Then post dist\\AmalAirways.exe for pilots. They double-click it — no Python,
-no browser, no terminal. Opens like a normal desktop app.
+Then wrap dist\\AmalAirways.exe in a free Windows installer with Inno Setup
+(see BUILD_DESKTOP_APP.txt). Pilots double-click it — no Python, no browser,
+no terminal. Opens as a native app; SimConnect is bundled inside.
 """
 
 import os, sys, threading, time, json
@@ -38,6 +38,20 @@ import http.server, socketserver
 
 PORT = 8770
 LIVE = {}
+# live shared bridge — the desktop app relays flights here so everyone sees them
+RENDER_BRIDGE = os.environ.get("RENDER_BRIDGE", "https://amal-airways-fms.onrender.com")
+
+def relay_to_render(path, payload):
+    """Forward a local update up to the hosted bridge so the whole airline sees it."""
+    def _go():
+        try:
+            import urllib.request
+            urllib.request.urlopen(urllib.request.Request(
+                RENDER_BRIDGE + path, data=json.dumps(payload).encode(),
+                method="POST", headers={"Content-Type": "application/json"}), timeout=8)
+        except Exception:
+            pass
+    threading.Thread(target=_go, daemon=True).start()
 ALERT = {"msg": "All clear", "level": "clear", "ts": 0}
 LOCK = threading.Lock()
 STALE_SECONDS = 30
@@ -65,6 +79,13 @@ class _Handler(http.server.SimpleHTTPRequestHandler):
             else:
                 self._send(404, "AmalAirways.html not found")
             return
+        if self.path == "/airports.js":
+            ap = resource_path("airports.js")
+            if os.path.exists(ap):
+                with open(ap, "rb") as f: self._send(200, f.read(), "application/javascript")
+            else:
+                self._send(200, "window.AIRPORTS=window.AIRPORTS||{};", "application/javascript")
+            return
         if self.path == "/live":
             _prune()
             with LOCK: self._send(200, json.dumps({"flights": list(LIVE.values())}))
@@ -87,10 +108,12 @@ class _Handler(http.server.SimpleHTTPRequestHandler):
             cs = (data.get("callsign") or "UNKNOWN").upper()
             data["_ts"] = time.time(); data["source"] = "acars"
             with LOCK: LIVE[cs] = data
+            relay_to_render("/update", data)   # share with the whole airline
             self._send(200, json.dumps({"ok": True})); return
         if self.path == "/end":
             cs = (data.get("callsign") or "").upper()
             with LOCK: LIVE.pop(cs, None)
+            relay_to_render("/end", {"callsign": cs})
             self._send(200, json.dumps({"ok": True})); return
         self._send(404, json.dumps({"error": "not found"}))
     def log_message(self, *a): pass
@@ -107,6 +130,8 @@ def start_bridge():
 # The heavy SimConnect engine lives in acars_client.py. We import it lazily so the
 # app still opens even if SimConnect isn't installed (e.g. no MSFS on this PC yet).
 def start_acars(callsign, dep, arr, demo=False):
+    # the engine posts to the local in-process bridge, which relays up to Render
+    os.environ["BRIDGE_URL"] = f"http://127.0.0.1:{PORT}"
     def run():
         try:
             import acars_client as ac
@@ -130,10 +155,10 @@ def start_acars(callsign, dep, arr, demo=False):
 # ---------- JS <-> Python bridge exposed to the dashboard ----------
 class Api:
     def start_flight(self, callsign, dep, arr):
-        start_acars(callsign or "ALA000", dep or "----", arr or "----", demo=False)
+        start_acars(callsign or "KLA000", dep or "----", arr or "----", demo=False)
         return {"ok": True, "mode": "sim"}
     def start_demo(self):
-        start_acars("ALA123", "KATL", "KMCO", demo=True)
+        start_acars("KLA123", "KATL", "KMCO", demo=True)
         return {"ok": True, "mode": "demo"}
 
 # ---------- launch the native window ----------

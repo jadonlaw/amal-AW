@@ -1,0 +1,39 @@
+ADD EVERY AIRPORT IN THE WORLD (one-time, at build — no script to run)
+=====================================================================
+The app already works with a built-in set of your hubs + major airports.
+To bundle ALL ~28,000 airports so pilots can search/fly to any of them:
+
+STEP 1 — get the free data file (one click)
+-------------------------------------------
+Download this public CSV (free, from OurAirports):
+    https://davidmegginson.github.io/ourairports-data/airports.csv
+Save it into your project folder (next to AmalAirways.html).
+
+STEP 2 — convert it to airports.js (the app reads this)
+-------------------------------------------------------
+Put this tiny file "make_airports.py" in the same folder and run it ONCE:
+
+    import csv, json
+    out = {}
+    with open("airports.csv", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            icao = (row.get("ident") or "").upper()
+            if len(icao) == 4 and row.get("latitude_deg") and row.get("longitude_deg"):
+                out[icao] = [row.get("name",""), float(row["latitude_deg"]), float(row["longitude_deg"])]
+    with open("airports.js","w",encoding="utf-8") as f:
+        f.write("window.AIRPORTS = " + json.dumps(out) + ";")
+    print("wrote", len(out), "airports")
+
+Run it:  python make_airports.py
+-> creates airports.js with every ICAO airport in the world.
+
+STEP 3 — build the app (bundles airports.js automatically)
+----------------------------------------------------------
+Use this build command (adds airports.js to the .exe):
+
+    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." --add-data "airports.js;." AmalAirways.py
+
+Now every pilot's install has all airports inside — offline, one-click, nothing
+for them to download. The search bar and Create Flight validate any real ICAO.
+
+(If you skip this, the app still works with the built-in major-airports set.)

@@ -37,6 +37,7 @@ def _default_state():
         "maintenance": [],    # maintenance log entries
         "flights": [],        # completed flight history (PIREPs)
         "pilots": {},         # username -> {name, role, type, flights, hours}
+        "routes": [],         # live routes anyone can fly: {dep, arr, by, ts}
     }
 
 def load_state():
@@ -146,7 +147,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
 
         # ---- persistent airline state saving ----
-        if self.path in ("/buy", "/maintenance", "/flight", "/pilot", "/state"):
+        if self.path in ("/buy", "/maintenance", "/flight", "/pilot", "/state", "/route"):
             length = int(self.headers.get("Content-Length", 0))
             try:
                 data = json.loads(self.rfile.read(length) or b"{}")
@@ -162,18 +163,35 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         if a.get("reg") == data.get("reg"):
                             a["maint"] = 0
                 elif self.path == "/flight":
+                    # tag with a sequential id so the bot can see what's new
+                    data["id"] = STATE.get("_flight_seq", 0) + 1
+                    STATE["_flight_seq"] = data["id"]
                     STATE["flights"].append(data)
-                    # roll the pilot's totals
+                    # roll the pilot's totals + detect rank-up
                     u = (data.get("pilot") or "").upper()
                     if u:
                         p = STATE["pilots"].setdefault(u, {"name": u, "role": "Pilot",
                              "type": data.get("type"), "flights": 0, "hours": 0})
+                        old_hours = p.get("hours", 0)
                         p["flights"] = p.get("flights", 0) + 1
-                        p["hours"] = round(p.get("hours", 0) + data.get("hours", 0), 1)
+                        p["hours"] = round(old_hours + data.get("hours", 0), 1)
+                        data["_old_hours"] = old_hours
+                        data["_new_hours"] = p["hours"]
+                        data["_pilot_name"] = p.get("name", u)
                 elif self.path == "/pilot":
                     u = (data.get("username") or "").upper()
                     if u:
                         STATE["pilots"][u] = {**STATE["pilots"].get(u, {}), **data}
+                elif self.path == "/route":
+                    dep = (data.get("dep") or "").upper()
+                    arr = (data.get("arr") or "").upper()
+                    if len(dep)==4 and len(arr)==4:
+                        # avoid duplicate routes
+                        exists = any(r.get("dep")==dep and r.get("arr")==arr for r in STATE["routes"])
+                        if not exists:
+                            STATE["routes"].insert(0, {"dep":dep, "arr":arr,
+                                "by": data.get("by",""), "ts": time.time(),
+                                "f": "KLA"+str(int(time.time()))[-3:]})
                 elif self.path == "/state":
                     # full overwrite (used to seed the roster)
                     for k in ("fleet", "maintenance", "flights", "pilots"):

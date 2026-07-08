@@ -1,0 +1,42 @@
+BUILD THE STANDALONE AMAL AIRWAYS DESKTOP APP  (all free)
+=========================================================
+This makes ONE Windows app: native window, login, flight creation, live
+tracking, and SimConnect — no browser, no scripts. Then wraps it in a real
+Windows installer. Nothing here costs money.
+
+FILES NEEDED IN THE SAME FOLDER:
+    AmalAirways.py        (the app)
+    AmalAirways.html      (the GUI)
+    acars_client.py       (the SimConnect engine it uses)
+
+STEP 1 — install the build tools (one time)
+-------------------------------------------
+    pip install pywebview pyinstaller SimConnect
+
+STEP 2 — build the single .exe
+------------------------------
+Run this ONE command (all on one line):
+
+    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." AmalAirways.py
+
+  -> produces  dist\AmalAirways.exe
+  This is the whole system in one file. Double-click = native app window with
+  the dashboard. "Start ACARS & fly" reads MSFS via the bundled SimConnect and
+  shares your flight to the live bridge so the whole airline sees it.
+
+STEP 3 — make a Windows installer (free)
+----------------------------------------
+1. Download Inno Setup (free): https://jrsoftware.org/isdl.php
+2. Open AmalAirways_installer.iss in Inno Setup.
+3. Click Build -> Compile.
+   -> produces AmalAirways_Setup.exe
+This is a proper installer: it installs the app, adds a Start Menu and desktop
+shortcut, and can be uninstalled normally. Share AmalAirways_Setup.exe with pilots.
+
+NOTES
+-----
+- First launch may show Windows "unknown publisher" -> More info -> Run anyway.
+  Removing that needs a paid code-signing certificate (do it later if you want).
+- pywebview uses the Edge WebView2 runtime, which is already on Windows 10/11.
+- The app talks to your live bridge at https://amal-airways-fms.onrender.com
+  automatically. Nothing for pilots to configure.

@@ -1,0 +1,25 @@
+BUILD THE AMAL ACARS CLIENT — zero-setup version for pilots
+===========================================================
+This bundles SimConnect INTO the .exe so pilots need nothing but the file.
+No pip, no Python, no setup. Download -> double-click -> fly.
+
+ON YOUR PC (one time, to build it):
+    pip install SimConnect pyinstaller
+
+BUILD (one command — bundles SimConnect in):
+    python -m PyInstaller --onefile --console --name AmalACARS --collect-all SimConnect AmalACARS.py
+
+    -> produces dist\AmalACARS.exe  (pilots need NOTHING installed to run it)
+
+WHAT PILOTS DO:
+    1. Download AmalACARS.exe
+    2. Double-click it
+    3. First time only: Windows may say "unknown publisher" -> More info -> Run anyway
+       (tell them: this is the official Amal Airways client, it's safe)
+    4. Enter callsign / departure / arrival when prompted
+    5. Fly. Their flight shows live on https://amal-airways-fms.onrender.com
+
+REMOVING THE "UNKNOWN PUBLISHER" WARNING (optional, costs money):
+    A code-signing certificate (~$100-200/year) makes Windows trust it with no
+    warning. Only worth it if the airline is long-term. Otherwise the one-time
+    "Run anyway" click is fine.

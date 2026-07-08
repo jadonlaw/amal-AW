@@ -6,6 +6,7 @@
 <title>Amal Airways — Flight Management System</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="airports.js" onerror="window.AIRPORTS=window.AIRPORTS||{}"></script>
 <style>
   :root{
     --blue:#0b2f6b; --blue2:#12489f; --sky:#2f7be0;
@@ -59,6 +60,16 @@
   tr:hover td{background:#f7f9fd}
   .badge{display:inline-block;background:#e6f6ec;color:#1a8a4a;font-weight:700;font-size:11px;padding:2px 8px;border-radius:20px}
   .badge.due{background:#fdeaea;color:#c33}
+  .badge.soon{background:#fff3d6;color:#9a6b12}
+  .mnt-btn{background:var(--blue);color:#fff;border:0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer}
+  .mnt-btn:hover{background:var(--blue2)}
+  .routebuilder{background:var(--mist);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:8px}
+  .rb-row{display:flex;gap:12px;flex-wrap:wrap}
+  .rb-fg{flex:1;min-width:120px}
+  .rb-fg label{display:block;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--sub);text-transform:uppercase;margin-bottom:5px}
+  .rb-fg input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px}
+  .rb-btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .rb-out{margin-top:14px;font-size:14px}
   .empty{color:#8496b0;font-style:italic;padding:28px;text-align:center}
   .bar{position:absolute;top:8px;left:8px;z-index:500;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;box-shadow:0 2px 8px rgba(12,35,63,.12);font-size:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .dot{width:9px;height:9px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25)}
@@ -91,8 +102,49 @@
   #challenge-banner h4{margin:2px 0 4px;font-size:16px;font-weight:800}
   #challenge-banner p{margin:0;font-size:12px;line-height:1.4;font-weight:600}
   #challenge-banner .rw{margin-top:6px;font-size:11px;font-weight:700;opacity:.85}
+  #hubpick{position:fixed;inset:0;z-index:9000;background:rgba(4,12,24,.55);display:grid;place-items:center}
+  .hubpick-inner{background:var(--card);border-top:4px solid var(--gold);border-radius:14px;padding:24px 26px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+  .hubpick-inner h3{margin:0 0 6px;color:var(--blue);font-size:17px}
+  .hubpick-inner p{margin:0 0 12px;color:var(--sub);font-size:13px}
+  .hubpick-inner select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:var(--card);color:var(--ink)}
+  .hubpick-btns{display:flex;gap:8px;margin-top:18px}
+  .hubpick-btns button{flex:1;padding:11px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;border:0}
+  .hp-cancel{background:#e8edf6;color:#5b6b84}
+  .hp-ok{background:var(--blue);color:#fff}
+  .hp-ok:hover{background:var(--blue2)}
   #darkbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:6px 11px;font-size:14px;cursor:pointer;margin-left:8px}
   #darkbtn:hover{background:rgba(255,255,255,.18)}
+  #globalsearch{display:flex;align-items:center;gap:0;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;padding:4px 4px 4px 6px;box-shadow:0 2px 8px rgba(0,0,0,.2);min-width:280px}
+  #globalsearch input{flex:1;border:0;background:rgba(255,255,255,.92);border-radius:7px 0 0 7px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--ink);outline:none;min-width:180px}
+  #globalsearch button{border:0;background:var(--blue);color:#fff;font-weight:700;font-size:13px;padding:8px 16px;border-radius:0 7px 7px 0;cursor:pointer}
+  #globalsearch button:hover{background:var(--blue2)}
+  .planbtn{border:0;border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;color:#fff}
+  .planbtn.sb{background:#2b6cb0}
+  .planbtn.sb:hover{background:#245a94}
+  .planbtn.vat{background:#5b3fa0}
+  .planbtn.vat:hover{background:#4c3488}
+  #greeting{position:fixed;top:82px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:9500;
+    opacity:0;pointer-events:none;transition:opacity .4s,transform .4s}
+  #greeting.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .greet-inner{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;border-left:4px solid var(--gold);
+    border-radius:12px;padding:14px 24px;box-shadow:0 12px 40px rgba(11,47,107,.35);text-align:center}
+  .greet-inner b{display:block;font-size:19px;font-weight:800}
+  .greet-inner span{font-size:12px;opacity:.8;letter-spacing:.3px}
+  #flightpanel{position:fixed;left:16px;bottom:16px;z-index:8000;width:240px;
+    background:linear-gradient(160deg,var(--blue),#0a2555);color:#fff;border-radius:14px;
+    border:1px solid rgba(255,255,255,.12);box-shadow:0 14px 44px rgba(0,0,0,.4);
+    padding:14px 16px;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .4s,transform .4s}
+  #flightpanel.show{opacity:1;transform:translateY(0)}
+  .fp-top{display:flex;justify-content:space-between;align-items:center;font-size:14px}
+  .fp-live{font-size:10px;font-weight:800;letter-spacing:1px;color:#4ade80;animation:fppulse 2s infinite}
+  @keyframes fppulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .fp-route{font-size:20px;font-weight:800;margin:8px 0;letter-spacing:.5px}
+  .fp-route span{color:var(--gold2);margin:0 4px}
+  .fp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+  .fp-grid div{background:rgba(255,255,255,.08);border-radius:8px;padding:7px 9px}
+  .fp-grid span{display:block;font-size:9px;letter-spacing:1px;opacity:.6}
+  .fp-grid b{font-size:14px;font-weight:700}
+  .fp-ac{font-size:11px;opacity:.6;margin-top:8px;text-align:center}
   /* in-app SOP alert box — about the size of the sign-in box */
   #alertbox{position:fixed;right:18px;bottom:18px;z-index:6000;width:320px;min-height:96px;
     background:var(--alertbg);border:1px solid var(--line);border-radius:14px;
@@ -122,7 +174,7 @@
       <option value="pilot">Pilot</option>
     </select>
     <label>Username</label>
-    <input id="l-user" placeholder="e.g. ALA001" autocomplete="off">
+    <input id="l-user" placeholder="e.g. KLA001" autocomplete="off">
     <label>Passcode</label>
     <input id="l-pass" type="password" placeholder="6-character code" autocomplete="off">
     <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:600;color:var(--ink);margin-top:12px;cursor:pointer">
@@ -144,6 +196,11 @@
     <button data-view="scoring">Scoring &amp; PIREPs</button>
     <button data-view="roster">Pilots</button>
   </nav>
+  <div id="globalsearch">
+    <input id="gsearch" placeholder="Search airport ICAO (e.g. KJFK)…" maxlength="4"
+      style="text-transform:uppercase" onkeydown="if(event.key==='Enter')globalSearch()">
+    <button onclick="globalSearch()">Search</button>
+  </div>
   <span id="whoami"></span>
   <button id="darkbtn" onclick="toggleDark()" title="Toggle light/dark">☾</button>
   <button id="logout" onclick="doLogout()">Sign out</button>
@@ -167,7 +224,7 @@
     <div class="bar">
       <span class="dot"></span><span id="status">Connecting to VATSIM…</span>
       <span class="cfg">| Callsign prefix
-        <input id="prefix" value="ALA" maxlength="5">
+        <input id="prefix" value="KLA" maxlength="5">
         <button onclick="setPrefix()">Track</button>
       </span>
     </div>
@@ -201,7 +258,7 @@
     <div class="panel">
       <h2>Fleet &amp; Maintenance Control</h2>
       <p class="sub">Track status, location, health, and maintenance so dispatch eligibility matches your operational realism. Add aircraft from the Fleet Shop.</p>
-      <table><thead><tr><th>Reg</th><th>Type</th><th>Location</th><th>Status</th><th>Hours</th><th>Maintenance</th></tr></thead>
+      <table><thead><tr><th>Reg</th><th>Type</th><th>Location</th><th>Status</th><th>Hours</th><th>Maintenance</th><th></th></tr></thead>
       <tbody id="fleet-body"></tbody></table>
     </div>
   </section>
@@ -219,10 +276,26 @@
   <section class="view" id="routes">
     <div class="panel">
       <h2>Route &amp; Hub Operations</h2>
-      <p class="sub">Build a network that makes sense. Manage hubs, routes, and eligibility rules so pilots always have a clear next leg.</p>
-      <table><thead><tr><th>Flight</th><th>From</th><th>To</th><th>Aircraft</th><th>Hub</th></tr></thead>
+      <p class="sub">Create a route and SimBrief builds the best routing for you — then pull it back and prefile straight to VATSIM. Set your SimBrief username once and it's all automatic.</p>
+
+      <div class="routebuilder">
+        <div class="rb-row">
+          <div class="rb-fg"><label>SimBrief username</label><input id="sb-user" placeholder="your SimBrief login"></div>
+          <div class="rb-fg"><label>From (ICAO)</label><input id="rb-dep" maxlength="4" placeholder="KDED" style="text-transform:uppercase"></div>
+          <div class="rb-fg"><label>To (ICAO)</label><input id="rb-arr" maxlength="4" placeholder="KMCO" style="text-transform:uppercase"></div>
+          <div class="rb-fg"><label>Aircraft</label><input id="rb-ac" placeholder="B738" style="text-transform:uppercase"></div>
+        </div>
+        <div class="rb-btns">
+          <button class="planbtn sb" onclick="buildOnSimBrief()">1 · Build on SimBrief</button>
+          <button class="planbtn" style="background:#1a8a4a" onclick="pullRoute()">2 · Pull route &amp; save</button>
+        </div>
+        <div id="rb-out" class="rb-out"></div>
+      </div>
+
+      <h3 style="margin:22px 0 10px;font-size:16px">Saved routes</h3>
+      <table><thead><tr><th>Flight</th><th>Route</th><th>Aircraft</th><th>Cruise</th><th></th></tr></thead>
       <tbody id="routes-body"></tbody></table>
-      <div class="featnote">Send me your real hubs and route list (or a SimBrief/CSV export) and I'll bulk-load them here with eligibility by aircraft type and rank.</div>
+      <div class="featnote" id="hubs-list"></div>
     </div>
   </section>
 
@@ -242,14 +315,14 @@
     <div class="panel">
       <h2>Pilots</h2>
       <p class="sub">Full airline roster — every pilot, their type, and their logged activity. Flight totals build up automatically as pilots complete flights.</p>
-      <table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Type</th><th>Flights</th><th>Hours</th></tr></thead>
+      <table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Rank</th><th>Flights</th><th>Hours</th></tr></thead>
       <tbody id="roster-body"><tr><td colspan="6" class="empty">Loading roster…</td></tr></tbody></table>
     </div>
   </section>
 </main>
 
 <script>
-const CREDS = {"CEO01": {"pass": "DAL6CH", "role": "ceo"}, "FM01": {"pass": "NLN873", "role": "fleet_manager"}, "FM02": {"pass": "TKQJCP", "role": "fleet_manager"}, "FM03": {"pass": "SJN677", "role": "fleet_manager"}, "FM04": {"pass": "CUCLY4", "role": "fleet_manager"}, "FM05": {"pass": "YTB7WW", "role": "fleet_manager"}, "FM06": {"pass": "3YVFTH", "role": "fleet_manager"}, "FM07": {"pass": "JJ8JWB", "role": "fleet_manager"}, "FM08": {"pass": "7PWN3H", "role": "fleet_manager"}, "FM09": {"pass": "JGRVY7", "role": "fleet_manager"}, "FM10": {"pass": "HKZVJA", "role": "fleet_manager"}, "FM11": {"pass": "549GLX", "role": "fleet_manager"}, "FM12": {"pass": "H9VZGE", "role": "fleet_manager"}, "FM13": {"pass": "YBG9PQ", "role": "fleet_manager"}, "FM14": {"pass": "EN2VZY", "role": "fleet_manager"}, "FM15": {"pass": "TVV3HF", "role": "fleet_manager"}, "FM16": {"pass": "A7E253", "role": "fleet_manager"}, "FM17": {"pass": "PH8SH6", "role": "fleet_manager"}, "FM18": {"pass": "PSU4XM", "role": "fleet_manager"}, "FM19": {"pass": "H6AES5", "role": "fleet_manager"}, "FM20": {"pass": "VH96VN", "role": "fleet_manager"}, "FM21": {"pass": "X3ZYYG", "role": "fleet_manager"}, "FM22": {"pass": "VRWXNJ", "role": "fleet_manager"}, "FM23": {"pass": "UVS6TW", "role": "fleet_manager"}, "FM24": {"pass": "TY2YDE", "role": "fleet_manager"}, "FM25": {"pass": "MSGRYV", "role": "fleet_manager"}, "FM26": {"pass": "FLSJLY", "role": "fleet_manager"}, "FM27": {"pass": "HPELAR", "role": "fleet_manager"}, "FM28": {"pass": "3BWKDA", "role": "fleet_manager"}, "FM29": {"pass": "T7Q9WC", "role": "fleet_manager"}, "FM30": {"pass": "TPD4GT", "role": "fleet_manager"}, "ALA001": {"pass": "EV2HEX", "role": "pilot"}, "ALA002": {"pass": "HCGYHN", "role": "pilot"}, "ALA003": {"pass": "YZ7ERQ", "role": "pilot"}, "ALA004": {"pass": "R52LU6", "role": "pilot"}, "ALA005": {"pass": "DK7WPV", "role": "pilot"}, "ALA006": {"pass": "KVDN47", "role": "pilot"}, "ALA007": {"pass": "V5AXBT", "role": "pilot"}, "ALA008": {"pass": "HL4FZW", "role": "pilot"}, "ALA009": {"pass": "EPMHMB", "role": "pilot"}, "ALA010": {"pass": "4RE6RX", "role": "pilot"}, "ALA011": {"pass": "TSTDQM", "role": "pilot"}, "ALA012": {"pass": "A7GQEB", "role": "pilot"}, "ALA013": {"pass": "8PFA72", "role": "pilot"}, "ALA014": {"pass": "H6K75N", "role": "pilot"}, "ALA015": {"pass": "8QLALL", "role": "pilot"}, "ALA016": {"pass": "CK3GB7", "role": "pilot"}, "ALA017": {"pass": "V8KDLU", "role": "pilot"}, "ALA018": {"pass": "FU9RAF", "role": "pilot"}, "ALA019": {"pass": "HMQW3V", "role": "pilot"}, "ALA020": {"pass": "HV54RK", "role": "pilot"}, "ALA021": {"pass": "L39MG9", "role": "pilot"}, "ALA022": {"pass": "CMJELQ", "role": "pilot"}, "ALA023": {"pass": "98Q3YH", "role": "pilot"}, "ALA024": {"pass": "9WNTV5", "role": "pilot"}, "ALA025": {"pass": "ZJPAXV", "role": "pilot"}, "ALA026": {"pass": "V5UV9J", "role": "pilot"}, "ALA027": {"pass": "Z2XKTS", "role": "pilot"}, "ALA028": {"pass": "CCXF57", "role": "pilot"}, "ALA029": {"pass": "CP33CP", "role": "pilot"}, "ALA030": {"pass": "558CZK", "role": "pilot"}, "ALA031": {"pass": "WPLENH", "role": "pilot"}, "ALA032": {"pass": "U4TAQJ", "role": "pilot"}, "ALA033": {"pass": "AKVMY8", "role": "pilot"}, "ALA034": {"pass": "T4RJK9", "role": "pilot"}, "ALA035": {"pass": "6D2QVK", "role": "pilot"}, "ALA036": {"pass": "M8BF2Q", "role": "pilot"}, "ALA037": {"pass": "XWDPUD", "role": "pilot"}, "ALA038": {"pass": "F25UM5", "role": "pilot"}, "ALA039": {"pass": "AFJHHM", "role": "pilot"}, "ALA040": {"pass": "627BDV", "role": "pilot"}, "ALA041": {"pass": "TJWNN6", "role": "pilot"}, "ALA042": {"pass": "SPPQLU", "role": "pilot"}, "ALA043": {"pass": "UPJJX9", "role": "pilot"}, "ALA044": {"pass": "2PYN8T", "role": "pilot"}, "ALA045": {"pass": "RKWDGC", "role": "pilot"}, "ALA046": {"pass": "ZXL243", "role": "pilot"}, "ALA047": {"pass": "QC223K", "role": "pilot"}, "ALA048": {"pass": "HR4K52", "role": "pilot"}, "ALA049": {"pass": "TR9BLV", "role": "pilot"}, "ALA050": {"pass": "CTGQBX", "role": "pilot"}, "ALA051": {"pass": "AQYE6J", "role": "pilot"}, "ALA052": {"pass": "K4AEDU", "role": "pilot"}, "ALA053": {"pass": "JCBXQ5", "role": "pilot"}, "ALA054": {"pass": "V3UYYF", "role": "pilot"}, "ALA055": {"pass": "8GPCBV", "role": "pilot"}, "ALA056": {"pass": "LPRDGT", "role": "pilot"}, "ALA057": {"pass": "WZ5CCH", "role": "pilot"}, "ALA058": {"pass": "HF6A2F", "role": "pilot"}, "ALA059": {"pass": "DRQDA9", "role": "pilot"}, "ALA060": {"pass": "6KR9BX", "role": "pilot"}, "ALA061": {"pass": "HBX2HN", "role": "pilot"}, "ALA062": {"pass": "QDDHKC", "role": "pilot"}, "ALA063": {"pass": "85U5FA", "role": "pilot"}, "ALA064": {"pass": "MCRJYC", "role": "pilot"}, "ALA065": {"pass": "758V22", "role": "pilot"}, "ALA066": {"pass": "ZSFKG7", "role": "pilot"}, "ALA067": {"pass": "QHCA37", "role": "pilot"}, "ALA068": {"pass": "L8DGQG", "role": "pilot"}, "ALA069": {"pass": "W23NBC", "role": "pilot"}, "ALA070": {"pass": "TEV8KQ", "role": "pilot"}, "ALA071": {"pass": "LJJXHN", "role": "pilot"}, "ALA072": {"pass": "87QTB3", "role": "pilot"}, "ALA073": {"pass": "9SL5LL", "role": "pilot"}, "ALA074": {"pass": "GJ9BJQ", "role": "pilot"}, "ALA075": {"pass": "FBU69M", "role": "pilot"}, "ALA076": {"pass": "YBXEFJ", "role": "pilot"}, "ALA077": {"pass": "4MMH2G", "role": "pilot"}, "ALA078": {"pass": "4QC3SH", "role": "pilot"}, "ALA079": {"pass": "G4GLQP", "role": "pilot"}, "ALA080": {"pass": "J6C3UJ", "role": "pilot"}, "ALA081": {"pass": "WMB27H", "role": "pilot"}, "ALA082": {"pass": "338ZJY", "role": "pilot"}, "ALA083": {"pass": "HD5RFY", "role": "pilot"}, "ALA084": {"pass": "7ASLX6", "role": "pilot"}, "ALA085": {"pass": "54SCAA", "role": "pilot"}, "ALA086": {"pass": "5V5LKH", "role": "pilot"}, "ALA087": {"pass": "LYR38R", "role": "pilot"}, "ALA088": {"pass": "3ZPC39", "role": "pilot"}, "ALA089": {"pass": "N53HX7", "role": "pilot"}, "ALA090": {"pass": "BP8BDK", "role": "pilot"}, "ALA091": {"pass": "NDYAXV", "role": "pilot"}, "ALA092": {"pass": "ZHMXQU", "role": "pilot"}, "ALA093": {"pass": "99FDWC", "role": "pilot"}, "ALA094": {"pass": "U5EC5X", "role": "pilot"}, "ALA095": {"pass": "KTK75Z", "role": "pilot"}, "ALA096": {"pass": "BWT3SA", "role": "pilot"}, "ALA097": {"pass": "CCNNXU", "role": "pilot"}, "ALA098": {"pass": "ER8HXB", "role": "pilot"}, "ALA099": {"pass": "N7VXDJ", "role": "pilot"}, "ALA100": {"pass": "WBT65J", "role": "pilot"}, "ALA101": {"pass": "UTJQFY", "role": "pilot"}, "ALA102": {"pass": "V7L8FS", "role": "pilot"}, "ALA103": {"pass": "K23LPW", "role": "pilot"}, "ALA104": {"pass": "V6B25A", "role": "pilot"}, "ALA105": {"pass": "NB89UU", "role": "pilot"}, "ALA106": {"pass": "6TEEA4", "role": "pilot"}, "ALA107": {"pass": "QA5SZ9", "role": "pilot"}, "ALA108": {"pass": "JUJZX6", "role": "pilot"}, "ALA109": {"pass": "ZQADJ6", "role": "pilot"}, "ALA110": {"pass": "YBJBDG", "role": "pilot"}, "ALA111": {"pass": "ZMLSYN", "role": "pilot"}, "ALA112": {"pass": "SLDT2W", "role": "pilot"}, "ALA113": {"pass": "ECWM8Z", "role": "pilot"}, "ALA114": {"pass": "F6M2PQ", "role": "pilot"}, "ALA115": {"pass": "CWT865", "role": "pilot"}, "ALA116": {"pass": "5JYNHC", "role": "pilot"}, "ALA117": {"pass": "GT7STD", "role": "pilot"}, "ALA118": {"pass": "JQ2XCY", "role": "pilot"}, "ALA119": {"pass": "M2BNSL", "role": "pilot"}, "ALA120": {"pass": "Z8Z8HZ", "role": "pilot"}, "ALA121": {"pass": "QJ2GAY", "role": "pilot"}, "ALA122": {"pass": "6ZSF96", "role": "pilot"}, "ALA123": {"pass": "TSFQNJ", "role": "pilot"}, "ALA124": {"pass": "ACNVXJ", "role": "pilot"}, "ALA125": {"pass": "BH73ZM", "role": "pilot"}, "ALA126": {"pass": "YT4QML", "role": "pilot"}, "ALA127": {"pass": "27ARQ5", "role": "pilot"}, "ALA128": {"pass": "EY3ZYF", "role": "pilot"}, "ALA129": {"pass": "7HQU4E", "role": "pilot"}, "ALA130": {"pass": "ZE8N9U", "role": "pilot"}, "ALA131": {"pass": "6ZHDKD", "role": "pilot"}, "ALA132": {"pass": "EMF9C3", "role": "pilot"}, "ALA133": {"pass": "BGHLUQ", "role": "pilot"}, "ALA134": {"pass": "UYRC8J", "role": "pilot"}, "ALA135": {"pass": "XZ6N83", "role": "pilot"}, "ALA136": {"pass": "ECCZW9", "role": "pilot"}, "ALA137": {"pass": "YWXFET", "role": "pilot"}, "ALA138": {"pass": "L3LMWC", "role": "pilot"}, "ALA139": {"pass": "UH6KDT", "role": "pilot"}, "ALA140": {"pass": "QXZSPQ", "role": "pilot"}, "ALA141": {"pass": "CZUWML", "role": "pilot"}, "ALA142": {"pass": "Y5ZEMV", "role": "pilot"}, "ALA143": {"pass": "PY2UQR", "role": "pilot"}, "ALA144": {"pass": "C87USU", "role": "pilot"}, "ALA145": {"pass": "RFXZAX", "role": "pilot"}, "ALA146": {"pass": "E6Q233", "role": "pilot"}, "ALA147": {"pass": "YZ2EJF", "role": "pilot"}, "ALA148": {"pass": "BUKFR9", "role": "pilot"}, "ALA149": {"pass": "JL7PEF", "role": "pilot"}, "ALA150": {"pass": "TLR6UJ", "role": "pilot"}};
+const CREDS = {"CEO01": {"pass": "DAL6CH", "role": "ceo"}, "FM01": {"pass": "NLN873", "role": "fleet_manager"}, "FM02": {"pass": "TKQJCP", "role": "fleet_manager"}, "FM03": {"pass": "SJN677", "role": "fleet_manager"}, "FM04": {"pass": "CUCLY4", "role": "fleet_manager"}, "FM05": {"pass": "YTB7WW", "role": "fleet_manager"}, "FM06": {"pass": "3YVFTH", "role": "fleet_manager"}, "FM07": {"pass": "JJ8JWB", "role": "fleet_manager"}, "FM08": {"pass": "7PWN3H", "role": "fleet_manager"}, "FM09": {"pass": "JGRVY7", "role": "fleet_manager"}, "FM10": {"pass": "HKZVJA", "role": "fleet_manager"}, "FM11": {"pass": "549GLX", "role": "fleet_manager"}, "FM12": {"pass": "H9VZGE", "role": "fleet_manager"}, "FM13": {"pass": "YBG9PQ", "role": "fleet_manager"}, "FM14": {"pass": "EN2VZY", "role": "fleet_manager"}, "FM15": {"pass": "TVV3HF", "role": "fleet_manager"}, "FM16": {"pass": "A7E253", "role": "fleet_manager"}, "FM17": {"pass": "PH8SH6", "role": "fleet_manager"}, "FM18": {"pass": "PSU4XM", "role": "fleet_manager"}, "FM19": {"pass": "H6AES5", "role": "fleet_manager"}, "FM20": {"pass": "VH96VN", "role": "fleet_manager"}, "FM21": {"pass": "X3ZYYG", "role": "fleet_manager"}, "FM22": {"pass": "VRWXNJ", "role": "fleet_manager"}, "FM23": {"pass": "UVS6TW", "role": "fleet_manager"}, "FM24": {"pass": "TY2YDE", "role": "fleet_manager"}, "FM25": {"pass": "MSGRYV", "role": "fleet_manager"}, "FM26": {"pass": "FLSJLY", "role": "fleet_manager"}, "FM27": {"pass": "HPELAR", "role": "fleet_manager"}, "FM28": {"pass": "3BWKDA", "role": "fleet_manager"}, "FM29": {"pass": "T7Q9WC", "role": "fleet_manager"}, "FM30": {"pass": "TPD4GT", "role": "fleet_manager"}, "KLA001": {"pass": "EV2HEX", "role": "pilot"}, "KLA002": {"pass": "HCGYHN", "role": "pilot"}, "KLA003": {"pass": "YZ7ERQ", "role": "pilot"}, "KLA004": {"pass": "R52LU6", "role": "pilot"}, "KLA005": {"pass": "DK7WPV", "role": "pilot"}, "KLA006": {"pass": "KVDN47", "role": "pilot"}, "KLA007": {"pass": "V5AXBT", "role": "pilot"}, "KLA008": {"pass": "HL4FZW", "role": "pilot"}, "KLA009": {"pass": "EPMHMB", "role": "pilot"}, "KLA010": {"pass": "4RE6RX", "role": "pilot"}, "KLA011": {"pass": "TSTDQM", "role": "pilot"}, "KLA012": {"pass": "A7GQEB", "role": "pilot"}, "KLA013": {"pass": "8PFA72", "role": "pilot"}, "KLA014": {"pass": "H6K75N", "role": "pilot"}, "KLA015": {"pass": "8QLALL", "role": "pilot"}, "KLA016": {"pass": "CK3GB7", "role": "pilot"}, "KLA017": {"pass": "V8KDLU", "role": "pilot"}, "KLA018": {"pass": "FU9RAF", "role": "pilot"}, "KLA019": {"pass": "HMQW3V", "role": "pilot"}, "KLA020": {"pass": "HV54RK", "role": "pilot"}, "KLA021": {"pass": "L39MG9", "role": "pilot"}, "KLA022": {"pass": "CMJELQ", "role": "pilot"}, "KLA023": {"pass": "98Q3YH", "role": "pilot"}, "KLA024": {"pass": "9WNTV5", "role": "pilot"}, "KLA025": {"pass": "ZJPAXV", "role": "pilot"}, "KLA026": {"pass": "V5UV9J", "role": "pilot"}, "KLA027": {"pass": "Z2XKTS", "role": "pilot"}, "KLA028": {"pass": "CCXF57", "role": "pilot"}, "KLA029": {"pass": "CP33CP", "role": "pilot"}, "KLA030": {"pass": "558CZK", "role": "pilot"}, "KLA031": {"pass": "WPLENH", "role": "pilot"}, "KLA032": {"pass": "U4TAQJ", "role": "pilot"}, "KLA033": {"pass": "AKVMY8", "role": "pilot"}, "KLA034": {"pass": "T4RJK9", "role": "pilot"}, "KLA035": {"pass": "6D2QVK", "role": "pilot"}, "KLA036": {"pass": "M8BF2Q", "role": "pilot"}, "KLA037": {"pass": "XWDPUD", "role": "pilot"}, "KLA038": {"pass": "F25UM5", "role": "pilot"}, "KLA039": {"pass": "AFJHHM", "role": "pilot"}, "KLA040": {"pass": "627BDV", "role": "pilot"}, "KLA041": {"pass": "TJWNN6", "role": "pilot"}, "KLA042": {"pass": "SPPQLU", "role": "pilot"}, "KLA043": {"pass": "UPJJX9", "role": "pilot"}, "KLA044": {"pass": "2PYN8T", "role": "pilot"}, "KLA045": {"pass": "RKWDGC", "role": "pilot"}, "KLA046": {"pass": "ZXL243", "role": "pilot"}, "KLA047": {"pass": "QC223K", "role": "pilot"}, "KLA048": {"pass": "HR4K52", "role": "pilot"}, "KLA049": {"pass": "TR9BLV", "role": "pilot"}, "KLA050": {"pass": "CTGQBX", "role": "pilot"}, "KLA051": {"pass": "AQYE6J", "role": "pilot"}, "KLA052": {"pass": "K4AEDU", "role": "pilot"}, "KLA053": {"pass": "JCBXQ5", "role": "pilot"}, "KLA054": {"pass": "V3UYYF", "role": "pilot"}, "KLA055": {"pass": "8GPCBV", "role": "pilot"}, "KLA056": {"pass": "LPRDGT", "role": "pilot"}, "KLA057": {"pass": "WZ5CCH", "role": "pilot"}, "KLA058": {"pass": "HF6A2F", "role": "pilot"}, "KLA059": {"pass": "DRQDA9", "role": "pilot"}, "KLA060": {"pass": "6KR9BX", "role": "pilot"}, "KLA061": {"pass": "HBX2HN", "role": "pilot"}, "KLA062": {"pass": "QDDHKC", "role": "pilot"}, "KLA063": {"pass": "85U5FA", "role": "pilot"}, "KLA064": {"pass": "MCRJYC", "role": "pilot"}, "KLA065": {"pass": "758V22", "role": "pilot"}, "KLA066": {"pass": "ZSFKG7", "role": "pilot"}, "KLA067": {"pass": "QHCA37", "role": "pilot"}, "KLA068": {"pass": "L8DGQG", "role": "pilot"}, "KLA069": {"pass": "W23NBC", "role": "pilot"}, "KLA070": {"pass": "TEV8KQ", "role": "pilot"}, "KLA071": {"pass": "LJJXHN", "role": "pilot"}, "KLA072": {"pass": "87QTB3", "role": "pilot"}, "KLA073": {"pass": "9SL5LL", "role": "pilot"}, "KLA074": {"pass": "GJ9BJQ", "role": "pilot"}, "KLA075": {"pass": "FBU69M", "role": "pilot"}, "KLA076": {"pass": "YBXEFJ", "role": "pilot"}, "KLA077": {"pass": "4MMH2G", "role": "pilot"}, "KLA078": {"pass": "4QC3SH", "role": "pilot"}, "KLA079": {"pass": "G4GLQP", "role": "pilot"}, "KLA080": {"pass": "J6C3UJ", "role": "pilot"}, "KLA081": {"pass": "WMB27H", "role": "pilot"}, "KLA082": {"pass": "338ZJY", "role": "pilot"}, "KLA083": {"pass": "HD5RFY", "role": "pilot"}, "KLA084": {"pass": "7ASLX6", "role": "pilot"}, "KLA085": {"pass": "54SCAA", "role": "pilot"}, "KLA086": {"pass": "5V5LKH", "role": "pilot"}, "KLA087": {"pass": "LYR38R", "role": "pilot"}, "KLA088": {"pass": "3ZPC39", "role": "pilot"}, "KLA089": {"pass": "N53HX7", "role": "pilot"}, "KLA090": {"pass": "BP8BDK", "role": "pilot"}, "KLA091": {"pass": "NDYAXV", "role": "pilot"}, "KLA092": {"pass": "ZHMXQU", "role": "pilot"}, "KLA093": {"pass": "99FDWC", "role": "pilot"}, "KLA094": {"pass": "U5EC5X", "role": "pilot"}, "KLA095": {"pass": "KTK75Z", "role": "pilot"}, "KLA096": {"pass": "BWT3SA", "role": "pilot"}, "KLA097": {"pass": "CCNNXU", "role": "pilot"}, "KLA098": {"pass": "ER8HXB", "role": "pilot"}, "KLA099": {"pass": "N7VXDJ", "role": "pilot"}, "KLA100": {"pass": "WBT65J", "role": "pilot"}, "KLA101": {"pass": "UTJQFY", "role": "pilot"}, "KLA102": {"pass": "V7L8FS", "role": "pilot"}, "KLA103": {"pass": "K23LPW", "role": "pilot"}, "KLA104": {"pass": "V6B25A", "role": "pilot"}, "KLA105": {"pass": "NB89UU", "role": "pilot"}, "KLA106": {"pass": "6TEEA4", "role": "pilot"}, "KLA107": {"pass": "QA5SZ9", "role": "pilot"}, "KLA108": {"pass": "JUJZX6", "role": "pilot"}, "KLA109": {"pass": "ZQADJ6", "role": "pilot"}, "KLA110": {"pass": "YBJBDG", "role": "pilot"}, "KLA111": {"pass": "ZMLSYN", "role": "pilot"}, "KLA112": {"pass": "SLDT2W", "role": "pilot"}, "KLA113": {"pass": "ECWM8Z", "role": "pilot"}, "KLA114": {"pass": "F6M2PQ", "role": "pilot"}, "KLA115": {"pass": "CWT865", "role": "pilot"}, "KLA116": {"pass": "5JYNHC", "role": "pilot"}, "KLA117": {"pass": "GT7STD", "role": "pilot"}, "KLA118": {"pass": "JQ2XCY", "role": "pilot"}, "KLA119": {"pass": "M2BNSL", "role": "pilot"}, "KLA120": {"pass": "Z8Z8HZ", "role": "pilot"}, "KLA121": {"pass": "QJ2GAY", "role": "pilot"}, "KLA122": {"pass": "6ZSF96", "role": "pilot"}, "KLA123": {"pass": "TSFQNJ", "role": "pilot"}, "KLA124": {"pass": "ACNVXJ", "role": "pilot"}, "KLA125": {"pass": "BH73ZM", "role": "pilot"}, "KLA126": {"pass": "YT4QML", "role": "pilot"}, "KLA127": {"pass": "27ARQ5", "role": "pilot"}, "KLA128": {"pass": "EY3ZYF", "role": "pilot"}, "KLA129": {"pass": "7HQU4E", "role": "pilot"}, "KLA130": {"pass": "ZE8N9U", "role": "pilot"}, "KLA131": {"pass": "6ZHDKD", "role": "pilot"}, "KLA132": {"pass": "EMF9C3", "role": "pilot"}, "KLA133": {"pass": "BGHLUQ", "role": "pilot"}, "KLA134": {"pass": "UYRC8J", "role": "pilot"}, "KLA135": {"pass": "XZ6N83", "role": "pilot"}, "KLA136": {"pass": "ECCZW9", "role": "pilot"}, "KLA137": {"pass": "YWXFET", "role": "pilot"}, "KLA138": {"pass": "L3LMWC", "role": "pilot"}, "KLA139": {"pass": "UH6KDT", "role": "pilot"}, "KLA140": {"pass": "QXZSPQ", "role": "pilot"}, "KLA141": {"pass": "CZUWML", "role": "pilot"}, "KLA142": {"pass": "Y5ZEMV", "role": "pilot"}, "KLA143": {"pass": "PY2UQR", "role": "pilot"}, "KLA144": {"pass": "C87USU", "role": "pilot"}, "KLA145": {"pass": "RFXZAX", "role": "pilot"}, "KLA146": {"pass": "E6Q233", "role": "pilot"}, "KLA147": {"pass": "YZ2EJF", "role": "pilot"}, "KLA148": {"pass": "BUKFR9", "role": "pilot"}, "KLA149": {"pass": "JL7PEF", "role": "pilot"}, "KLA150": {"pass": "TLR6UJ", "role": "pilot"}};
 let SESSION = null;
 function doLogin(){
   const role = document.getElementById('l-role').value;
@@ -266,12 +339,51 @@ function doLogin(){
   }
   enterApp(user, role);
 }
+// ===== RANK SYSTEM =====
+// Everyone starts First Officer (except CEO). Ranks earned by hours flown.
+const RANKS = [
+  {name:"First Officer", min:0},
+  {name:"Senior First Officer", min:25},
+  {name:"Captain", min:75},
+  {name:"Senior Captain", min:150},
+  {name:"Training Captain", min:300},
+];
+function rankForHours(h){
+  let r = RANKS[0];
+  for(const t of RANKS){ if(h >= t.min) r = t; }
+  return r.name;
+}
+function pilotRank(user, role){
+  if(role==='ceo') return "Chief Executive Officer";
+  if(role==='fleet_manager') return "Fleet Manager";
+  const p = (window.PILOTS && window.PILOTS[user]) || (baseRoster()[user]);
+  const hrs = p ? (p.hours||0) : 0;
+  return rankForHours(hrs);
+}
+function displayName(user){
+  const p = (window.PILOTS && window.PILOTS[user]) || (baseRoster()[user]);
+  return (p && p.name) ? p.name : user;
+}
+
 function enterApp(user, role){
   SESSION = {user, role};
   document.getElementById('login').style.display='none';
-  document.getElementById('whoami').textContent = user+' · '+({ceo:'CEO',fleet_manager:'FLEET MANAGER',pilot:'PILOT'}[role]||role.toUpperCase());
+  const name = displayName(user);
+  const rank = pilotRank(user, role);
+  document.getElementById('whoami').textContent = user+' · '+rank;
+  showGreeting(name, rank);
   applyRole(role);
   if(map) setTimeout(()=>map.invalidateSize(),80);
+}
+function showGreeting(name, rank){
+  let g = document.getElementById('greeting');
+  if(!g){
+    g = document.createElement('div'); g.id='greeting';
+    document.body.appendChild(g);
+  }
+  g.innerHTML = `<div class="greet-inner"><b>Hello, ${name}</b><span>${rank} · welcome back to Amal Airways</span></div>`;
+  g.classList.add('show');
+  setTimeout(()=>g.classList.remove('show'), 4200);
 }
 function tryAutoLogin(){
   try{
@@ -305,13 +417,13 @@ const TYPE_LABEL = {commercial:'Commercial', cargo:'Cargo', charter:'Charter', t
 // sample scheduled routes by type (staff will manage the real lists)
 const SCHED = {
   commercial: [
-    {no:'ALA101', dep:'KATL', arr:'KMCO', ac:'B738'},
-    {no:'ALA220', dep:'KORD', arr:'KLGA', ac:'A320'},
-    {no:'ALA455', dep:'KATL', arr:'KBOS', ac:'E175'}
+    {no:'KLA101', dep:'KATL', arr:'KMCO', ac:'B738'},
+    {no:'KLA220', dep:'KORD', arr:'KLGA', ac:'A320'},
+    {no:'KLA455', dep:'KATL', arr:'KBOS', ac:'E175'}
   ],
   cargo: [
-    {no:'ALA901F', dep:'KMEM', arr:'KATL', ac:'B77W'},
-    {no:'ALA915F', dep:'KIND', arr:'KORD', ac:'B788'}
+    {no:'KLA901F', dep:'KMEM', arr:'KATL', ac:'B77W'},
+    {no:'KLA915F', dep:'KIND', arr:'KORD', ac:'B788'}
   ],
   tour: [
     {tour:'Coastal Hopper', leg:1, dep:'KBOS', arr:'KJFK', ac:'E175'},
@@ -370,9 +482,9 @@ function fileFlight(){
     dep=(document.getElementById('c-dep').value||'').toUpperCase();
     arr=(document.getElementById('c-arr').value||'').toUpperCase();
     if(dep.length!==4||arr.length!==4){ document.getElementById('c-out').innerHTML='<p style="color:#c33">Enter valid 4-letter ICAO codes.</p>'; return; }
-    no='ALA'+Math.floor(100+Math.random()*899);
+    no='KLA'+Math.floor(100+Math.random()*899);
   } else if(t==='tour'){
-    const l=SCHED.tour[document.getElementById('c-leg').value]; dep=l.dep; arr=l.arr; no='ALA'+l.tour.replace(/[^A-Z]/gi,'').slice(0,2).toUpperCase()+l.leg;
+    const l=SCHED.tour[document.getElementById('c-leg').value]; dep=l.dep; arr=l.arr; no='KLA'+l.tour.replace(/[^A-Z]/gi,'').slice(0,2).toUpperCase()+l.leg;
   } else {
     const r=SCHED[t][document.getElementById('c-route').value]; dep=r.dep; arr=r.arr; no=r.no;
   }
@@ -380,10 +492,48 @@ function fileFlight(){
     `<div class="featnote" style="border-left-color:#1a8a4a;margin-top:16px">
       <b>Flight created ✓</b><br>${no} · ${dep} → ${arr} · ${ac}<br>
       <span style="color:var(--sub);font-size:12px">Start your sim and connect the ACARS client — this flight will track live and file a PIREP on arrival.</span>
-      <div style="margin-top:10px">
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="planbtn sb" onclick="planSimBrief('${dep}','${arr}','${acType(ac)}')">① Plan &amp; prefile on SimBrief</button>
         <button class="buy" style="max-width:220px" onclick="startAcars('${no}','${dep}','${arr}')">Start ACARS &amp; fly</button>
+        <button class="planbtn vat" onclick="prefileVatsim('${no}','${dep}','${arr}','${acType(ac)}')">Quick VATSIM prefile</button>
+      </div>
+      <div style="color:var(--sub);font-size:11.5px;margin-top:10px;line-height:1.5">
+        <b>Recommended:</b> use <b>Plan &amp; prefile on SimBrief</b> — it builds your full flight plan, then <b>scroll to the bottom of the SimBrief page and click "Prefile" next to VATSIM</b> to file it complete with route, fuel, and equipment.<br>
+        <span style="color:#a07d1a">The Quick VATSIM prefile is a shortcut and won't fill every field — for a complete plan, prefile through SimBrief instead.</span>
       </div>
     </div>`;
+}
+
+// pull the ICAO type out of "LA-204 (B738)" -> "B738"
+function acType(s){ const m=(s||'').match(/\(([^)]+)\)/); return m?m[1]:(s||'').trim(); }
+
+// SimBrief: open dispatch pre-filled with dep/arr/aircraft (the pilot generates the OFP)
+function planSimBrief(dep, arr, type){
+  const u = `https://dispatch.simbrief.com/options/custom?orig=${encodeURIComponent(dep)}&dest=${encodeURIComponent(arr)}&type=${encodeURIComponent(type)}`;
+  window.open(u, '_blank');
+}
+
+// VATSIM: open the myVATSIM flight-plan form pre-filled (pilot logs in + files).
+// Same URL-parameter mechanism SimBrief and VA systems use.
+function prefileVatsim(callsign, dep, arr, type){
+  // pick a sensible cruise + equipment by aircraft class
+  const wide = /^(B74|B77|B78|A33|A34|A35|A38|B76|MD11)/.test(type);
+  const regional = /^(CRJ|E17|E19|DH8|AT7|E45)/.test(type);
+  const cruise = wide ? 'FL380' : regional ? 'FL280' : 'FL350';
+  const speed  = wide ? 'N0490' : regional ? 'N0420' : 'N0460';
+  const p = new URLSearchParams({
+    callsign: callsign,
+    dep: dep, dest: arr,
+    aircraft: type,
+    equipment: type + '/L',        // ICAO equip suffix
+    rules: 'I',                    // IFR
+    route: 'DCT',                  // pilot refines from SimBrief
+    speed: speed,
+    cruise: cruise,
+    wake: wide ? 'H' : 'M',
+    remarks: 'AMAL AIRWAYS VA / PBN/A1 DOF/'+new Date().toISOString().slice(2,10).replace(/-/g,'')
+  });
+  window.open('https://my.vatsim.net/pilots/flightplan?' + p.toString(), '_blank');
 }
 
 // launch the SimConnect ACARS engine (only works inside the fused app window)
@@ -399,7 +549,7 @@ function startAcars(no, dep, arr){
 }
 
 const PLANE = `<svg width="26" height="26" viewBox="0 0 24 24" class="plane"><path fill="currentColor" d="M12 2c-.6 0-1 .9-1 2v5.6L3 14v1.6l8-2.2V19l-2 1.2v1.3l3-.8 3 .8v-1.3L15 19v-5.6l8 2.2V14l-8-4.4V4c0-1.1-.4-2-1-2z"/></svg>`;
-let map, layer, prefix = "ALA";
+let map, layer, prefix = "KLA";
 
 // ===================================================================
 // SHARED BRIDGE URL — this is what makes every active flight show for
@@ -408,7 +558,7 @@ let map, layer, prefix = "ALA";
 //   const BRIDGE_URL = "https://amal-bridge.onrender.com";
 // Every pilot using this same URL will see every other active flight.
 // ===================================================================
-const BRIDGE_URL = "http://localhost:8770";
+const BRIDGE_URL = "https://amal-airways-fms.onrender.com";
 
 // ===================================================================
 // WEEKLY CHALLENGE — edit this each week. The whole crew sees it on
@@ -435,7 +585,7 @@ const CATALOG = [
   {type:"C172",  name:"Cessna 172",       cat:"GA",          desc:"Light trainer for GA and short hops."}
 ];
 let fleet = [];  // starts empty — add from Fleet Shop
-const HUBS = ["KATL","KORD"];
+const HUBS = ["KLAX", "CYVR", "KJFK", "CYYT", "KATL", "CYYZ", "KMIA", "CYUL", "KDFW", "CYEG", "EGKK", "KMEM", "VHHH", "PANC", "ZSPD", "TJSJ", "MKJS", "CYQM", "KSDF", "CYHM", "KTUS", "KTEB", "KVNY", "KPBI", "KAPF", "LFPB", "EGGW", "UUWW"];
 const MAINT_INTERVAL = 100;
 
 function initMap(){
@@ -447,6 +597,61 @@ function initMap(){
 function planeIcon(hdg){
   return L.divIcon({className:'',html:`<div style="transform:rotate(${hdg}deg)">${PLANE}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
 }
+
+// ============ AIRPORT DATABASE ============
+// window.AIRPORTS is loaded from airports.js (bundled full world list, ~28k).
+// If that file isn't present, this starter set of hubs + majors keeps it working.
+window.AIRPORTS = window.AIRPORTS || {};
+const STARTER_AIRPORTS = {
+  KLAX:["Los Angeles Intl",33.9416,-118.4085], CYVR:["Vancouver Intl",49.1947,-123.1792],
+  KJFK:["John F Kennedy Intl",40.6413,-73.7781], CYYT:["St John's Intl",47.6186,-52.7519],
+  KATL:["Hartsfield-Jackson Atlanta",33.6407,-84.4277], CYYZ:["Toronto Pearson",43.6777,-79.6248],
+  KMIA:["Miami Intl",25.7959,-80.2870], CYUL:["Montreal-Trudeau",45.4706,-73.7408],
+  KDFW:["Dallas/Fort Worth",32.8998,-97.0403], CYEG:["Edmonton Intl",53.3097,-113.5801],
+  EGKK:["London Gatwick",51.1481,-0.1903], KMEM:["Memphis Intl",35.0424,-89.9767],
+  VHHH:["Hong Kong Intl",22.3080,113.9185], PANC:["Anchorage Intl",61.1744,-149.9964],
+  ZSPD:["Shanghai Pudong",31.1443,121.8083], TJSJ:["San Juan Luis Munoz Marin",18.4394,-66.0018],
+  MKJS:["Montego Bay Sangster",18.5037,-77.9134], CYQM:["Greater Moncton",46.1122,-64.6786],
+  KSDF:["Louisville Muhammad Ali",38.1744,-85.7360], CYHM:["Hamilton Intl",43.1736,-79.9350],
+  KTUS:["Tucson Intl",32.1161,-110.9410], KTEB:["Teterboro",40.8501,-74.0608],
+  KVNY:["Van Nuys",34.2098,-118.4899], KPBI:["Palm Beach Intl",26.6832,-80.0956],
+  KAPF:["Naples Municipal",26.1526,-81.7752], LFPB:["Paris Le Bourget",48.9694,2.4414],
+  EGGW:["London Luton",51.8747,-0.3683], UUWW:["Moscow Vnukovo",55.5915,37.2615],
+  KORD:["Chicago O'Hare",41.9742,-87.9073], KDEN:["Denver Intl",39.8561,-104.6737],
+  KSEA:["Seattle-Tacoma",47.4502,-122.3088], KBOS:["Boston Logan",42.3656,-71.0096],
+  KLGA:["LaGuardia",40.7769,-73.8740], KMCO:["Orlando Intl",28.4312,-81.3081],
+  KDED:["DeLand Municipal",29.0670,-81.2838], EGLL:["London Heathrow",51.4700,-0.4543],
+  LFPG:["Paris CDG",49.0097,2.5479], EDDF:["Frankfurt",50.0379,8.5622],
+  RJTT:["Tokyo Haneda",35.5494,139.7798], OMDB:["Dubai Intl",25.2532,55.3657],
+  YSSY:["Sydney",-33.9399,151.1753], KSFO:["San Francisco Intl",37.6213,-122.3790]
+};
+function apt(code){
+  code=(code||"").toUpperCase();
+  if(window.AIRPORTS[code]) return window.AIRPORTS[code];
+  if(STARTER_AIRPORTS[code]) return STARTER_AIRPORTS[code];
+  return null;
+}
+
+let airportPin = null;
+function clearAirportPin(){ if(airportPin){ layer.removeLayer(airportPin); airportPin=null; } }
+
+// header gold search bar — jump to Live Map and pin the airport
+function globalSearch(){
+  const code=(document.getElementById('gsearch').value||"").toUpperCase().trim();
+  if(!code) return;
+  document.querySelector('nav button[data-view="mapview"]').click();
+  setTimeout(()=>{
+    if(map) map.invalidateSize();
+    const a=apt(code);
+    const st=document.getElementById('status');
+    if(!a){ if(st) st.textContent=`Airport "${code}" not found. Try a 4-letter ICAO.`; return; }
+    clearAirportPin();
+    airportPin=L.marker([a[1],a[2]],{title:code}).addTo(layer)
+      .bindTooltip(`<b>${code}</b><div class="row">${a[0]}</div>`,{className:'acft',permanent:true,direction:'top',offset:[0,-6]});
+    map.setView([a[1],a[2]],7);
+  }, 120);
+}
+// ==========================================
 
 async function refresh(){
   const st = document.getElementById('status');
@@ -494,23 +699,46 @@ async function refresh(){
   st.textContent = `Live · ${mine.length} flight(s) tracked · updated ${new Date().toLocaleTimeString()}`;
 }
 function setPrefix(){
-  prefix = (document.getElementById('prefix').value||'ALA').toUpperCase();
+  prefix = (document.getElementById('prefix').value||'KLA').toUpperCase();
   refresh();
 }
 
 // ---- fleet render ----
 function renderFleet(){
   const b = document.getElementById('fleet-body');
-  if(!fleet.length){ b.innerHTML='<tr><td colspan="6" class="empty">No aircraft yet — add some from the Fleet Shop.</td></tr>'; }
+  if(!fleet.length){ b.innerHTML='<tr><td colspan="7" class="empty">No aircraft yet — add some from the Fleet Shop.</td></tr>'; }
   else{
-    b.innerHTML = fleet.map(a=>{
-      const due = a.maint>=MAINT_INTERVAL;
+    b.innerHTML = fleet.map((a,i)=>{
+      const sinceMaint = a.maint||0;
+      const due = sinceMaint >= MAINT_INTERVAL;
+      const soon = !due && sinceMaint >= MAINT_INTERVAL*0.8;
+      // overdue aircraft are automatically grounded until serviced
+      let status = a.status;
+      if(due) status = "Grounded — maintenance";
+      const maintCell = due
+        ? '<span class="badge due">Check due</span>'
+        : soon ? `<span class="badge soon">Due soon (${(MAINT_INTERVAL-sinceMaint).toFixed(0)}h)</span>`
+               : '<span class="badge">OK</span>';
+      const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+      const btn = (staff && sinceMaint>0)
+        ? `<button class="mnt-btn" onclick="doMaint(${i})">Perform maintenance</button>` : '';
       return `<tr><td><b>${a.reg}</b></td><td>${a.type}</td><td>${a.loc}</td>
-        <td><span class="badge">${a.status}</span></td><td>${a.hours.toFixed(1)}</td>
-        <td>${due?'<span class="badge due">Check due</span>':'<span class="badge">OK</span>'}</td></tr>`;
+        <td><span class="badge${due?' due':''}">${status}</span></td>
+        <td>${(a.hours||0).toFixed(1)}</td>
+        <td>${maintCell}</td><td>${btn}</td></tr>`;
     }).join('');
   }
   document.getElementById('k-fleet').textContent = fleet.length;
+}
+
+// perform maintenance — resets the hours-since-maintenance and returns to service
+function doMaint(i){
+  const a = fleet[i];
+  if(!a) return;
+  a.maint = 0;
+  a.status = "Available";
+  renderFleet();
+  saveToBridge('/maintenance', {reg:a.reg, at:new Date().toISOString().slice(0,10), note:'Scheduled check'});
 }
 
 // ---- shop render ----
@@ -539,12 +767,35 @@ function makeReg(ac){
   return reg;
 }
 function buy(i){
+  // open the hub picker for this aircraft
   const a = CATALOG[i];
+  const opts = HUBS.map(h=>`<option value="${h}">${h}</option>`).join('');
+  const box = document.createElement('div');
+  box.id = 'hubpick';
+  box.innerHTML = `
+    <div class="hubpick-inner">
+      <h3>Assign ${a.name} to a hub</h3>
+      <p>Choose the home base for this aircraft:</p>
+      <select id="hub-sel">${opts}</select>
+      <div class="hubpick-btns">
+        <button class="hp-cancel" onclick="closeHubPick()">Cancel</button>
+        <button class="hp-ok" onclick="confirmBuy(${i})">Add to fleet</button>
+      </div>
+    </div>`;
+  document.body.appendChild(box);
+}
+function closeHubPick(){
+  const b = document.getElementById('hubpick'); if(b) b.remove();
+}
+function confirmBuy(i){
+  const a = CATALOG[i];
+  const hub = document.getElementById('hub-sel').value;
   const reg = makeReg(a);
-  const ac = {reg, type:a.type, loc:HUBS[0], status:"Available", hours:0, maint:0};
+  const ac = {reg, type:a.type, loc:hub, status:"Available", hours:0, maint:0};
   fleet.push(ac);
   renderFleet();
-  saveToBridge('/buy', ac);   // persist so everyone sees it and it survives restart
+  saveToBridge('/buy', ac);
+  closeHubPick();
   document.querySelector('nav button[data-view="fleet"]').click();
 }
 
@@ -562,34 +813,116 @@ async function loadState(){
     if(s.fleet && s.fleet.length){ fleet = s.fleet; renderFleet(); }
     if(s.pilots){ window.PILOTS = s.pilots; }
     if(s.flights){ window.FLIGHTS = s.flights; }
+    if(s.routes){ window.BRIDGE_ROUTES = s.routes; }
     renderRoster();
   }catch(e){ /* bridge not running yet */ }
 }
 
-const REAL_ROSTER = {"CEO01": {"name": "Amal N.", "role": "CEO", "type": "—", "flights": 0, "hours": 0}, "FM01": {"name": "jadon l.", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "FM02": {"name": "Angus P.", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "ALA001": {"name": "Fmendes_13", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA002": {"name": "Duckyboy", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA003": {"name": "Benny L.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA004": {"name": "Dillon M.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA005": {"name": "Tyshaun S.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA006": {"name": "oscar f.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA007": {"name": "Joshua S.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA008": {"name": "Luko the pilot", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA009": {"name": "Jace C.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA010": {"name": "Matthew A.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA011": {"name": "Conner M.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA012": {"name": "Braycen S.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA013": {"name": "Logan Nomad", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA014": {"name": "Will D.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA015": {"name": "Ace P.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "ALA016": {"name": "Joel R.", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}};
+const REAL_ROSTER = {"CEO01": {"name": "Aveek Amal - CEO", "role": "CEO", "type": "—", "flights": 0, "hours": 0}, "FM01": {"name": "Jadon", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "FM02": {"name": "Angus Preston", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "KLA002": {"name": "Luko the pilot", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA003": {"name": "Benny", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA004": {"name": "BrayBray", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA005": {"name": "Capitan Trell", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA006": {"name": "Pepe Garcia", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA007": {"name": "Sammy Binchasin", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA008": {"name": "Silver Inhaler", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA009": {"name": "67 Diego Fortnite King", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA010": {"name": "Nomad Avi", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA011": {"name": "Ace P", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA012": {"name": "Ben T", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA013": {"name": "Junior", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA014": {"name": "Matt Mods10", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA015": {"name": "Oliver T10_", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA016": {"name": "Pilot Booy", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA017": {"name": "SSeguyaa", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA018": {"name": "spookydoa123_024216", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}};
 // real airline roster (names loaded from Amal Airways)
 function baseRoster(){ return JSON.parse(JSON.stringify(REAL_ROSTER)); }
 function renderRoster(){
   const body = document.getElementById('roster-body');
   if(!body) return;
-  const merged = {...baseRoster(), ...(window.PILOTS||{})};
+  const base = baseRoster();
+  // only merge live hours/flights for pilots who are in the CURRENT roster.
+  // ignore any stale entries from the bridge (e.g. old ALA pilots).
+  const merged = {...base};
+  if(window.PILOTS){
+    for(const u in window.PILOTS){
+      if(base[u]){                       // only if this code is a current pilot
+        merged[u] = {...base[u], ...window.PILOTS[u], name: base[u].name, role: base[u].role};
+      }
+    }
+  }
   const rows = Object.keys(merged).sort().map(u=>{
     const p = merged[u];
+    const hrs = p.hours||0;
+    const rank = p.role==='CEO' ? 'Chief Executive Officer'
+               : p.role==='Fleet Manager' ? 'Fleet Manager'
+               : rankForHours(hrs);
     return `<tr><td><b>${u}</b></td><td>${p.name||u}</td><td>${p.role||'Pilot'}</td>
-      <td>${p.type||'—'}</td><td>${p.flights||0}</td><td>${(p.hours||0).toFixed? (p.hours||0).toFixed(1):p.hours||0}</td></tr>`;
+      <td>${rank}</td><td>${p.flights||0}</td><td>${hrs.toFixed? hrs.toFixed(1):hrs}</td></tr>`;
   }).join('');
   body.innerHTML = rows || '<tr><td colspan="6" class="empty">No pilots yet.</td></tr>';
 }
 
-// ---- routes render ----
+// ---- ROUTE CREATOR (SimBrief-powered) ----
+// Saved routes the user builds. Persist in memory for the session.
+let SAVED_ROUTES = [];
+
+// Step 1: open SimBrief pre-filled. Omitting the route makes SimBrief pick
+// the best routing from its database automatically.
+function buildOnSimBrief(){
+  const dep=(document.getElementById('rb-dep').value||'').toUpperCase().trim();
+  const arr=(document.getElementById('rb-arr').value||'').toUpperCase().trim();
+  const ac =(document.getElementById('rb-ac').value||'').toUpperCase().trim()||'B738';
+  const out=document.getElementById('rb-out');
+  if(dep.length!==4||arr.length!==4){ out.innerHTML='<span style="color:#c33">Enter valid 4-letter ICAO codes.</span>'; return; }
+  const u=`https://www.simbrief.com/system/dispatch.php?type=${encodeURIComponent(ac)}&orig=${encodeURIComponent(dep)}&dest=${encodeURIComponent(arr)}`;
+  window.open(u,'_blank');
+  out.innerHTML='SimBrief opened for <b>'+dep+' → '+arr+'</b>. Click <b>Generate</b> there, then come back and press <b>Pull route &amp; save</b>.';
+}
+
+// Step 2: fetch the user's latest generated OFP back from SimBrief and save it.
+async function pullRoute(){
+  const user=(document.getElementById('sb-user').value||'').trim();
+  const out=document.getElementById('rb-out');
+  if(!user){ out.innerHTML='<span style="color:#c33">Enter your SimBrief username first.</span>'; return; }
+  out.innerHTML='Pulling your latest SimBrief plan…';
+  try{
+    const r=await fetch(`https://www.simbrief.com/api/xml.fetcher.php?username=${encodeURIComponent(user)}&json=1`,{cache:'no-store'});
+    if(!r.ok) throw new Error('SimBrief returned '+r.status);
+    const d=await r.json();
+    const g=d.general||{}, o=d.origin||{}, dst=d.destination||{}, ac=d.aircraft||{}, atc=d.atc||{};
+    const route={
+      f: (d.params&&d.params.request_id? 'KLA'+String(d.params.request_id).slice(-3): 'KLA'+Math.floor(100+Math.random()*899)),
+      dep: o.icao_code||'', arr: dst.icao_code||'',
+      ac: ac.icaocode||ac.icao_code||'',
+      cruise: g.initial_altitude? 'FL'+String(Math.round(g.initial_altitude/100)).padStart(3,'0') : '',
+      route: g.route || 'DCT',
+      callsign: atc.callsign || ''
+    };
+    if(!route.dep||!route.arr){ throw new Error('No recent plan found for that username'); }
+    SAVED_ROUTES.unshift(route);
+    renderRoutes();
+    out.innerHTML=`Saved ✓ <b>${route.dep} → ${route.arr}</b> · ${route.ac} · ${route.cruise}<br><span style="color:var(--sub);font-size:12px">Route: ${route.route}</span>`;
+  }catch(e){
+    out.innerHTML='<span style="color:#c33">Couldn\'t pull the plan: '+e.message+'. Make sure you generated it on SimBrief first and the username is right.</span>';
+  }
+}
+
 function renderRoutes(){
-  const sample = [
-    {f:"ALA101", d:"KATL", a:"KMCO", ac:"B738", h:"KATL"},
-    {f:"ALA220", d:"KORD", a:"KLGA", ac:"A320", h:"KORD"},
-    {f:"ALA455", d:"KATL", a:"KBOS", ac:"E175", h:"KATL"}
-  ];
-  document.getElementById('routes-body').innerHTML = sample.map(r=>
-    `<tr><td><b>${r.f}</b></td><td>${r.d}</td><td>${r.a}</td><td>${r.ac}</td><td>${r.h}</td></tr>`).join('');
+  const body=document.getElementById('routes-body');
+  if(!body) return;
+  // combine bot-created routes (from Discord) with saved SimBrief routes
+  const botRoutes = (window.BRIDGE_ROUTES||[]).map(r=>({
+    f:r.f||'KLA', dep:r.dep, arr:r.arr, ac:'', cruise:'', route:'DCT', callsign:r.f, by:r.by
+  }));
+  const all = [...botRoutes, ...SAVED_ROUTES];
+  if(!all.length){ body.innerHTML='<tr><td colspan="5" class="empty">No routes yet — post one in Discord (KATL-KMCO) or build one above.</td></tr>'; return; }
+  body.innerHTML = all.map((r,i)=>
+    `<tr><td><b>${r.f}</b></td><td>${r.dep} → ${r.arr}${r.by?` <span style="color:var(--sub);font-size:11px">· ${r.by}</span>`:''}</td><td>${r.ac||'—'}</td><td>${r.cruise||'—'}</td>
+      <td><button class="planbtn vat" style="padding:6px 12px;font-size:12px" onclick="prefileSavedRoute(${i})">Prefile on VATSIM</button></td></tr>`
+  ).join('');
+  // keep prefile working against the combined list
+  window.__ALL_ROUTES = all;
+}
+// prefile a saved route to VATSIM using the REAL SimBrief route string
+function prefileSavedRoute(i){
+  const list = window.__ALL_ROUTES || SAVED_ROUTES;
+  const r=list[i]; if(!r) return;
+  const p=new URLSearchParams({
+    callsign: r.callsign||r.f, dep:r.dep, dest:r.arr, aircraft:r.ac,
+    rules:'I', route:r.route||'DCT', cruise:(r.cruise||'FL350').replace('FL',''),
+    remarks:'AMAL AIRWAYS VA'
+  });
+  window.open('https://my.vatsim.net/pilots/flightplan?'+p.toString(),'_blank');
+}
+function renderHubsList(){
+  const el=document.getElementById('hubs-list');
+  if(!el) return;
+  el.innerHTML = `<b>Network hubs (${HUBS.length}):</b> ` + HUBS.join(' · ');
 }
 
 // ---- nav ----
@@ -602,6 +935,7 @@ document.querySelectorAll('nav button').forEach(b=>{
     if(b.dataset.view==='mapview' && map) setTimeout(()=>map.invalidateSize(),50);
     if(b.dataset.view==='create') renderCreate();
     if(b.dataset.view==='roster') renderRoster();
+    if(b.dataset.view==='routes'){ renderRoutes(); renderHubsList(); }
   };
 });
 
@@ -660,6 +994,43 @@ renderShop();
 renderRoutes();
 refresh();
 setInterval(refresh, 20000);
+
+// ===== LIVE FLIGHT PANEL =====
+// Appears when ACARS detects THIS pilot is in an active flight in the sim.
+async function checkActiveFlight(){
+  if(!SESSION) return;
+  try{
+    const r = await fetch(`${BRIDGE_URL}/live`,{cache:'no-store'});
+    const d = await r.json();
+    // find this pilot's flight (their username IS their callsign, e.g. KLA772)
+    const me = SESSION.user;
+    const mine = (d.flights||[]).find(f =>
+      (f.callsign||'').toUpperCase()===me.toUpperCase() ||
+      (f.callsign||'').toUpperCase().startsWith(me.toUpperCase()));
+    if(mine) showFlightPanel(mine); else hideFlightPanel();
+  }catch(e){ hideFlightPanel(); }
+}
+function showFlightPanel(f){
+  let p = document.getElementById('flightpanel');
+  if(!p){ p=document.createElement('div'); p.id='flightpanel'; document.body.appendChild(p); }
+  const phase = f.phase || (f.on_ground ? 'On ground' : 'Airborne');
+  const vs = f.vs||0;
+  const vsArrow = vs>100?'▲':vs<-100?'▼':'▬';
+  p.innerHTML = `
+    <div class="fp-top"><span class="fp-live">● IN FLIGHT</span> <b>${f.callsign}</b></div>
+    <div class="fp-route">${f.dep||'----'} <span>→</span> ${f.arr||'----'}</div>
+    <div class="fp-grid">
+      <div><span>ALT</span><b>${(f.altitude||0).toLocaleString()} ft</b></div>
+      <div><span>SPD</span><b>${f.groundspeed||0} kt</b></div>
+      <div><span>V/S</span><b>${vsArrow} ${Math.abs(vs)}</b></div>
+      <div><span>PHASE</span><b>${phase}</b></div>
+    </div>
+    <div class="fp-ac">${f.aircraft||''}</div>`;
+  p.classList.add('show');
+}
+function hideFlightPanel(){ const p=document.getElementById('flightpanel'); if(p) p.classList.remove('show'); }
+checkActiveFlight();
+setInterval(checkActiveFlight, 5000);
 </script>
 </body>
 </html>

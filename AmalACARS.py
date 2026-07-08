@@ -370,24 +370,13 @@ def run_flight(sim, overlay, callsign, dep, arr):
             prev_slew = slewing
 
             # --- push live position to the dashboard bridge ---
-            alt_agl = s.get("alt_agl", 0)
-            if s.get("on_ground", True):
-                phase = "Taxi" if s.get("gs",0) > 2 else "Parked"
-            elif alt_agl < 1500:
-                phase = "Departure" if s.get("vs",0) > 200 else ("Approach" if s.get("vs",0) < -200 else "Low")
-            elif s.get("vs",0) > 300:
-                phase = "Climb"
-            elif s.get("vs",0) < -300:
-                phase = "Descent"
-            else:
-                phase = "Cruise"
             bridge_post("/update", {
                 "callsign": callsign, "dep": dep, "arr": arr,
                 "lat": s.get("lat"), "lon": s.get("lon"),
                 "altitude": int(s.get("alt", 0)), "groundspeed": int(s.get("gs", 0)),
                 "heading": int(s.get("heading", 0)) if s.get("heading") else 0,
                 "aircraft": title, "on_ground": s.get("on_ground", True),
-                "vs": int(s.get("vs", 0)), "phase": phase
+                "vs": int(s.get("vs", 0))
             })
 
             # --- takeoff / landing detection ---
@@ -473,22 +462,45 @@ def open_dashboard():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--callsign", default="KLA000")
-    ap.add_argument("--dep", default="----")
-    ap.add_argument("--arr", default="----")
+    ap.add_argument("--callsign", default=None)
+    ap.add_argument("--dep", default=None)
+    ap.add_argument("--arr", default=None)
     ap.add_argument("--demo", action="store_true", help="run scripted flight, no MSFS needed")
     ap.add_argument("--skip-preflight", action="store_true")
     ap.add_argument("--no-dashboard", action="store_true", help="don't auto-open the HTML")
     args = ap.parse_args()
 
-    if not args.no_dashboard:
-        open_dashboard()
+    # If double-clicked with no flight info, ask for it in a friendly prompt.
+    if not args.demo and not args.callsign:
+        print("=" * 50)
+        print("   AMAL AIRWAYS — ACARS CLIENT")
+        print("   Connects your flight to the live airline.")
+        print("=" * 50)
+        print()
+        cs = input("  Your callsign (e.g. KLA772): ").strip().upper() or "KLA000"
+        dep = input("  Departure airport (e.g. KDED): ").strip().upper() or "----"
+        arr = input("  Arrival airport (e.g. KMCO): ").strip().upper() or "----"
+        print()
+        print(f"  Starting ACARS for {cs}: {dep} -> {arr}")
+        print("  Make sure MSFS is running. Ctrl+C to stop.")
+        print()
+        args.callsign, args.dep, args.arr = cs, dep, arr
+
+    callsign = args.callsign or "KLA000"
+    dep = args.dep or "----"
+    arr = args.arr or "----"
 
     sim = Sim(demo=args.demo)
     overlay = Overlay()
     if not args.demo and not args.skip_preflight:
         run_preflight(sim, overlay)
-    run_flight(sim, overlay, args.callsign, args.dep, args.arr)
+    run_flight(sim, overlay, callsign, dep, arr)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nACARS stopped.")
+    except Exception as e:
+        print(f"\nError: {e}")
+    input("\nPress Enter to close...")   # keeps window open so pilots can read it
