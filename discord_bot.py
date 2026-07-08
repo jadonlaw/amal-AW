@@ -164,23 +164,30 @@ async def on_message(message):
                 f"Got **{dep} → {arr}**, but I couldn't reach the airline server. Try again shortly.")
     await bot.process_commands(message)
 
-# ===== /getcode =====
+# ===== /getcode — matches the user's ID role (CEO01 / FM## / KLA###) =====
+import re as _re
+ID_ROLE = _re.compile(r'^(CEO0?1|FM\d{1,2}|KLA\d{1,3})$', _re.IGNORECASE)
+
 @bot.tree.command(description="Get your Amal Airways sign-in code by DM")
 async def getcode(interaction: discord.Interaction):
-    rn = rolenames(interaction.user)
-    if ROLE_CEO in rn: pref="CEO"
-    elif ROLE_FM in rn: pref="FM"
-    elif ROLE_PILOT in rn: pref="KLA"
-    else:
-        await interaction.response.send_message("You don't have a crew role yet — ask a Fleet Manager.", ephemeral=True); return
-    slot = next((u for u in sorted(CODES) if u.startswith(pref)), None)
-    if not slot:
-        await interaction.response.send_message("No codes available — tell the CEO.", ephemeral=True); return
+    # find the role that matches a credential ID (e.g. FM01, KLA002, CEO01)
+    ids = [r.name.upper() for r in interaction.user.roles if ID_ROLE.match(r.name)]
+    if not ids:
+        await interaction.response.send_message(
+            "You don't have an ID role yet (like KLA002 or FM01) — ask a Fleet Manager to assign one.",
+            ephemeral=True); return
+    # normalize CEO1 -> CEO01
+    myid = ids[0]
+    if myid in ("CEO1","CEO01"): myid = "CEO01"
+    code = CODES.get(myid)
+    if not code:
+        await interaction.response.send_message(
+            f"Your ID **{myid}** isn't in the credentials list yet — tell the CEO.", ephemeral=True); return
     try:
         await interaction.user.send(
-            f"**Amal Airways — your sign-in**\nUsername: `{slot}`\nPasscode: `{CODES[slot]}`\n\n"
-            f"⚠️ Yours alone. Don't share it.")
-        await interaction.response.send_message("Sent your code by DM ✈️", ephemeral=True)
+            f"**Amal Airways — your sign-in**\nUsername: `{myid}`\nPasscode: `{code}`\n\n"
+            f"⚠️ This is yours alone. Don't share it.")
+        await interaction.response.send_message(f"Sent your code for **{myid}** by DM ✈️", ephemeral=True)
     except discord.Forbidden:
         await interaction.response.send_message("Enable DMs from server members and try again.", ephemeral=True)
 
