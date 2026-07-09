@@ -30,9 +30,10 @@ BRIDGE = os.environ.get("BRIDGE_URL", "http://127.0.0.1:80")
 
 # ---- config ----
 ROLE_CEO = "CEO"; ROLE_FM = "Fleet Manager"; ROLE_PILOT = "Pilot"; ROLE_STRIKE = "Strike One"
-CHANNEL_ROUTES = 0     # route channel ID (0 = watch all channels)
+CHANNEL_ROUTES = 1491904248399794336   # #route-request — only this channel is watched for routes
 CHANNEL_PUBLIC = 0     # public flight call-outs (0 = off until you set it)
 CHANNEL_STAFF  = 0     # staff-only alerts: slew, violations (0 = off until you set it)
+CHANNEL_OPS    = 1490325655814930505   # #ops — flight summaries post here
 
 # rank thresholds (must match the app)
 RANKS = [(0,"First Officer"),(25,"Senior First Officer"),(75,"Captain"),
@@ -80,6 +81,30 @@ def load_codes():
     return codes
 CODES = load_codes()
 
+# airport database for validation + suggestions
+def load_airports():
+    try:
+        d = json.load(open("bot_airports.json", encoding="utf-8"))
+        return d.get("db",{}), d.get("cityidx",{})
+    except Exception as e:
+        print("airport db not loaded:", e); return {}, {}
+AIRPORTS, CITY_IDX = load_airports()
+
+import unicodedata
+def _norm(s): return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c)!='Mn').lower().strip()
+
+def suggest_airport(token):
+    """Given a bad code or a city name, suggest a valid ICAO."""
+    t = token.strip()
+    # city name match (e.g. 'Cancun' -> MMUN)
+    key = _norm(t)
+    if key in CITY_IDX: return CITY_IDX[key]
+    # partial city match
+    for city,code in CITY_IDX.items():
+        if key and (key in city or city in key) and len(key)>=3:
+            return code
+    return None
+
 def rolenames(m): return {r.name for r in m.roles}
 
 @bot.event
@@ -111,21 +136,36 @@ async def watch_flights():
 async def announce_flight(f):
     pub = bot.get_channel(CHANNEL_PUBLIC) if CHANNEL_PUBLIC else None
     staff = bot.get_channel(CHANNEL_STAFF) if CHANNEL_STAFF else None
+    ops = bot.get_channel(CHANNEL_OPS) if CHANNEL_OPS else None
     cs = f.get("pilot","KLA"); dep=f.get("dep","----"); arr=f.get("arr","----")
     tier = f.get("tier",""); fpm = f.get("landing_fpm",0); score=f.get("score",0)
     viol = f.get("violations",0); ac=f.get("aircraft","")
+    hrs = f.get("hours",0)
 
-    # SLEW -> staff alert
+    # SLEW -> staff alert (and ops record)
     if str(tier).upper().startswith("SLEW") or f.get("slew"):
         if staff:
             await staff.send(f"🚫 **{cs}** — FLIGHT VOIDED (SLEW DETECTED) on {dep} → {arr}. "
                              f"Score 0. A Fleet Manager should review and strike if confirmed.")
+        if ops:
+            await ops.send(f"🚫 **{cs}** {dep} → {arr} — **VOIDED (slew)**")
         return
+
+    # FLIGHT SUMMARY -> ops channel (every completed flight)
+    if ops:
+        emoji = "🧈" if str(tier).lower()=="butter" else "🛬"
+        summary = (f"{emoji} **Flight Report — {cs}**\n"
+                   f"**Route:** {dep} → {arr}\n"
+                   f"**Aircraft:** {ac}\n"
+                   f"**Block time:** {hrs:.1f} h\n"
+                   f"**Landing:** {fpm} fpm ({tier})\n"
+                   f"**Score:** {score}/100\n"
+                   f"**Violations:** {viol}")
+        await ops.send(summary)
 
     # normal completed flight -> public call-out
     if pub:
         line = f"🛬 **{cs}** {dep} → {arr} · {ac}\nLanding: **{fpm} fpm** ({tier}) · Score: **{score}**"
-        # butter shout-out
         if tier and tier.lower()=="butter":
             line = f"🧈 **BUTTER!** {cs} greased {dep} → {arr} at **{fpm} fpm** — smooth as it gets."
         await pub.send(line)
@@ -154,14 +194,34 @@ async def on_message(message):
     m = ROUTE_RE.search(message.content or "")
     if m:
         dep, arr = m.group(1).upper(), m.group(2).upper()
+        # validate against the airport database
+        bad = []
+        if AIRPORTS and dep not in AIRPORTS: bad.append(dep)
+        if AIRPORTS and arr not in AIRPORTS: bad.append(arr)
+        if bad:
+            tips = []
+            for code in bad:
+                s = suggest_airport(code)
+                if s: tips.append(f"**{code}** isn't valid — did you mean **{s}** ({AIRPORTS[s]['name']})?")
+                else: tips.append(f"**{code}** isn't a valid airport code.")
+            await message.channel.send("⚠️ " + " ".join(tips) + "\nPost it again with valid ICAO codes (e.g. `KMIA-KPBI`).")
+            await bot.process_commands(message); return
         ok = bridge_post("/route", {"dep":dep, "arr":arr, "by":str(message.author)})
         if ok:
+            dn = AIRPORTS.get(dep,{}).get('city',dep); an = AIRPORTS.get(arr,{}).get('city',arr)
             await message.channel.send(
-                f"✈️ **{dep} → {arr}** is now a live route — anyone can fly it! "
+                f"✈️ **{dep} → {arr}** ({dn} to {an}) is now a live route — anyone can fly it! "
                 f"It's in the app under Routes & Hubs.")
         else:
             await message.channel.send(
                 f"Got **{dep} → {arr}**, but I couldn't reach the airline server. Try again shortly.")
+    # also handle "city to city" when no ICAO codes matched
+    elif AIRPORTS:
+        cm = _re.search(r'route:?\s+([A-Za-z .]{3,25})\s+(?:to|-|>)\s+([A-Za-z .]{3,25})', message.content or '', _re.IGNORECASE)
+        if cm:
+            d = suggest_airport(cm.group(1)); a = suggest_airport(cm.group(2))
+            if d and a:
+                await message.channel.send(f"Did you mean **{d} → {a}**? Post `{d}-{a}` to make it a live route.")
     await bot.process_commands(message)
 
 # ===== /getcode — matches the user's ID role (CEO01 / FM## / KLA###) =====

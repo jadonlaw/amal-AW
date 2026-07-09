@@ -130,6 +130,23 @@
     border-radius:12px;padding:14px 24px;box-shadow:0 12px 40px rgba(11,47,107,.35);text-align:center}
   .greet-inner b{display:block;font-size:19px;font-weight:800}
   .greet-inner span{font-size:12px;opacity:.8;letter-spacing:.3px}
+  #welcome-overlay{position:fixed;inset:0;z-index:10000;background:rgba(11,31,58,.7);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;padding:20px}
+  .welcome-card{background:#fff;border-radius:18px;max-width:640px;width:100%;max-height:88vh;display:flex;flex-direction:column;
+    box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden;border-top:5px solid var(--gold)}
+  .welcome-head{display:flex;gap:14px;align-items:center;padding:22px 26px 14px}
+  .welcome-head .wlogo{width:48px;height:48px;border-radius:11px;background:var(--gold);color:var(--blue);
+    font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .welcome-head h2{font-size:20px;color:var(--blue);margin:0}
+  .welcome-head p{font-size:12px;color:var(--sub);margin:2px 0 0}
+  .welcome-body{overflow-y:auto;padding:8px 26px 20px;line-height:1.6;color:#2a3b52;font-size:14px}
+  .welcome-body h3{color:var(--blue);font-size:15px;margin:18px 0 6px}
+  .welcome-body p{margin:0 0 10px}
+  .welcome-foot{padding:16px 26px;border-top:1px solid var(--line);background:var(--mist)}
+  .welcome-accept{width:100%;padding:14px;border:0;border-radius:11px;font-size:15px;font-weight:700;color:#fff;
+    background:var(--blue);cursor:pointer;transition:background .2s}
+  .welcome-accept:disabled{background:#b9c4d4;cursor:not-allowed}
+  .welcome-accept:not(:disabled):hover{background:var(--blue2)}
   #flightpanel{position:fixed;left:16px;bottom:16px;z-index:8000;width:240px;
     background:linear-gradient(160deg,var(--blue),#0a2555);color:#fff;border-radius:14px;
     border:1px solid rgba(255,255,255,.12);box-shadow:0 14px 44px rgba(0,0,0,.4);
@@ -159,6 +176,29 @@
 </style>
 </head>
 <body>
+<div id="welcome-overlay">
+  <div class="welcome-card">
+    <div class="welcome-head">
+      <div class="wlogo">AA</div>
+      <div><h2>Welcome to the Amal Airways ACARS</h2><p>Please read this in full before you begin flying.</p></div>
+    </div>
+    <div class="welcome-body" onscroll="onLetterScroll(this)">
+      <p>Welcome aboard, and thank you for joining <b>Amal Airways</b>. This application is your <b>ACARS</b> — the Aircraft Communications Addressing and Reporting System — the same kind of tool real airlines and virtual airlines use to track flights, monitor performance, and keep operations running smoothly. Please take a few minutes to understand how it works.</p>
+      <h3>What this system does</h3>
+      <p>When you fly in Microsoft Flight Simulator, the ACARS reads your aircraft directly through SimConnect. It follows your entire flight from gate to gate: it verifies your pre-flight setup, tracks your position, altitude, and speed live on the crew map, watches your adherence to standard operating procedures, and grades your landing the moment your wheels touch down. When you arrive, it automatically files a flight report (a PIREP) and adds your hours to your logbook. Everything is shared through our cloud server, so your fellow pilots — whether they're across the country or across the world — can see your flight in real time.</p>
+      <h3>How to use it</h3>
+      <p>Start by signing in with the credentials sent to you. Head to <b>Create Flight</b> to set up your route — we recommend planning through <b>SimBrief</b>, which builds a complete, realistic flight plan and lets you prefile directly to VATSIM. Once you're set up in the sim, start the ACARS and fly. Your rank grows as you log hours, beginning as a First Officer and advancing toward Captain and beyond. Larger and heavier aircraft require higher ranks, so build your experience on smaller types first. Scheduled routes can be claimed in <b>Routes &amp; Hubs</b> — claim one that matches your class, then fly it at the scheduled time.</p>
+      <h3>What we expect</h3>
+      <p>Fly professionally and honestly. The ACARS detects slewing, and using it will void your flight. Follow standard operating procedures — excessive violations are logged and reviewed by staff. Respect your fellow crew and the airline. Repeated violations may result in strikes.</p>
+      <h3>Need help?</h3>
+      <p>If you ever get stuck, have a question, or something isn't working, don't struggle alone — reach out in Discord. Ping or DM the <b>CEO</b>, the <b>COO</b>, or a <b>Fleet Manager</b> and someone will help you get sorted. We want you flying, not fighting with software.</p>
+      <p style="margin-top:18px"><b>By accepting below, you confirm you've read and understood how the Amal Airways ACARS works and agree to fly by our standards. Welcome to the fleet — we're glad to have you.</b></p>
+    </div>
+    <div class="welcome-foot">
+      <button id="accept-btn" class="welcome-accept" disabled onclick="acceptTos()">Scroll to the bottom to continue…</button>
+    </div>
+  </div>
+</div>
 <div id="login">
   <div class="box">
     <div class="brand">
@@ -238,16 +278,7 @@
       <h2>Create Flight <span id="ptype-badge" class="badge" style="font-size:12px"></span></h2>
       <p class="sub" id="create-sub">Book your next flight. The options shown match your pilot type.</p>
 
-      <!-- temporary pilot-type tester (assigned per pilot in a future update) -->
-      <div class="featnote" id="ptype-tester">
-        <b>Testing:</b> pick a pilot type to preview its Create Flight flow:
-        <select id="ptype-sel" onchange="setPilotType(this.value)" style="margin-left:8px;padding:6px 8px;border:1px solid var(--line);border-radius:7px">
-          <option value="commercial">Commercial</option>
-          <option value="cargo">Cargo</option>
-          <option value="charter">Charter</option>
-          <option value="tour">Tour</option>
-        </select>
-      </div>
+      <div class="featnote" id="ptype-note"></div>
 
       <div id="create-form" style="margin-top:18px"></div>
     </div>
@@ -295,6 +326,21 @@
       <h3 style="margin:22px 0 10px;font-size:16px">Saved routes</h3>
       <table><thead><tr><th>Flight</th><th>Route</th><th>Aircraft</th><th>Cruise</th><th></th></tr></thead>
       <tbody id="routes-body"></tbody></table>
+
+      <h3 style="margin:26px 0 10px;font-size:16px">📅 Scheduled routes</h3>
+      <div id="sched-create" class="routebuilder" style="display:none">
+        <div class="rb-row">
+          <div class="rb-fg"><label>From</label><input id="sc-dep" maxlength="4" placeholder="KMIA" style="text-transform:uppercase"></div>
+          <div class="rb-fg"><label>To</label><input id="sc-arr" maxlength="4" placeholder="KPBI" style="text-transform:uppercase"></div>
+          <div class="rb-fg"><label>Aircraft</label><input id="sc-ac" placeholder="B738" style="text-transform:uppercase"></div>
+          <div class="rb-fg"><label>Class</label><select id="sc-cls"><option value="commercial">Commercial</option><option value="cargo">Cargo</option><option value="charter">Charter</option><option value="tour">Tour</option></select></div>
+          <div class="rb-fg"><label>Time</label><input id="sc-time" placeholder="3:00 PM EST"></div>
+        </div>
+        <div class="rb-btns"><button class="planbtn" style="background:#1a8a4a" onclick="createSchedule()">Add scheduled route</button></div>
+      </div>
+      <table><thead><tr><th>Route</th><th>Aircraft</th><th>Class</th><th>Time</th><th>Status</th><th></th></tr></thead>
+      <tbody id="sched-body"></tbody></table>
+
       <div class="featnote" id="hubs-list"></div>
     </div>
   </section>
@@ -315,7 +361,7 @@
     <div class="panel">
       <h2>Pilots</h2>
       <p class="sub">Full airline roster — every pilot, their type, and their logged activity. Flight totals build up automatically as pilots complete flights.</p>
-      <table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Rank</th><th>Flights</th><th>Hours</th></tr></thead>
+      <table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Rank</th><th>Type</th><th>Flights</th><th>Hours</th></tr></thead>
       <tbody id="roster-body"><tr><td colspan="6" class="empty">Loading roster…</td></tr></tbody></table>
     </div>
   </section>
@@ -353,6 +399,29 @@ function rankForHours(h){
   for(const t of RANKS){ if(h >= t.min) r = t; }
   return r.name;
 }
+// rank as a number (0=FO up to 4=Training Captain) for comparisons
+function rankLevel(rankName){
+  const i = RANKS.findIndex(r=>r.name===rankName);
+  return i<0 ? 0 : i;
+}
+function myHours(){
+  const u = SESSION && SESSION.user;
+  const p = (window.PILOTS && window.PILOTS[u]) || (baseRoster()[u||'']);
+  return p ? (p.hours||0) : 0;
+}
+function myRankLevel(){
+  if(SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager')) return 99; // staff bypass
+  return rankLevel(rankForHours(myHours()));
+}
+// aircraft type -> minimum rank level required to fly it
+// widebodies need Captain (2), heavies/long-haul need Senior Captain (3)
+function rankRequiredForAircraft(type){
+  const t=(type||'').toUpperCase();
+  if(/^(A38|B74|B77|B78)/.test(t)) return 3;   // Senior Captain for the big widebodies
+  if(/^(A33|A34|A35|B76|B75|MD11|A30|A31)/.test(t)) return 2; // Captain for widebodies
+  if(/^(A32|A31|A319|A320|A321|B73|B738|B739|E19|E17|E75)/.test(t)) return 1; // Senior FO for jets
+  return 0; // props/regional: anyone
+}
 function pilotRank(user, role){
   if(role==='ceo') return "Chief Executive Officer";
   if(role==='fleet_manager') return "Fleet Manager";
@@ -367,6 +436,7 @@ function displayName(user){
 
 function enterApp(user, role){
   SESSION = {user, role};
+  PILOT_TYPE = typeForUser(user);   // real assigned type, not a test pick
   document.getElementById('login').style.display='none';
   const name = displayName(user);
   const rank = pilotRank(user, role);
@@ -374,6 +444,47 @@ function enterApp(user, role){
   showGreeting(name, rank);
   applyRole(role);
   if(map) setTimeout(()=>map.invalidateSize(),80);
+  maybeShowWelcome(user);
+}
+// ===== WELCOME / TERMS LETTER (first sign-in only) =====
+function hasAcceptedTos(user){
+  const p = (window.PILOTS && window.PILOTS[user]);
+  return !!(p && p.accepted_tos);
+}
+function maybeShowWelcome(user){
+  // check the bridge first so we know if they've already accepted (avoids re-showing on refresh)
+  fetch(`${BRIDGE_URL}/state`,{cache:'no-store'}).then(r=>r.json()).then(s=>{
+    const p = s.pilots && s.pilots[user];
+    if(p && p.accepted_tos){
+      // already accepted — never show again
+      if(!window.PILOTS) window.PILOTS={};
+      window.PILOTS[user] = {...(window.PILOTS[user]||{}), accepted_tos:true};
+      return;
+    }
+    const ov = document.getElementById('welcome-overlay');
+    if(ov) ov.style.display='flex';
+  }).catch(()=>{
+    // if bridge unreachable, don't nag — only show if we have no record locally
+    if(!hasAcceptedTos(user)){
+      const ov=document.getElementById('welcome-overlay'); if(ov) ov.style.display='flex';
+    }
+  });
+}
+function acceptTos(){
+  const u = SESSION && SESSION.user;
+  if(u){
+    if(!window.PILOTS) window.PILOTS={};
+    window.PILOTS[u] = {...(window.PILOTS[u]||{}), accepted_tos:true};
+    saveToBridge('/accept', {username:u});
+  }
+  const ov=document.getElementById('welcome-overlay'); if(ov) ov.style.display='none';
+}
+// enable the Accept button only once scrolled to the bottom of the letter
+function onLetterScroll(el){
+  const btn=document.getElementById('accept-btn');
+  if(el.scrollTop + el.clientHeight >= el.scrollHeight - 12){
+    btn.disabled=false; btn.textContent='I understand & accept';
+  }
 }
 function showGreeting(name, rank){
   let g = document.getElementById('greeting');
@@ -411,20 +522,19 @@ function applyRole(role){
 }
 
 // ---- pilot type + Create Flight ----
-let PILOT_TYPE = 'commercial';   // pilot type (set per pilot in a future update)
+let PILOT_TYPE = 'commercial';   // set from the pilot's assigned type at login
+// pilot types assigned per pilot (staff can change). Defaults everyone to Commercial.
+function typeForUser(user){
+  const p = (window.PILOTS && window.PILOTS[user]) || (baseRoster()[user]);
+  const t = p && p.ptype ? p.ptype : 'commercial';
+  return t;
+}
 const TYPE_LABEL = {commercial:'Commercial', cargo:'Cargo', charter:'Charter', tour:'Tour'};
 
 // sample scheduled routes by type (staff will manage the real lists)
 const SCHED = {
-  commercial: [
-    {no:'KLA101', dep:'KATL', arr:'KMCO', ac:'B738'},
-    {no:'KLA220', dep:'KORD', arr:'KLGA', ac:'A320'},
-    {no:'KLA455', dep:'KATL', arr:'KBOS', ac:'E175'}
-  ],
-  cargo: [
-    {no:'KLA901F', dep:'KMEM', arr:'KATL', ac:'B77W'},
-    {no:'KLA915F', dep:'KIND', arr:'KORD', ac:'B788'}
-  ],
+  commercial: [],
+  cargo: [],
   tour: [
     {tour:'Coastal Hopper', leg:1, dep:'KBOS', arr:'KJFK', ac:'E175'},
     {tour:'Coastal Hopper', leg:2, dep:'KJFK', arr:'KDCA', ac:'E175'},
@@ -436,8 +546,14 @@ function setPilotType(t){ PILOT_TYPE = t; renderCreate(); }
 
 function renderCreate(){
   const t = PILOT_TYPE;
-  // staff and pilots can preview each type here
   document.getElementById('ptype-badge').textContent = TYPE_LABEL[t]+' Pilot';
+  const noteEl = document.getElementById('ptype-note');
+  if(noteEl){
+    const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+    noteEl.innerHTML = staff
+      ? `You're viewing the <b>${TYPE_LABEL[t]}</b> flow. Each pilot's type is set in the <b>Pilots</b> tab.`
+      : `Your pilot type is <b>${TYPE_LABEL[t]}</b> — set by airline staff. The flight options below match it.`;
+  }
   const box = document.getElementById('create-form');
   const own = fleet.map(a=>`<option>${a.reg} (${a.type})</option>`).join('') || '<option disabled>No aircraft owned yet</option>';
 
@@ -458,11 +574,19 @@ function renderCreate(){
       <button class="buy" style="max-width:220px" onclick="fileFlight()">Create tour flight</button>
       <div id="c-out"></div>`;
   } else {
-    // commercial or cargo: pick a scheduled route
+    // commercial or cargo: fly a route you've CLAIMED from the schedule (staff-created)
     const label = t==='cargo' ? 'Cargo route' : 'Scheduled route';
-    const rows = SCHED[t].map((r,i)=>`<option value="${i}">${r.no} — ${r.dep} → ${r.arr} (${r.ac})</option>`).join('');
+    const mine = (window.SCHEDULE||[]).filter(r=>
+      (r.cls===t) && (r.claimed_by===(SESSION&&SESSION.user)) && r.status!=='Missed Flight');
     document.getElementById('create-sub').textContent =
-      t==='cargo' ? 'Cargo: fly an assigned freight route.' : 'Commercial: fly a scheduled passenger route.';
+      t==='cargo' ? 'Cargo: fly a freight route you claimed in Routes & Hubs.'
+                  : 'Commercial: fly a scheduled route you claimed in Routes & Hubs.';
+    if(!mine.length){
+      box.innerHTML = `<div class="featnote">You haven't claimed any ${t} routes yet. Go to <b>Routes &amp; Hubs</b> → <b>Scheduled routes</b> and claim one that matches your class, then come back here to fly it.</div>`;
+      return;
+    }
+    const rows = mine.map((r,i)=>`<option value="${i}">${r.dep} → ${r.arr}${r.ac?' ('+r.ac+')':''}${r.time?' · '+r.time:''}</option>`).join('');
+    window.__MY_CLAIMED = mine;
     box.innerHTML = `
       ${field(label, `<select id="c-route">${rows}</select>`)}
       ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
@@ -478,6 +602,19 @@ function field(label, control){
 }
 function fileFlight(){
   const t = PILOT_TYPE; let dep,arr,no,ac=document.getElementById('c-ac')?.value||'—';
+  // --- RANK ENFORCEMENT: check the pilot can fly this aircraft ---
+  const acCode = acType(ac);
+  const need = rankRequiredForAircraft(acCode);
+  if(myRankLevel() < need){
+    const needName = RANKS[need].name;
+    document.getElementById('c-out').innerHTML =
+      `<div class="featnote" style="border-left-color:#c33;margin-top:16px">
+        <b>Rank too low for this aircraft.</b><br>
+        The ${acCode} requires <b>${needName}</b>. You're currently <b>${rankForHours(myHours())}</b> (${myHours().toFixed(1)}h).<br>
+        <span style="color:var(--sub);font-size:12px">Fly more hours to rank up, or pick a smaller aircraft.</span>
+      </div>`;
+    return;
+  }
   if(t==='charter'){
     dep=(document.getElementById('c-dep').value||'').toUpperCase();
     arr=(document.getElementById('c-arr').value||'').toUpperCase();
@@ -486,7 +623,9 @@ function fileFlight(){
   } else if(t==='tour'){
     const l=SCHED.tour[document.getElementById('c-leg').value]; dep=l.dep; arr=l.arr; no='KLA'+l.tour.replace(/[^A-Z]/gi,'').slice(0,2).toUpperCase()+l.leg;
   } else {
-    const r=SCHED[t][document.getElementById('c-route').value]; dep=r.dep; arr=r.arr; no=r.no;
+    const r=(window.__MY_CLAIMED||[])[document.getElementById('c-route').value];
+    if(!r){ document.getElementById('c-out').innerHTML='<p style="color:#c33">Claim a route in Routes &amp; Hubs first.</p>'; return; }
+    dep=r.dep; arr=r.arr; no='KLA'+Math.floor(100+Math.random()*899);
   }
   document.getElementById('c-out').innerHTML =
     `<div class="featnote" style="border-left-color:#1a8a4a;margin-top:16px">
@@ -627,7 +766,12 @@ const STARTER_AIRPORTS = {
 };
 function apt(code){
   code=(code||"").toUpperCase();
-  if(window.AIRPORTS[code]) return window.AIRPORTS[code];
+  // bundled full DB (object form: {name, lat, lon, city, country})
+  if(window.AIRPORTS && window.AIRPORTS[code]){
+    const a=window.AIRPORTS[code];
+    if(Array.isArray(a)) return a;
+    return [a.name, a.lat, a.lon, a.city, a.country];
+  }
   if(STARTER_AIRPORTS[code]) return STARTER_AIRPORTS[code];
   return null;
 }
@@ -814,7 +958,11 @@ async function loadState(){
     if(s.pilots){ window.PILOTS = s.pilots; }
     if(s.flights){ window.FLIGHTS = s.flights; }
     if(s.routes){ window.BRIDGE_ROUTES = s.routes; }
+    if(s.schedule){ window.SCHEDULE = s.schedule; }
     renderRoster();
+    // refresh route/schedule views so reloaded data actually shows
+    if(typeof renderSchedule==='function') renderSchedule();
+    if(typeof renderRoutes==='function') renderRoutes();
   }catch(e){ /* bridge not running yet */ }
 }
 
@@ -835,16 +983,35 @@ function renderRoster(){
       }
     }
   }
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
   const rows = Object.keys(merged).sort().map(u=>{
     const p = merged[u];
     const hrs = p.hours||0;
     const rank = p.role==='CEO' ? 'Chief Executive Officer'
                : p.role==='Fleet Manager' ? 'Fleet Manager'
                : rankForHours(hrs);
+    const isPilot = (p.role||'Pilot')==='Pilot';
+    const cur = p.ptype || 'commercial';
+    let typeCell;
+    if(isPilot && staff){
+      const opts = ['commercial','cargo','charter','tour'].map(x=>
+        `<option value="${x}"${x===cur?' selected':''}>${x[0].toUpperCase()+x.slice(1)}</option>`).join('');
+      typeCell = `<select onchange="setPilotTypeFor('${u}',this.value)" style="padding:4px 6px;border:1px solid var(--line);border-radius:6px;font-size:12px">${opts}</select>`;
+    } else if(isPilot){
+      typeCell = cur[0].toUpperCase()+cur.slice(1);
+    } else {
+      typeCell = '—';
+    }
     return `<tr><td><b>${u}</b></td><td>${p.name||u}</td><td>${p.role||'Pilot'}</td>
-      <td>${rank}</td><td>${p.flights||0}</td><td>${hrs.toFixed? hrs.toFixed(1):hrs}</td></tr>`;
+      <td>${rank}</td><td>${typeCell}</td><td>${p.flights||0}</td><td>${hrs.toFixed? hrs.toFixed(1):hrs}</td></tr>`;
   }).join('');
-  body.innerHTML = rows || '<tr><td colspan="6" class="empty">No pilots yet.</td></tr>';
+  body.innerHTML = rows || '<tr><td colspan="7" class="empty">No pilots yet.</td></tr>';
+}
+// staff assigns a pilot's type — saves to the shared bridge
+function setPilotTypeFor(user, type){
+  if(!window.PILOTS) window.PILOTS = {};
+  window.PILOTS[user] = {...(window.PILOTS[user]||{}), ptype: type};
+  saveToBridge('/pilot', {username:user, ptype:type});
 }
 
 // ---- ROUTE CREATOR (SimBrief-powered) ----
@@ -925,6 +1092,69 @@ function renderHubsList(){
   el.innerHTML = `<b>Network hubs (${HUBS.length}):</b> ` + HUBS.join(' · ');
 }
 
+// ---- SCHEDULED ROUTES ----
+function createSchedule(){
+  const dep=(document.getElementById('sc-dep').value||'').toUpperCase().trim();
+  const arr=(document.getElementById('sc-arr').value||'').toUpperCase().trim();
+  const ac=(document.getElementById('sc-ac').value||'').toUpperCase().trim();
+  const cls=document.getElementById('sc-cls').value;
+  const time=document.getElementById('sc-time').value.trim();
+  if(dep.length!==4||arr.length!==4){ alert('Enter valid 4-letter ICAO codes.'); return; }
+  const sched={dep,arr,ac,cls,time};
+  saveToBridge('/schedule', sched);
+  // optimistic local add
+  if(!window.SCHEDULE) window.SCHEDULE=[];
+  window.SCHEDULE.unshift({id:Date.now(),dep,arr,ac,cls,time,claimed_by:'',claimed_name:'',status:'Open'});
+  renderSchedule();
+  document.getElementById('sc-dep').value='';document.getElementById('sc-arr').value='';
+  document.getElementById('sc-ac').value='';document.getElementById('sc-time').value='';
+}
+function renderSchedule(){
+  const body=document.getElementById('sched-body');
+  if(!body) return;
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  // show/hide the staff create form
+  const cr=document.getElementById('sched-create'); if(cr) cr.style.display = staff?'block':'none';
+  const list = window.SCHEDULE||[];
+  if(!list.length){ body.innerHTML='<tr><td colspan="6" class="empty">No scheduled routes yet.</td></tr>'; return; }
+  const myType = PILOT_TYPE;
+  body.innerHTML = list.map(r=>{
+    const claimed = r.status==='Claimed';
+    const done = ['Claimed','Flown','Delayed','Missed Flight'].includes(r.status);
+    const classMatch = !r.cls || r.cls===myType;
+    let action;
+    if(staff){
+      action = `<button class="planbtn vat" style="padding:5px 10px;font-size:11px" onclick="removeSchedule(${r.id})">Remove</button>`;
+    } else if(done){
+      action = `<span style="color:var(--sub);font-size:12px">Claimed by ${r.claimed_name||r.claimed_by}</span>`;
+    } else if(classMatch){
+      action = `<button class="planbtn" style="background:#1a8a4a;padding:5px 10px;font-size:11px" onclick="claimRoute(${r.id})">Claim</button>`;
+    } else {
+      action = `<span style="color:var(--sub);font-size:11px">${cap(r.cls)} pilots only</span>`;
+    }
+    const badge = claimed
+      ? `<span class="badge" style="background:#e6f4ea;color:#1a8a4a">${r.claimed_name||r.claimed_by}</span>`
+      : r.status==='Flown' ? `<span class="badge" style="background:#e6f4ea;color:#1a8a4a">✓ Flown</span>`
+      : r.status==='Delayed' ? `<span class="badge soon">Delayed</span>`
+      : r.status==='Missed Flight' ? `<span class="badge due">Missed Flight</span>`
+      : `<span class="badge">Open</span>`;
+    return `<tr><td><b>${r.dep} → ${r.arr}</b></td><td>${r.ac||'—'}</td><td>${cap(r.cls)}</td>
+      <td>${r.time||'—'}</td><td>${badge}</td><td>${action}</td></tr>`;
+  }).join('');
+}
+function cap(s){ return s? s[0].toUpperCase()+s.slice(1): '—'; }
+function claimRoute(id){
+  const r=(window.SCHEDULE||[]).find(x=>x.id===id); if(!r) return;
+  r.status='Claimed'; r.claimed_by=SESSION.user; r.claimed_name=displayName(SESSION.user);
+  saveToBridge('/claim', {id, by:SESSION.user, name:displayName(SESSION.user)});
+  renderSchedule();
+}
+function removeSchedule(id){
+  window.SCHEDULE=(window.SCHEDULE||[]).filter(x=>x.id!==id);
+  saveToBridge('/claim', {id, remove:true});
+  renderSchedule();
+}
+
 // ---- nav ----
 document.querySelectorAll('nav button').forEach(b=>{
   b.onclick=()=>{
@@ -935,7 +1165,7 @@ document.querySelectorAll('nav button').forEach(b=>{
     if(b.dataset.view==='mapview' && map) setTimeout(()=>map.invalidateSize(),50);
     if(b.dataset.view==='create') renderCreate();
     if(b.dataset.view==='roster') renderRoster();
-    if(b.dataset.view==='routes'){ renderRoutes(); renderHubsList(); }
+    if(b.dataset.view==='routes'){ renderRoutes(); renderHubsList(); renderSchedule(); }
   };
 });
 
@@ -994,6 +1224,7 @@ renderShop();
 renderRoutes();
 refresh();
 setInterval(refresh, 20000);
+setInterval(loadState, 15000);   // keep schedule/routes/roster synced across pilots
 
 // ===== LIVE FLIGHT PANEL =====
 // Appears when ACARS detects THIS pilot is in an active flight in the sim.
