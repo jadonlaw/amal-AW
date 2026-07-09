@@ -1,0 +1,66 @@
+================================================================
+AMAL AIRWAYS FMS — PROJECT STATUS (handoff for new chat)
+================================================================
+
+WHAT THIS IS:
+A virtual airline flight management system for MSFS/VATSIM. Callsign KLA.
+Desktop app + cloud server + Discord bot + ACARS engine.
+
+LIVE INFRASTRUCTURE:
+- Cloud server: AWS Lightsail, Ubuntu 24.04
+- STATIC IP (permanent): 52.3.240.140  <- app points here
+- Bridge runs as service: amal-bridge (port 80, systemd, 24/7)
+- Discord bot runs as service: amal-bot (systemd, 24/7)
+- GitHub repo: github.com/jadonlaw/amal-AW
+- Deploy: upload to GitHub -> on server: cd amal-AW && git pull && sudo systemctl restart amal-bridge (or amal-bot)
+- NOTE: airline_state.json conflicts on git pull -> run: git checkout -- airline_state.json  first
+
+DISCORD:
+- Bot: "Amal Airways Flight Manager", App ID 1523519753577300089
+- /getcode works (matches ID role FM01/KLA002/CEO01 -> DMs their code)
+- /strike (staff only)
+- Route detection: post KATL-KMCO in #route-request (ID 1491904248399794336) -> live route
+- Flight summaries auto-post to #ops (ID 1490325655814930505)
+- Bot suggests airports if invalid code / city name posted
+- Channels still OFF (0) for CHANNEL_PUBLIC and CHANNEL_STAFF (set if wanted)
+
+DONE:
+- Server live (Lightsail + static IP + bridge 24/7)
+- App points at 52.3.240.140 (all files)
+- Pilot types (real per-pilot, staff assign in Pilots tab)
+- Ranks + personalized greeting ("Hello, [name]")
+- Discord bot live 24/7 (getcode, strike, route detection, auto call-outs, ops summaries)
+- Scheduled + claimable routes (staff create, pilots claim by class, enforcement flags Missed/Delayed/Flown)
+- Rank enforcement (aircraft gated by rank)
+- Maintenance depth (hours auto-accumulate, auto-ground at 100h)
+- Airports: all US + major per country (2,728 total) in airports.js
+- Welcome/ToS letter (first sign-in only, scroll-to-accept, remembered locally + server)
+- Live flight panel (shows when ACARS detects active flight)
+- SimBrief route builder (build -> pull -> prefile to VATSIM)
+- INSTALLER BUILT: AmalAirways.exe works. Transferring to fly PC for sim testing.
+
+ROSTER (CREDENTIALS.txt):
+- CEO01/DAL6CH -> Aveek Amal
+- FM01/NLN873 -> Jadon | FM02/TKQJCP -> Angus Preston
+- KLA002-018 assigned (Luko, Benny, BrayBray, Capitan Trell, Pepe Garcia, Sammy Binchasin,
+  Silver Inhaler, 67 Diego Fortnite King, Nomad Avi, Ace P, Ben T, Junior, Matt Mods10,
+  Oliver T10_, Pilot Booy, SSeguyaa, spookydoa123_024216)
+- KLA001 unassigned
+
+STILL TO DO / NEXT:
+1. Real sim testing on fly PC (does ACARS read MSFS? does flight track + post to #ops?)
+2. Push any pending updates to server (git pull + restart)
+3. Optional: set CHANNEL_PUBLIC / CHANNEL_STAFF channel IDs for more bot call-outs
+4. Optional later: code-signing cert (~$100-200/yr) to remove SmartScreen warning
+5. Optional later: convert installer to "thin" (loads dashboard from server = no reinstall to update)
+6. Distribute: upload AmalAirways.exe to Google Drive -> share link in Discord
+
+BUILD THE .EXE (on Windows PC, in folder with the files):
+  pip install pywebview pyinstaller SimConnect
+  python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." --add-data "airports.js;." AmalAirways.py
+  -> then compile AmalAirways_installer.iss in Inno Setup (free)
+
+COMMUNICATION STYLE:
+- Non-technical, voice-to-text (interpret truncated/phonetic words).
+- Wants honesty over reassurance. Plain human copy, NOT AI-formatted (no headers/emoji dumps).
+- Keep this project isolated from other chats.

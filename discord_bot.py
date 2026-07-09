@@ -15,7 +15,6 @@ Enable in the Discord Developer Portal -> Bot -> Privileged Gateway Intents:
 """
 import os, re, json, urllib.request
 
-# ---- token ----
 def load_token():
     here = os.path.dirname(os.path.abspath(__file__))
     p = os.path.join(here, "token.txt")
@@ -25,17 +24,14 @@ def load_token():
     return os.environ.get("BOT_TOKEN", "").strip()
 BOT_TOKEN = load_token()
 
-# ---- bridge (same server) ----
 BRIDGE = os.environ.get("BRIDGE_URL", "http://127.0.0.1:80")
 
-# ---- config ----
 ROLE_CEO = "CEO"; ROLE_FM = "Fleet Manager"; ROLE_PILOT = "Pilot"; ROLE_STRIKE = "Strike One"
-CHANNEL_ROUTES = 1491904248399794336   # #route-request — only this channel is watched for routes
-CHANNEL_PUBLIC = 0     # public flight call-outs (0 = off until you set it)
-CHANNEL_STAFF  = 0     # staff-only alerts: slew, violations (0 = off until you set it)
-CHANNEL_OPS    = 1490325655814930505   # #ops — flight summaries post here
+CHANNEL_ROUTES = 1491904248399794336
+CHANNEL_PUBLIC = 0
+CHANNEL_STAFF  = 0
+CHANNEL_OPS    = 1490325655814930505
 
-# rank thresholds (must match the app)
 RANKS = [(0,"First Officer"),(25,"Senior First Officer"),(75,"Captain"),
          (150,"Senior Captain"),(300,"Training Captain")]
 def rank_for(h):
@@ -81,7 +77,6 @@ def load_codes():
     return codes
 CODES = load_codes()
 
-# airport database for validation + suggestions
 def load_airports():
     try:
         d = json.load(open("bot_airports.json", encoding="utf-8"))
@@ -96,10 +91,10 @@ def _norm(s): return ''.join(c for c in unicodedata.normalize('NFD', s) if unico
 def suggest_airport(token):
     """Given a bad code or a city name, suggest a valid ICAO."""
     t = token.strip()
-    # city name match (e.g. 'Cancun' -> MMUN)
+
     key = _norm(t)
     if key in CITY_IDX: return CITY_IDX[key]
-    # partial city match
+
     for city,code in CITY_IDX.items():
         if key and (key in city or city in key) and len(key)>=3:
             return code
@@ -114,8 +109,47 @@ async def on_ready():
     print(f"Amal Airways bot online as {bot.user}")
     if not watch_flights.is_running():
         watch_flights.start()
+    if not watch_new_pilots.is_running():
+        watch_new_pilots.start()
 
-# ===== AUTO WATCHER — posts flight events with NO slash commands =====
+@tasks.loop(seconds=10)
+async def watch_new_pilots():
+    state = bridge_get("/state")
+    if not state: return
+    queue = state.get("new_pilots", [])
+    pending = [q for q in queue if not q.get("made")]
+    if not pending: return
+
+    guild = bot.guilds[0] if bot.guilds else None
+    if not guild: return
+    for q in pending:
+        callsign = (q.get("username") or "").upper()
+        if not callsign: continue
+
+        existing = discord.utils.get(guild.roles, name=callsign)
+        if existing:
+            bridge_post("/rolemade", {"username": callsign})
+            continue
+        try:
+            await guild.create_role(name=callsign, reason="New Amal Airways pilot created in the app")
+            bridge_post("/rolemade", {"username": callsign})
+
+            ops = bot.get_channel(CHANNEL_OPS) if CHANNEL_OPS else None
+            if ops:
+                nm = q.get("name") or callsign
+                label = f" ({nm})" if nm and nm != callsign else ""
+                await ops.send(f"🆕 New pilot **{callsign}**{label} added — Discord role created.")
+        except discord.Forbidden:
+
+            staff = bot.get_channel(CHANNEL_STAFF) if CHANNEL_STAFF else None
+            target = staff or (bot.get_channel(CHANNEL_OPS) if CHANNEL_OPS else None)
+            if target:
+                await target.send(f"⚠️ Couldn't create role **{callsign}** — give me **Manage Roles** and move my role to the top in Server Settings, then I'll retry.")
+            return
+        except Exception as e:
+            print("role create error:", e)
+            return
+
 _last_flight_id = [None]
 
 @tasks.loop(seconds=8)
@@ -124,7 +158,7 @@ async def watch_flights():
     if not state: return
     flights = state.get("flights", [])
     if not flights: return
-    # first run: remember where we are, don't spam old flights
+
     if _last_flight_id[0] is None:
         _last_flight_id[0] = max((f.get("id",0) for f in flights), default=0)
         return
@@ -142,7 +176,6 @@ async def announce_flight(f):
     viol = f.get("violations",0); ac=f.get("aircraft","")
     hrs = f.get("hours",0)
 
-    # SLEW -> staff alert (and ops record)
     if str(tier).upper().startswith("SLEW") or f.get("slew"):
         if staff:
             await staff.send(f"🚫 **{cs}** — FLIGHT VOIDED (SLEW DETECTED) on {dep} → {arr}. "
@@ -151,7 +184,6 @@ async def announce_flight(f):
             await ops.send(f"🚫 **{cs}** {dep} → {arr} — **VOIDED (slew)**")
         return
 
-    # FLIGHT SUMMARY -> ops channel (every completed flight)
     if ops:
         emoji = "🧈" if str(tier).lower()=="butter" else "🛬"
         summary = (f"{emoji} **Flight Report — {cs}**\n"
@@ -163,25 +195,20 @@ async def announce_flight(f):
                    f"**Violations:** {viol}")
         await ops.send(summary)
 
-    # normal completed flight -> public call-out
     if pub:
         line = f"🛬 **{cs}** {dep} → {arr} · {ac}\nLanding: **{fpm} fpm** ({tier}) · Score: **{score}**"
         if tier and tier.lower()=="butter":
             line = f"🧈 **BUTTER!** {cs} greased {dep} → {arr} at **{fpm} fpm** — smooth as it gets."
         await pub.send(line)
 
-    # violations -> staff channel
     if viol and staff:
         await staff.send(f"⚠️ **{cs}** logged **{viol}** SOP violation(s) on {dep} → {arr}.")
 
-    # rank-up -> public
     old_r = rank_for(f.get("_old_hours",0)); new_r = rank_for(f.get("_new_hours",0))
     if old_r != new_r and pub:
         name = f.get("_pilot_name", cs)
         await pub.send(f"🎉 Congratulations **{name}** — promoted to **{new_r}**!")
 
-# ===== ROUTE DETECTION (no slash command needed) =====
-# Detects "KATL-KMCO", "KATL KMCO", "KATL to KMCO" and makes it a live route.
 ICAO = r'([A-Za-z]{4})'
 ROUTE_RE = re.compile(ICAO + r'\s*(?:-|to|>|→|/)\s*' + ICAO, re.IGNORECASE)
 
@@ -194,7 +221,7 @@ async def on_message(message):
     m = ROUTE_RE.search(message.content or "")
     if m:
         dep, arr = m.group(1).upper(), m.group(2).upper()
-        # validate against the airport database
+
         bad = []
         if AIRPORTS and dep not in AIRPORTS: bad.append(dep)
         if AIRPORTS and arr not in AIRPORTS: bad.append(arr)
@@ -215,7 +242,7 @@ async def on_message(message):
         else:
             await message.channel.send(
                 f"Got **{dep} → {arr}**, but I couldn't reach the airline server. Try again shortly.")
-    # also handle "city to city" when no ICAO codes matched
+
     elif AIRPORTS:
         cm = _re.search(r'route:?\s+([A-Za-z .]{3,25})\s+(?:to|-|>)\s+([A-Za-z .]{3,25})', message.content or '', _re.IGNORECASE)
         if cm:
@@ -224,13 +251,20 @@ async def on_message(message):
                 await message.channel.send(f"Did you mean **{d} → {a}**? Post `{d}-{a}` to make it a live route.")
     await bot.process_commands(message)
 
-# ===== /getcode — matches the user's ID role (CEO01 / FM## / KLA###) =====
 import re as _re
 ID_ROLE = _re.compile(r'^(CEO0?1|FM\d{1,2}|KLA\d{1,3})$', _re.IGNORECASE)
 
+def type_from_roles(member):
+    """Read a pilot's type from their Discord role names. Returns the type or None."""
+    names = [r.name.lower() for r in getattr(member, "roles", [])]
+    for t in ("cargo", "commercial", "charter", "tour"):
+        if any(t in n for n in names):
+            return t
+    return None
+
 @bot.tree.command(description="Get your Amal Airways sign-in code by DM")
 async def getcode(interaction: discord.Interaction):
-    # get the full guild member (so roles are populated, not a bare User)
+
     member = interaction.user
     if interaction.guild and not isinstance(member, discord.Member):
         member = interaction.guild.get_member(member.id) or member
@@ -247,9 +281,14 @@ async def getcode(interaction: discord.Interaction):
             "You don't have an ID role yet (like KLA002 or FM01) — ask a Fleet Manager to assign one.\n"
             f"(Roles I can see: {', '.join(all_roles) if all_roles else 'none'})",
             ephemeral=True); return
-    # normalize CEO1 -> CEO01
+
     myid = ids[0]
     if myid in ("CEO1","CEO01"): myid = "CEO01"
+    # sync this pilot's type from their Discord roles to the app
+    if myid.startswith("KLA"):
+        t = type_from_roles(member)
+        if t:
+            bridge_post("/pilot", {"username": myid, "ptype": t})
     code = CODES.get(myid)
     if not code:
         await interaction.response.send_message(
@@ -262,7 +301,6 @@ async def getcode(interaction: discord.Interaction):
     except discord.Forbidden:
         await interaction.response.send_message("Enable DMs from server members and try again.", ephemeral=True)
 
-# ===== /strike =====
 @bot.tree.command(description="Apply Strike One (staff only)")
 @app_commands.describe(pilot="Pilot to strike", reason="Reason")
 async def strike(interaction: discord.Interaction, pilot: discord.Member, reason: str="SOP violation"):

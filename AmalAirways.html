@@ -50,6 +50,7 @@
   .card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold);border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(12,35,63,.05);display:flex;flex-direction:column}
   .card h3{margin:0 0 6px;color:var(--blue);font-size:15px}
   .card p{margin:0;font-size:13px;color:var(--sub);line-height:1.5;flex:1}
+  .card p.ac-code{font-family:ui-monospace,monospace;font-size:12px;letter-spacing:1px;color:var(--gold);font-weight:700;flex:none}
   .card .type{font-size:11px;color:#8496b0;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
   .buy{margin-top:12px;background:var(--blue);color:#fff;border:0;border-radius:8px;padding:9px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
   .buy:hover{background:var(--blue2)}
@@ -78,7 +79,6 @@
   .cfg button{background:var(--blue);color:#fff;border:0;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer}
   .featnote{background:var(--card);border-left:3px solid var(--gold);padding:12px 14px;margin-top:16px;font-size:13px;color:var(--sub);border-radius:0 8px 8px 0}
 
-  /* ---- login ---- */
   #login{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,var(--blue),#071d43);display:grid;place-items:center}
   #login .box{background:#fff;border-radius:16px;border-top:5px solid var(--gold);box-shadow:0 20px 60px rgba(0,0,0,.4);padding:32px 30px;width:340px;max-width:92vw}
   #login .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
@@ -102,13 +102,21 @@
   #challenge-banner h4{margin:2px 0 4px;font-size:16px;font-weight:800}
   #challenge-banner p{margin:0;font-size:12px;line-height:1.4;font-weight:600}
   #challenge-banner .rw{margin-top:6px;font-size:11px;font-weight:700;opacity:.85}
-  #hubpick{position:fixed;inset:0;z-index:9000;background:rgba(4,12,24,.55);display:grid;place-items:center}
-  .hubpick-inner{background:var(--card);border-top:4px solid var(--gold);border-radius:14px;padding:24px 26px;width:340px;max-width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-  .hubpick-inner h3{margin:0 0 6px;color:var(--blue);font-size:17px}
-  .hubpick-inner p{margin:0 0 12px;color:var(--sub);font-size:13px}
-  .hubpick-inner select{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;font-size:15px;background:var(--card);color:var(--ink)}
-  .hubpick-btns{display:flex;gap:8px;margin-top:18px}
-  .hubpick-btns button{flex:1;padding:11px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;border:0}
+  #challenge-banner .cd{margin-top:6px;font-size:11px;font-weight:800;letter-spacing:.5px;background:rgba(255,255,255,.18);display:inline-block;padding:2px 8px;border-radius:20px}
+  #hubpick{position:fixed;inset:0;z-index:9000;background:rgba(4,12,24,.6);display:grid;place-items:center;opacity:0;transition:opacity .18s ease;backdrop-filter:blur(3px)}
+  .hubpick-inner{background:var(--card);border-top:4px solid var(--gold);border-radius:16px;padding:26px 28px;width:400px;max-width:92vw;box-shadow:0 24px 70px rgba(0,0,0,.5);transform:translateY(16px);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+  .hubpick-inner .hp-badge{display:inline-block;background:var(--gold);color:#1a2a44;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;padding:4px 10px;border-radius:20px;margin-bottom:10px}
+  .hubpick-inner h3{margin:0 0 6px;color:var(--blue);font-size:20px}
+  .hubpick-inner p{margin:0 0 16px;color:var(--sub);font-size:13px;line-height:1.5}
+  .hubpick-inner .hp-label{display:block;font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:6px}
+  .hubpick-inner select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:15px;background:var(--card);color:var(--ink);cursor:pointer}
+  .hubpick-inner select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,90,.18)}
+  .hubpick-btns{display:flex;gap:10px;margin-top:20px}
+  .hubpick-btns button{flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:0;transition:transform .1s,filter .1s}
+  .hubpick-btns button:active{transform:scale(.97)}
+  .hubpick-btns .hp-cancel{background:#eef1f6;color:#55627a}
+  .hubpick-btns .hp-ok{background:#1a8a4a;color:#fff}
+  .hubpick-btns .hp-ok:hover{filter:brightness(1.08)}
   .hp-cancel{background:#e8edf6;color:#5b6b84}
   .hp-ok{background:var(--blue);color:#fff}
   .hp-ok:hover{background:var(--blue2)}
@@ -162,7 +170,6 @@
   .fp-grid span{display:block;font-size:9px;letter-spacing:1px;opacity:.6}
   .fp-grid b{font-size:14px;font-weight:700}
   .fp-ac{font-size:11px;opacity:.6;margin-top:8px;text-align:center}
-  /* in-app SOP alert box — about the size of the sign-in box */
   #alertbox{position:fixed;right:18px;bottom:18px;z-index:6000;width:320px;min-height:96px;
     background:var(--alertbg);border:1px solid var(--line);border-radius:14px;
     box-shadow:0 10px 30px rgba(0,0,0,.28);padding:16px 18px;display:none;flex-direction:column;gap:6px}
@@ -220,7 +227,7 @@
     <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:600;color:var(--ink);margin-top:12px;cursor:pointer">
       <input type="checkbox" id="l-remember" style="width:auto;margin:0"> Keep me signed in
     </label>
-    <button onclick="doLogin()">Sign in</button>
+    <button id="l-btn" onclick="doLogin()">Sign in</button>
     <div class="err" id="l-err"></div>
   </div>
 </div>
@@ -235,6 +242,7 @@
     <button data-view="routes">Routes &amp; Hubs</button>
     <button data-view="scoring">Scoring &amp; PIREPs</button>
     <button data-view="roster">Pilots</button>
+    <button data-view="leaderboard" data-pilot="1">Leaderboard</button>
   </nav>
   <div id="globalsearch">
     <input id="gsearch" placeholder="Search airport ICAO (e.g. KJFK)…" maxlength="4"
@@ -279,7 +287,7 @@
       <p class="sub" id="create-sub">Book your next flight. The options shown match your pilot type.</p>
 
       <div class="featnote" id="ptype-note"></div>
-
+      <div id="staff-type-switch" style="display:none;margin-top:14px"></div>
       <div id="create-form" style="margin-top:18px"></div>
     </div>
   </section>
@@ -298,7 +306,18 @@
   <section class="view" id="shop">
     <div class="panel">
       <h2>Fleet Shop</h2>
-      <p class="sub">Acquire aircraft for the airline. Pick a type and it joins your fleet, ready for dispatch. Used-marketplace and buyback workflows can layer on later.</p>
+      <p class="sub">Acquire aircraft for the airline. Pick a type and it joins your fleet, ready for dispatch. Any pilot can buy any aircraft.</p>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+        <input id="shop-search" oninput="renderShop()" placeholder="Search aircraft — e.g. 737, Airbus, Cessna, cargo…"
+          style="flex:1;min-width:240px;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px">
+        <select id="shop-cat" onchange="renderShop()" style="padding:11px;border:1px solid var(--line);border-radius:10px;font-size:14px;background:var(--card);color:var(--ink)">
+          <option value="">All categories</option>
+          <option>Narrow-body</option><option>Wide-body</option><option>Regional</option>
+          <option>Turboprop</option><option>GA</option><option>Business</option>
+          <option>Cargo</option><option>Special</option>
+        </select>
+        <span id="shop-count" style="font-size:12px;color:var(--sub);white-space:nowrap"></span>
+      </div>
       <div class="cards" id="shop-cards"></div>
     </div>
   </section>
@@ -309,7 +328,7 @@
       <h2>Route &amp; Hub Operations</h2>
       <p class="sub">Create a route and SimBrief builds the best routing for you — then pull it back and prefile straight to VATSIM. Set your SimBrief username once and it's all automatic.</p>
 
-      <div class="routebuilder">
+      <div class="routebuilder" id="route-builder">
         <div class="rb-row">
           <div class="rb-fg"><label>SimBrief username</label><input id="sb-user" placeholder="your SimBrief login"></div>
           <div class="rb-fg"><label>From (ICAO)</label><input id="rb-dep" maxlength="4" placeholder="KDED" style="text-transform:uppercase"></div>
@@ -361,8 +380,21 @@
     <div class="panel">
       <h2>Pilots</h2>
       <p class="sub">Full airline roster — every pilot, their type, and their logged activity. Flight totals build up automatically as pilots complete flights.</p>
+      <div id="roster-admin" style="display:none;margin-bottom:14px">
+        <button onclick="addPilotPrompt()" class="planbtn" style="background:#1a8a4a;padding:8px 16px;font-size:13px">+ Add pilot</button>
+        <div id="addpilot-area" style="display:none;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:10px;max-width:520px"></div>
+      </div>
       <table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Rank</th><th>Type</th><th>Flights</th><th>Hours</th></tr></thead>
       <tbody id="roster-body"><tr><td colspan="6" class="empty">Loading roster…</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section class="view" id="leaderboard">
+    <div class="panel">
+      <h2>Leaderboard</h2>
+      <p class="sub" id="lb-sub">This week's standings, reset every Monday. Fly to climb the board.</p>
+      <div id="lb-tabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px"></div>
+      <div id="lb-body"></div>
     </div>
   </section>
 </main>
@@ -370,23 +402,49 @@
 <script>
 const CREDS = {"CEO01": {"pass": "DAL6CH", "role": "ceo"}, "FM01": {"pass": "NLN873", "role": "fleet_manager"}, "FM02": {"pass": "TKQJCP", "role": "fleet_manager"}, "FM03": {"pass": "SJN677", "role": "fleet_manager"}, "FM04": {"pass": "CUCLY4", "role": "fleet_manager"}, "FM05": {"pass": "YTB7WW", "role": "fleet_manager"}, "FM06": {"pass": "3YVFTH", "role": "fleet_manager"}, "FM07": {"pass": "JJ8JWB", "role": "fleet_manager"}, "FM08": {"pass": "7PWN3H", "role": "fleet_manager"}, "FM09": {"pass": "JGRVY7", "role": "fleet_manager"}, "FM10": {"pass": "HKZVJA", "role": "fleet_manager"}, "FM11": {"pass": "549GLX", "role": "fleet_manager"}, "FM12": {"pass": "H9VZGE", "role": "fleet_manager"}, "FM13": {"pass": "YBG9PQ", "role": "fleet_manager"}, "FM14": {"pass": "EN2VZY", "role": "fleet_manager"}, "FM15": {"pass": "TVV3HF", "role": "fleet_manager"}, "FM16": {"pass": "A7E253", "role": "fleet_manager"}, "FM17": {"pass": "PH8SH6", "role": "fleet_manager"}, "FM18": {"pass": "PSU4XM", "role": "fleet_manager"}, "FM19": {"pass": "H6AES5", "role": "fleet_manager"}, "FM20": {"pass": "VH96VN", "role": "fleet_manager"}, "FM21": {"pass": "X3ZYYG", "role": "fleet_manager"}, "FM22": {"pass": "VRWXNJ", "role": "fleet_manager"}, "FM23": {"pass": "UVS6TW", "role": "fleet_manager"}, "FM24": {"pass": "TY2YDE", "role": "fleet_manager"}, "FM25": {"pass": "MSGRYV", "role": "fleet_manager"}, "FM26": {"pass": "FLSJLY", "role": "fleet_manager"}, "FM27": {"pass": "HPELAR", "role": "fleet_manager"}, "FM28": {"pass": "3BWKDA", "role": "fleet_manager"}, "FM29": {"pass": "T7Q9WC", "role": "fleet_manager"}, "FM30": {"pass": "TPD4GT", "role": "fleet_manager"}, "KLA001": {"pass": "EV2HEX", "role": "pilot"}, "KLA002": {"pass": "HCGYHN", "role": "pilot"}, "KLA003": {"pass": "YZ7ERQ", "role": "pilot"}, "KLA004": {"pass": "R52LU6", "role": "pilot"}, "KLA005": {"pass": "DK7WPV", "role": "pilot"}, "KLA006": {"pass": "KVDN47", "role": "pilot"}, "KLA007": {"pass": "V5AXBT", "role": "pilot"}, "KLA008": {"pass": "HL4FZW", "role": "pilot"}, "KLA009": {"pass": "EPMHMB", "role": "pilot"}, "KLA010": {"pass": "4RE6RX", "role": "pilot"}, "KLA011": {"pass": "TSTDQM", "role": "pilot"}, "KLA012": {"pass": "A7GQEB", "role": "pilot"}, "KLA013": {"pass": "8PFA72", "role": "pilot"}, "KLA014": {"pass": "H6K75N", "role": "pilot"}, "KLA015": {"pass": "8QLALL", "role": "pilot"}, "KLA016": {"pass": "CK3GB7", "role": "pilot"}, "KLA017": {"pass": "V8KDLU", "role": "pilot"}, "KLA018": {"pass": "FU9RAF", "role": "pilot"}, "KLA019": {"pass": "HMQW3V", "role": "pilot"}, "KLA020": {"pass": "HV54RK", "role": "pilot"}, "KLA021": {"pass": "L39MG9", "role": "pilot"}, "KLA022": {"pass": "CMJELQ", "role": "pilot"}, "KLA023": {"pass": "98Q3YH", "role": "pilot"}, "KLA024": {"pass": "9WNTV5", "role": "pilot"}, "KLA025": {"pass": "ZJPAXV", "role": "pilot"}, "KLA026": {"pass": "V5UV9J", "role": "pilot"}, "KLA027": {"pass": "Z2XKTS", "role": "pilot"}, "KLA028": {"pass": "CCXF57", "role": "pilot"}, "KLA029": {"pass": "CP33CP", "role": "pilot"}, "KLA030": {"pass": "558CZK", "role": "pilot"}, "KLA031": {"pass": "WPLENH", "role": "pilot"}, "KLA032": {"pass": "U4TAQJ", "role": "pilot"}, "KLA033": {"pass": "AKVMY8", "role": "pilot"}, "KLA034": {"pass": "T4RJK9", "role": "pilot"}, "KLA035": {"pass": "6D2QVK", "role": "pilot"}, "KLA036": {"pass": "M8BF2Q", "role": "pilot"}, "KLA037": {"pass": "XWDPUD", "role": "pilot"}, "KLA038": {"pass": "F25UM5", "role": "pilot"}, "KLA039": {"pass": "AFJHHM", "role": "pilot"}, "KLA040": {"pass": "627BDV", "role": "pilot"}, "KLA041": {"pass": "TJWNN6", "role": "pilot"}, "KLA042": {"pass": "SPPQLU", "role": "pilot"}, "KLA043": {"pass": "UPJJX9", "role": "pilot"}, "KLA044": {"pass": "2PYN8T", "role": "pilot"}, "KLA045": {"pass": "RKWDGC", "role": "pilot"}, "KLA046": {"pass": "ZXL243", "role": "pilot"}, "KLA047": {"pass": "QC223K", "role": "pilot"}, "KLA048": {"pass": "HR4K52", "role": "pilot"}, "KLA049": {"pass": "TR9BLV", "role": "pilot"}, "KLA050": {"pass": "CTGQBX", "role": "pilot"}, "KLA051": {"pass": "AQYE6J", "role": "pilot"}, "KLA052": {"pass": "K4AEDU", "role": "pilot"}, "KLA053": {"pass": "JCBXQ5", "role": "pilot"}, "KLA054": {"pass": "V3UYYF", "role": "pilot"}, "KLA055": {"pass": "8GPCBV", "role": "pilot"}, "KLA056": {"pass": "LPRDGT", "role": "pilot"}, "KLA057": {"pass": "WZ5CCH", "role": "pilot"}, "KLA058": {"pass": "HF6A2F", "role": "pilot"}, "KLA059": {"pass": "DRQDA9", "role": "pilot"}, "KLA060": {"pass": "6KR9BX", "role": "pilot"}, "KLA061": {"pass": "HBX2HN", "role": "pilot"}, "KLA062": {"pass": "QDDHKC", "role": "pilot"}, "KLA063": {"pass": "85U5FA", "role": "pilot"}, "KLA064": {"pass": "MCRJYC", "role": "pilot"}, "KLA065": {"pass": "758V22", "role": "pilot"}, "KLA066": {"pass": "ZSFKG7", "role": "pilot"}, "KLA067": {"pass": "QHCA37", "role": "pilot"}, "KLA068": {"pass": "L8DGQG", "role": "pilot"}, "KLA069": {"pass": "W23NBC", "role": "pilot"}, "KLA070": {"pass": "TEV8KQ", "role": "pilot"}, "KLA071": {"pass": "LJJXHN", "role": "pilot"}, "KLA072": {"pass": "87QTB3", "role": "pilot"}, "KLA073": {"pass": "9SL5LL", "role": "pilot"}, "KLA074": {"pass": "GJ9BJQ", "role": "pilot"}, "KLA075": {"pass": "FBU69M", "role": "pilot"}, "KLA076": {"pass": "YBXEFJ", "role": "pilot"}, "KLA077": {"pass": "4MMH2G", "role": "pilot"}, "KLA078": {"pass": "4QC3SH", "role": "pilot"}, "KLA079": {"pass": "G4GLQP", "role": "pilot"}, "KLA080": {"pass": "J6C3UJ", "role": "pilot"}, "KLA081": {"pass": "WMB27H", "role": "pilot"}, "KLA082": {"pass": "338ZJY", "role": "pilot"}, "KLA083": {"pass": "HD5RFY", "role": "pilot"}, "KLA084": {"pass": "7ASLX6", "role": "pilot"}, "KLA085": {"pass": "54SCAA", "role": "pilot"}, "KLA086": {"pass": "5V5LKH", "role": "pilot"}, "KLA087": {"pass": "LYR38R", "role": "pilot"}, "KLA088": {"pass": "3ZPC39", "role": "pilot"}, "KLA089": {"pass": "N53HX7", "role": "pilot"}, "KLA090": {"pass": "BP8BDK", "role": "pilot"}, "KLA091": {"pass": "NDYAXV", "role": "pilot"}, "KLA092": {"pass": "ZHMXQU", "role": "pilot"}, "KLA093": {"pass": "99FDWC", "role": "pilot"}, "KLA094": {"pass": "U5EC5X", "role": "pilot"}, "KLA095": {"pass": "KTK75Z", "role": "pilot"}, "KLA096": {"pass": "BWT3SA", "role": "pilot"}, "KLA097": {"pass": "CCNNXU", "role": "pilot"}, "KLA098": {"pass": "ER8HXB", "role": "pilot"}, "KLA099": {"pass": "N7VXDJ", "role": "pilot"}, "KLA100": {"pass": "WBT65J", "role": "pilot"}, "KLA101": {"pass": "UTJQFY", "role": "pilot"}, "KLA102": {"pass": "V7L8FS", "role": "pilot"}, "KLA103": {"pass": "K23LPW", "role": "pilot"}, "KLA104": {"pass": "V6B25A", "role": "pilot"}, "KLA105": {"pass": "NB89UU", "role": "pilot"}, "KLA106": {"pass": "6TEEA4", "role": "pilot"}, "KLA107": {"pass": "QA5SZ9", "role": "pilot"}, "KLA108": {"pass": "JUJZX6", "role": "pilot"}, "KLA109": {"pass": "ZQADJ6", "role": "pilot"}, "KLA110": {"pass": "YBJBDG", "role": "pilot"}, "KLA111": {"pass": "ZMLSYN", "role": "pilot"}, "KLA112": {"pass": "SLDT2W", "role": "pilot"}, "KLA113": {"pass": "ECWM8Z", "role": "pilot"}, "KLA114": {"pass": "F6M2PQ", "role": "pilot"}, "KLA115": {"pass": "CWT865", "role": "pilot"}, "KLA116": {"pass": "5JYNHC", "role": "pilot"}, "KLA117": {"pass": "GT7STD", "role": "pilot"}, "KLA118": {"pass": "JQ2XCY", "role": "pilot"}, "KLA119": {"pass": "M2BNSL", "role": "pilot"}, "KLA120": {"pass": "Z8Z8HZ", "role": "pilot"}, "KLA121": {"pass": "QJ2GAY", "role": "pilot"}, "KLA122": {"pass": "6ZSF96", "role": "pilot"}, "KLA123": {"pass": "TSFQNJ", "role": "pilot"}, "KLA124": {"pass": "ACNVXJ", "role": "pilot"}, "KLA125": {"pass": "BH73ZM", "role": "pilot"}, "KLA126": {"pass": "YT4QML", "role": "pilot"}, "KLA127": {"pass": "27ARQ5", "role": "pilot"}, "KLA128": {"pass": "EY3ZYF", "role": "pilot"}, "KLA129": {"pass": "7HQU4E", "role": "pilot"}, "KLA130": {"pass": "ZE8N9U", "role": "pilot"}, "KLA131": {"pass": "6ZHDKD", "role": "pilot"}, "KLA132": {"pass": "EMF9C3", "role": "pilot"}, "KLA133": {"pass": "BGHLUQ", "role": "pilot"}, "KLA134": {"pass": "UYRC8J", "role": "pilot"}, "KLA135": {"pass": "XZ6N83", "role": "pilot"}, "KLA136": {"pass": "ECCZW9", "role": "pilot"}, "KLA137": {"pass": "YWXFET", "role": "pilot"}, "KLA138": {"pass": "L3LMWC", "role": "pilot"}, "KLA139": {"pass": "UH6KDT", "role": "pilot"}, "KLA140": {"pass": "QXZSPQ", "role": "pilot"}, "KLA141": {"pass": "CZUWML", "role": "pilot"}, "KLA142": {"pass": "Y5ZEMV", "role": "pilot"}, "KLA143": {"pass": "PY2UQR", "role": "pilot"}, "KLA144": {"pass": "C87USU", "role": "pilot"}, "KLA145": {"pass": "RFXZAX", "role": "pilot"}, "KLA146": {"pass": "E6Q233", "role": "pilot"}, "KLA147": {"pass": "YZ2EJF", "role": "pilot"}, "KLA148": {"pass": "BUKFR9", "role": "pilot"}, "KLA149": {"pass": "JL7PEF", "role": "pilot"}, "KLA150": {"pass": "TLR6UJ", "role": "pilot"}};
 let SESSION = null;
-function doLogin(){
+async function doLogin(){
   const role = document.getElementById('l-role').value;
   const user = (document.getElementById('l-user').value||'').trim().toUpperCase();
   const pass = (document.getElementById('l-pass').value||'').trim().toUpperCase();
   const err = document.getElementById('l-err');
+  const btn = document.getElementById('l-btn');
   if(!role){ err.textContent='Please select a role.'; return; }
-  const acct = CREDS[user];
-  if(!acct || acct.pass.toUpperCase()!==pass){ err.textContent='Username or passcode is incorrect.'; return; }
+  if(!user || !pass){ err.textContent='Enter your username and passcode.'; return; }
+
+  err.textContent=''; err.style.color='';
+  const oldBtn = btn ? btn.textContent : '';
+  if(btn){ btn.disabled=true; btn.textContent='Checking…'; }
+
+  let acct = null, serverAnswered = false;
+  try{
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 6000);
+    const r = await fetch(`${BRIDGE_URL}/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({username:user, passcode:pass}), signal:ctrl.signal });
+    clearTimeout(t);
+    const j = await r.json();
+    serverAnswered = true;
+    if(j && j.ok){ acct = {pass, role:j.role, name:j.name, ptype:j.ptype}; }
+  }catch(e){ serverAnswered = false; }  // server unreachable — fall back below
+
+  // Fallback to the built-in list ONLY if the server didn't answer (offline/unreachable).
+  // If the server answered and said no, we trust that — don't fall back.
+  if(!serverAnswered){
+    const local = CREDS[user];
+    if(local && local.pass.toUpperCase()===pass){ acct = {pass, role:local.role}; }
+  }
+
+  if(btn){ btn.disabled=false; btn.textContent=oldBtn; }
+
+  if(!acct){ err.textContent='Username or passcode is incorrect.'; return; }
   if(acct.role!==role){ const nm={ceo:'CEO',fleet_manager:'Fleet Manager',pilot:'Pilot'}; err.textContent='That account is a '+(nm[acct.role]||acct.role)+', not a '+(nm[role]||role)+'.'; return; }
-  // "Keep me signed in" — remember this session
+  if(acct.name){ if(!window.PILOTS) window.PILOTS={}; window.PILOTS[user]={...(window.PILOTS[user]||{}), name:acct.name, ...(acct.ptype?{ptype:acct.ptype}:{})}; }
   if(document.getElementById('l-remember').checked){
     try{ localStorage.setItem('ala_session', JSON.stringify({user, role})); }catch(e){}
   }
   enterApp(user, role);
 }
-// ===== RANK SYSTEM =====
-// Everyone starts First Officer (except CEO). Ranks earned by hours flown.
 const RANKS = [
   {name:"First Officer", min:0},
   {name:"Senior First Officer", min:25},
@@ -399,7 +457,6 @@ function rankForHours(h){
   for(const t of RANKS){ if(h >= t.min) r = t; }
   return r.name;
 }
-// rank as a number (0=FO up to 4=Training Captain) for comparisons
 function rankLevel(rankName){
   const i = RANKS.findIndex(r=>r.name===rankName);
   return i<0 ? 0 : i;
@@ -413,8 +470,6 @@ function myRankLevel(){
   if(SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager')) return 99; // staff bypass
   return rankLevel(rankForHours(myHours()));
 }
-// aircraft type -> minimum rank level required to fly it
-// widebodies need Captain (2), heavies/long-haul need Senior Captain (3)
 function rankRequiredForAircraft(type){
   const t=(type||'').toUpperCase();
   if(/^(A38|B74|B77|B78)/.test(t)) return 3;   // Senior Captain for the big widebodies
@@ -430,8 +485,11 @@ function pilotRank(user, role){
   return rankForHours(hrs);
 }
 function displayName(user){
-  const p = (window.PILOTS && window.PILOTS[user]) || (baseRoster()[user]);
-  return (p && p.name) ? p.name : user;
+  const roster = REAL_ROSTER[user];
+  if(roster && roster.name && roster.name!==user) return roster.name;
+  const p = window.PILOTS && window.PILOTS[user];
+  if(p && p.name && p.name!==user) return p.name;   // ignore server's code-as-name placeholder
+  return user;
 }
 
 function enterApp(user, role){
@@ -446,17 +504,16 @@ function enterApp(user, role){
   if(map) setTimeout(()=>map.invalidateSize(),80);
   maybeShowWelcome(user);
 }
-// ===== WELCOME / TERMS LETTER (first sign-in only) =====
 function hasAcceptedTos(user){
   const p = (window.PILOTS && window.PILOTS[user]);
   return !!(p && p.accepted_tos);
 }
 function maybeShowWelcome(user){
-  // check the bridge first so we know if they've already accepted (avoids re-showing on refresh)
+  try{ if(localStorage.getItem('ala_tos_'+user)==='1') return; }catch(e){}
   fetch(`${BRIDGE_URL}/state`,{cache:'no-store'}).then(r=>r.json()).then(s=>{
     const p = s.pilots && s.pilots[user];
     if(p && p.accepted_tos){
-      // already accepted — never show again
+      try{ localStorage.setItem('ala_tos_'+user,'1'); }catch(e){}
       if(!window.PILOTS) window.PILOTS={};
       window.PILOTS[user] = {...(window.PILOTS[user]||{}), accepted_tos:true};
       return;
@@ -464,22 +521,19 @@ function maybeShowWelcome(user){
     const ov = document.getElementById('welcome-overlay');
     if(ov) ov.style.display='flex';
   }).catch(()=>{
-    // if bridge unreachable, don't nag — only show if we have no record locally
-    if(!hasAcceptedTos(user)){
-      const ov=document.getElementById('welcome-overlay'); if(ov) ov.style.display='flex';
-    }
+    const ov=document.getElementById('welcome-overlay'); if(ov) ov.style.display='flex';
   });
 }
 function acceptTos(){
   const u = SESSION && SESSION.user;
   if(u){
+    try{ localStorage.setItem('ala_tos_'+u,'1'); }catch(e){}
     if(!window.PILOTS) window.PILOTS={};
     window.PILOTS[u] = {...(window.PILOTS[u]||{}), accepted_tos:true};
     saveToBridge('/accept', {username:u});
   }
   const ov=document.getElementById('welcome-overlay'); if(ov) ov.style.display='none';
 }
-// enable the Accept button only once scrolled to the bottom of the letter
 function onLetterScroll(el){
   const btn=document.getElementById('accept-btn');
   if(el.scrollTop + el.clientHeight >= el.scrollHeight - 12){
@@ -499,7 +553,9 @@ function showGreeting(name, rank){
 function tryAutoLogin(){
   try{
     const saved = JSON.parse(localStorage.getItem('ala_session')||'null');
-    if(saved && saved.user && CREDS[saved.user] && CREDS[saved.user].role===saved.role){
+    // Auto-login if the saved session matches a known baked-in account, OR if it's a
+    // newer server-only pilot (not in the built-in list) — they were validated at first login.
+    if(saved && saved.user && saved.role && (!CREDS[saved.user] || CREDS[saved.user].role===saved.role)){
       enterApp(saved.user, saved.role);
     }
   }catch(e){}
@@ -507,23 +563,19 @@ function tryAutoLogin(){
 function doLogout(){ try{ localStorage.removeItem('ala_session'); }catch(e){} location.reload(); }
 function applyRole(role){
   const staff = (role==='ceo'||role==='fleet_manager');
-  // Pilots can ONLY fly: they see Live Map + Create Flight, everything else hidden.
-  document.querySelector('nav button[data-view="shop"]').style.display    = staff?'':'none';
-  document.querySelector('nav button[data-view="routes"]').style.display  = staff?'':'none';
-  document.querySelector('nav button[data-view="fleet"]').style.display   = staff?'':'none';
-  document.querySelector('nav button[data-view="scoring"]').style.display = staff?'':'none';
-  document.querySelector('nav button[data-view="roster"]').style.display = staff?'':'none';
-  // Create Flight is for pilots (staff can view it too)
+  document.querySelector('nav button[data-view="shop"]').style.display    = staff?'':'none';  // shop stays staff-only
+  document.querySelector('nav button[data-view="routes"]').style.display  = '';  // pilots see it read-only
+  document.querySelector('nav button[data-view="fleet"]').style.display   = '';  // pilots see it read-only
+  document.querySelector('nav button[data-view="scoring"]').style.display = '';  // pilots see their own flights only
+  document.querySelector('nav button[data-view="roster"]').style.display = '';  // pilots see it read-only
+  document.querySelector('nav button[data-view="leaderboard"]').style.display = '';  // everyone sees the leaderboard
   document.querySelector('nav button[data-view="create"]').style.display  = '';
   if(!staff){
-    // land pilots straight on Create Flight
     renderCreate();
   }
 }
 
-// ---- pilot type + Create Flight ----
 let PILOT_TYPE = 'commercial';   // set from the pilot's assigned type at login
-// pilot types assigned per pilot (staff can change). Defaults everyone to Commercial.
 function typeForUser(user){
   const p = (window.PILOTS && window.PILOTS[user]) || (baseRoster()[user]);
   const t = p && p.ptype ? p.ptype : 'commercial';
@@ -531,31 +583,38 @@ function typeForUser(user){
 }
 const TYPE_LABEL = {commercial:'Commercial', cargo:'Cargo', charter:'Charter', tour:'Tour'};
 
-// sample scheduled routes by type (staff will manage the real lists)
 const SCHED = {
   commercial: [],
   cargo: [],
-  tour: [
-    {tour:'Coastal Hopper', leg:1, dep:'KBOS', arr:'KJFK', ac:'E175'},
-    {tour:'Coastal Hopper', leg:2, dep:'KJFK', arr:'KDCA', ac:'E175'},
-    {tour:'Island Runner', leg:1, dep:'KMIA', arr:'TJSJ', ac:'A320'}
-  ]
+  tour: []
 };
 
 function setPilotType(t){ PILOT_TYPE = t; renderCreate(); }
 
 function renderCreate(){
   const t = PILOT_TYPE;
-  document.getElementById('ptype-badge').textContent = TYPE_LABEL[t]+' Pilot';
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  document.getElementById('ptype-badge').textContent = staff ? 'Staff' : TYPE_LABEL[t]+' Pilot';
   const noteEl = document.getElementById('ptype-note');
   if(noteEl){
-    const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
     noteEl.innerHTML = staff
-      ? `You're viewing the <b>${TYPE_LABEL[t]}</b> flow. Each pilot's type is set in the <b>Pilots</b> tab.`
+      ? `You're staff — pick the type of flying below. You can fly any route and any aircraft, no rank limit.`
       : `Your pilot type is <b>${TYPE_LABEL[t]}</b> — set by airline staff. The flight options below match it.`;
   }
+  const swWrap = document.getElementById('staff-type-switch');
+  if(swWrap){
+    if(staff){
+      swWrap.style.display='block';
+      swWrap.innerHTML = `<div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:6px">Fly as</div>`
+        + ['commercial','cargo','charter','tour'].map(x=>
+          `<button onclick="setPilotType('${x}')" style="margin:0 6px 6px 0;padding:6px 14px;font-size:12px;border-radius:8px;cursor:pointer;border:1px solid ${x===t?'#1a6fa8':'var(--line)'};background:${x===t?'#1a6fa8':'#fff'};color:${x===t?'#fff':'var(--sub)'};font-weight:${x===t?'700':'400'}">${TYPE_LABEL[x]}</button>`
+        ).join('');
+    } else {
+      swWrap.style.display='none';
+    }
+  }
   const box = document.getElementById('create-form');
-  const own = fleet.map(a=>`<option>${a.reg} (${a.type})</option>`).join('') || '<option disabled>No aircraft owned yet</option>';
+  const own = fleet.map(a=>{ const g=isGrounded(a); return `<option${g?' disabled':''}>${a.reg} (${a.type})${g?' — GROUNDED':''}</option>`; }).join('') || '<option disabled>No aircraft owned yet</option>';
 
   if(t==='charter'){
     document.getElementById('create-sub').textContent = 'Charter: fly any city pair you choose. Pick your airports and aircraft.';
@@ -566,33 +625,206 @@ function renderCreate(){
       <button class="buy" style="max-width:220px" onclick="fileFlight()">Create charter flight</button>
       <div id="c-out"></div>`;
   } else if(t==='tour'){
-    document.getElementById('create-sub').textContent = 'Tour: fly the next leg of an official tour. Pick a leg below.';
-    const legs = SCHED.tour.map((l,i)=>`<option value="${i}">${l.tour} — Leg ${l.leg}: ${l.dep} → ${l.arr} (${l.ac})</option>`).join('');
-    box.innerHTML = `
-      ${field('Tour leg', `<select id="c-leg">${legs}</select>`)}
-      ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
-      <button class="buy" style="max-width:220px" onclick="fileFlight()">Create tour flight</button>
-      <div id="c-out"></div>`;
-  } else {
-    // commercial or cargo: fly a route you've CLAIMED from the schedule (staff-created)
-    const label = t==='cargo' ? 'Cargo route' : 'Scheduled route';
-    const mine = (window.SCHEDULE||[]).filter(r=>
-      (r.cls===t) && (r.claimed_by===(SESSION&&SESSION.user)) && r.status!=='Missed Flight');
-    document.getElementById('create-sub').textContent =
-      t==='cargo' ? 'Cargo: fly a freight route you claimed in Routes & Hubs.'
-                  : 'Commercial: fly a scheduled route you claimed in Routes & Hubs.';
-    if(!mine.length){
-      box.innerHTML = `<div class="featnote">You haven't claimed any ${t} routes yet. Go to <b>Routes &amp; Hubs</b> → <b>Scheduled routes</b> and claim one that matches your class, then come back here to fly it.</div>`;
-      return;
+    document.getElementById('create-sub').textContent = 'Tour: fly the next leg of an official tour.';
+    if(!SCHED.tour.length){
+      box.innerHTML = `<div class="featnote">No tours are running right now. Check back when a tour is announced.</div>`;
+    } else {
+      const legs = SCHED.tour.map((l,i)=>`<option value="${i}">${l.tour} — Leg ${l.leg}: ${l.dep} → ${l.arr} (${l.ac})</option>`).join('');
+      box.innerHTML = `
+        ${field('Tour leg', `<select id="c-leg">${legs}</select>`)}
+        ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
+        <button class="buy" style="max-width:220px" onclick="fileFlight()">Create tour flight</button>
+        <div id="c-out"></div>`;
     }
-    const rows = mine.map((r,i)=>`<option value="${i}">${r.dep} → ${r.arr}${r.ac?' ('+r.ac+')':''}${r.time?' · '+r.time:''}</option>`).join('');
-    window.__MY_CLAIMED = mine;
-    box.innerHTML = `
-      ${field(label, `<select id="c-route">${rows}</select>`)}
-      ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
-      <button class="buy" style="max-width:220px" onclick="fileFlight()">Create ${t} flight</button>
-      <div id="c-out"></div>`;
+  } else {
+    const label = t==='cargo' ? 'Cargo route' : 'Scheduled route';
+    const me = SESSION && SESSION.user;
+    const all = (window.SCHEDULE||[]).filter(r=>r.cls===t);
+    const mine = all.filter(r=> r.claimed_by===me && r.status!=='Missed Flight');
+    const open = all.filter(r=> (!r.claimed_by) && r.status==='Open');
+    const taken = all.filter(r=> r.claimed_by && r.claimed_by!==me);
+    document.getElementById('create-sub').textContent =
+      t==='cargo' ? 'Cargo: claim a freight route below, then fly it.'
+                  : 'Commercial: claim a scheduled route below, then fly it.';
+
+    let claimHtml = '';
+    if(open.length){
+      claimHtml = `<div style="margin-bottom:10px"><div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:6px">Available ${t} routes — claim one to fly</div>`
+        + open.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;max-width:520px">
+            <span><b>${r.dep} → ${r.arr}</b>${r.ac?' · '+r.ac:''}${r.time?' · <span style=\"color:var(--sub)\">'+r.time+'</span>':''}</span>
+            <button class="planbtn" style="background:#1a8a4a;padding:5px 12px;font-size:11px" onclick="claimRoute(${r.id})">Claim</button>
+          </div>`).join('') + `</div>`;
+    }
+    let takenHtml = '';
+    if(taken.length){
+      takenHtml = taken.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;max-width:520px;opacity:.55">
+            <span><b>${r.dep} → ${r.arr}</b>${r.ac?' · '+r.ac:''}${r.time?' · '+r.time:''}</span>
+            <span style="font-size:11px;color:var(--sub)">Claimed by ${r.claimed_name||r.claimed_by}</span>
+          </div>`).join('');
+    }
+
+    let flyHtml = '';
+    if(mine.length){
+      const rows = mine.map((r,i)=>`<option value="${i}">${r.dep} → ${r.arr}${r.ac?' ('+r.ac+')':''}${r.time?' · '+r.time:''}</option>`).join('');
+      window.__MY_CLAIMED = mine;
+      flyHtml = `<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#1a8a4a;text-transform:uppercase;margin-bottom:8px">Your claimed routes — ready to fly</div>
+        ${field(label, `<select id="c-route">${rows}</select>`)}
+        ${field('Aircraft', `<select id="c-ac">${own}</select>`)}
+        <button class="buy" style="max-width:220px" onclick="fileFlight()">Create ${t} flight</button>
+        <div id="c-out"></div></div>`;
+    }
+
+    if(!open.length && !mine.length && !taken.length){
+      box.innerHTML = `<div class="featnote">No ${t} routes are scheduled yet. Once staff add ${t} routes to the schedule, they'll appear here — or fly an open route below.</div>`;
+    } else {
+      box.innerHTML = claimHtml + takenHtml + flyHtml
+        + (!mine.length ? `<div class="featnote" style="margin-top:12px">Claim a route above to set it up for flying.</div>` : '');
+    }
   }
+  renderOpenRoutes();
+  renderLogbook();
+}
+
+function renderLogbook(){
+  const box = document.getElementById('create-form');
+  if(!box) return;
+  const me = SESSION && SESSION.user;
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  const mine = (window.FLIGHTS||[]).filter(f=>(f.pilot||'').toUpperCase()===(me||'').toUpperCase())
+                                   .slice().reverse();
+  const hrs = myHours();
+  const flightCount = mine.length;
+  const rankName = staff ? (SESSION.role==='ceo'?'Chief Executive Officer':'Fleet Manager') : rankForHours(hrs);
+
+  let progressHtml = '';
+  if(!staff){
+    const lvl = rankLevel(rankForHours(hrs));
+    const next = RANKS[lvl+1];
+    if(next){
+      const span = next.min - RANKS[lvl].min;
+      const into = hrs - RANKS[lvl].min;
+      const pct = Math.max(0, Math.min(100, Math.round(into/span*100)));
+      const left = Math.max(0, (next.min - hrs)).toFixed(1);
+      progressHtml = `<div style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:4px">
+          <span>${rankName}</span><span>${left}h to ${next.name}</span></div>
+        <div style="height:8px;background:var(--line);border-radius:5px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:#1a8a4a"></div></div>
+      </div>`;
+    } else {
+      progressHtml = `<div style="margin-top:10px;font-size:12px;color:#1a8a4a"><b>Top rank reached — ${rankName}.</b></div>`;
+    }
+  }
+
+  const tierColor = tier=>{
+    const x=(tier||'').toLowerCase();
+    if(x==='butter') return '#1a8a4a';
+    if(x==='smooth') return '#4a9e5c';
+    if(x==='firm')   return '#a07d1a';
+    if(x==='hard')   return '#c46a1a';
+    if(x==='unsafe'||x==='void'||x==='voided') return '#c33';
+    return 'var(--sub)';
+  };
+
+  let rows;
+  if(!flightCount){
+    rows = `<tr><td colspan="5" class="empty" style="padding:16px;text-align:center;color:var(--sub)">No flights logged yet. Fly a route above and it'll appear here.</td></tr>`;
+  } else {
+    rows = mine.map(f=>{
+      const d = f.filed_at ? String(f.filed_at).split('T')[0] : '—';
+      const grade = f.tier ? `<span style="color:${tierColor(f.tier)};font-weight:700">${f.tier}</span>${f.landing_fpm!=null?` <span style="color:var(--sub);font-size:11px">(${f.landing_fpm} fpm)</span>`:''}` : '—';
+      return `<tr>
+        <td><b>${f.dep||'—'} → ${f.arr||'—'}</b></td>
+        <td>${f.aircraft||f.reg||'—'}</td>
+        <td>${(f.hours!=null?f.hours:'—')}</td>
+        <td>${grade}</td>
+        <td>${d}</td></tr>`;
+    }).join('');
+  }
+
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'margin-top:18px;padding-top:16px;border-top:2px solid var(--line)';
+  wrap.innerHTML = `
+    <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:10px">My Logbook</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+      <div style="flex:1;min-width:120px;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:12px">
+        <div style="font-size:22px;font-weight:800;color:var(--ink,#12325a)">${hrs.toFixed(1)}</div>
+        <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px">Total hours</div></div>
+      <div style="flex:1;min-width:120px;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:12px">
+        <div style="font-size:22px;font-weight:800;color:var(--ink,#12325a)">${flightCount}</div>
+        <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px">Flights</div></div>
+      <div style="flex:2;min-width:160px;background:var(--card,#fff);border:1px solid var(--line);border-radius:10px;padding:12px">
+        <div style="font-size:15px;font-weight:800;color:var(--ink,#12325a)">${rankName}</div>
+        <div style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px">Current rank</div>
+        ${progressHtml}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px">
+      <thead><tr style="text-align:left;color:var(--sub);font-size:11px;text-transform:uppercase;letter-spacing:.4px">
+        <th style="padding:6px 8px">Route</th><th style="padding:6px 8px">Aircraft</th>
+        <th style="padding:6px 8px">Hours</th><th style="padding:6px 8px">Landing</th><th style="padding:6px 8px">Date</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  box.appendChild(wrap);
+}
+
+function renderOpenRoutes(){
+  const box = document.getElementById('create-form');
+  if(!box) return;
+  const open = (window.BRIDGE_ROUTES||[]);
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'margin-top:16px;padding-top:16px;border-top:2px solid var(--line)';
+  if(!open.length){
+    wrap.innerHTML = `<div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:6px">Open routes</div>
+      <div class="featnote" style="margin:0">No open routes right now. Post one in the Discord <b>#route-request</b> channel (e.g. <b>KMCO-KJFK</b>) and it'll appear here for anyone to fly.</div>`;
+  } else {
+    const own = fleet.map(a=>{ const g=isGrounded(a); return `<option${g?' disabled':''}>${a.reg} (${a.type})${g?' — GROUNDED':''}</option>`; }).join('') || '<option disabled>No aircraft owned yet</option>';
+    const rows = open.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;max-width:560px">
+        <span><b>${r.dep} → ${r.arr}</b>${r.by?` <span style=\"color:var(--sub);font-size:11px\">· ${r.by}</span>`:''}</span>
+        <button class="buy" style="max-width:130px;padding:6px 14px;font-size:12px;margin:0" onclick="flyOpenRoute('${r.dep}','${r.arr}')">Fly this</button>
+      </div>`).join('');
+    wrap.innerHTML = `<div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#1a6fa8;text-transform:uppercase;margin-bottom:4px">Open routes — anyone can fly</div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:10px">Posted in Discord. No claiming — pick one and fly.</div>
+      <div style="margin-bottom:10px">${field('Aircraft for open route', `<select id="open-ac">${own}</select>`)}</div>
+      ${rows}
+      <div id="open-out"></div>`;
+  }
+  box.appendChild(wrap);
+}
+
+function flyOpenRoute(dep, arr){
+  const ac = document.getElementById('open-ac')?.value || '—';
+  const acObj = fleet.find(a=>`${a.reg} (${a.type})`===ac || a.reg===(ac||'').split(' ')[0]);
+  if(acObj && isGrounded(acObj)){
+    document.getElementById('open-out').innerHTML =
+      `<div class="featnote" style="border-left-color:#c33;margin-top:12px">
+        <b>${acObj.reg} is grounded for maintenance.</b><br>
+        <span style="color:var(--sub);font-size:12px">It can't be dispatched until maintenance is performed. Pick another aircraft.</span>
+      </div>`;
+    return;
+  }
+  const acCode = acType(ac);
+  const need = rankRequiredForAircraft(acCode);
+  if(myRankLevel() < need){
+    document.getElementById('open-out').innerHTML =
+      `<div class="featnote" style="border-left-color:#c33;margin-top:12px">
+        <b>Rank too low for this aircraft.</b><br>
+        The ${acCode} requires <b>${RANKS[need].name}</b>. You're currently <b>${rankForHours(myHours())}</b> (${myHours().toFixed(1)}h).
+      </div>`;
+    return;
+  }
+  const no='KLA'+Math.floor(100+Math.random()*899);
+  document.getElementById('open-out').innerHTML =
+    `<div class="featnote" style="border-left-color:#1a8a4a;margin-top:12px">
+      <b>Flight created ✓</b><br>${no} · ${dep} → ${arr} · ${ac}<br>
+      <span style="color:var(--sub);font-size:12px">Start your sim and connect the ACARS — this flight will track live and file a PIREP on arrival.</span>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="planbtn sb" onclick="planSimBrief('${dep}','${arr}','${acType(ac)}')">① Plan &amp; prefile on SimBrief</button>
+        <button class="buy" style="max-width:220px" onclick="startAcars('${no}','${dep}','${arr}')">Start ACARS &amp; fly</button>
+        <button class="planbtn vat" onclick="prefileVatsim('${no}','${dep}','${arr}','${acType(ac)}')">Quick VATSIM prefile</button>
+      </div>
+    </div>`;
 }
 function field(label, control){
   return `<div style="margin-bottom:12px;max-width:420px">
@@ -602,7 +834,15 @@ function field(label, control){
 }
 function fileFlight(){
   const t = PILOT_TYPE; let dep,arr,no,ac=document.getElementById('c-ac')?.value||'—';
-  // --- RANK ENFORCEMENT: check the pilot can fly this aircraft ---
+  const acObj = fleet.find(a=>`${a.reg} (${a.type})`===ac || a.reg===(ac||'').split(' ')[0]);
+  if(acObj && isGrounded(acObj)){
+    document.getElementById('c-out').innerHTML =
+      `<div class="featnote" style="border-left-color:#c33;margin-top:16px">
+        <b>${acObj.reg} is grounded for maintenance.</b><br>
+        <span style="color:var(--sub);font-size:12px">It can't be dispatched until a staff member performs maintenance in the Fleet tab. Pick another aircraft.</span>
+      </div>`;
+    return;
+  }
   const acCode = acType(ac);
   const need = rankRequiredForAircraft(acCode);
   if(myRankLevel() < need){
@@ -643,19 +883,14 @@ function fileFlight(){
     </div>`;
 }
 
-// pull the ICAO type out of "LA-204 (B738)" -> "B738"
 function acType(s){ const m=(s||'').match(/\(([^)]+)\)/); return m?m[1]:(s||'').trim(); }
 
-// SimBrief: open dispatch pre-filled with dep/arr/aircraft (the pilot generates the OFP)
 function planSimBrief(dep, arr, type){
   const u = `https://dispatch.simbrief.com/options/custom?orig=${encodeURIComponent(dep)}&dest=${encodeURIComponent(arr)}&type=${encodeURIComponent(type)}`;
   window.open(u, '_blank');
 }
 
-// VATSIM: open the myVATSIM flight-plan form pre-filled (pilot logs in + files).
-// Same URL-parameter mechanism SimBrief and VA systems use.
 function prefileVatsim(callsign, dep, arr, type){
-  // pick a sensible cruise + equipment by aircraft class
   const wide = /^(B74|B77|B78|A33|A34|A35|A38|B76|MD11)/.test(type);
   const regional = /^(CRJ|E17|E19|DH8|AT7|E45)/.test(type);
   const cruise = wide ? 'FL380' : regional ? 'FL280' : 'FL350';
@@ -675,7 +910,6 @@ function prefileVatsim(callsign, dep, arr, type){
   window.open('https://my.vatsim.net/pilots/flightplan?' + p.toString(), '_blank');
 }
 
-// launch the SimConnect ACARS engine (only works inside the fused app window)
 function startAcars(no, dep, arr){
   if(window.pywebview && window.pywebview.api){
     window.pywebview.api.start_flight(no, dep, arr);
@@ -690,41 +924,52 @@ function startAcars(no, dep, arr){
 const PLANE = `<svg width="26" height="26" viewBox="0 0 24 24" class="plane"><path fill="currentColor" d="M12 2c-.6 0-1 .9-1 2v5.6L3 14v1.6l8-2.2V19l-2 1.2v1.3l3-.8 3 .8v-1.3L15 19v-5.6l8 2.2V14l-8-4.4V4c0-1.1-.4-2-1-2z"/></svg>`;
 let map, layer, prefix = "KLA";
 
-// ===================================================================
-// SHARED BRIDGE URL — this is what makes every active flight show for
-// EVERYONE (VATSIM or not). Leave as localhost for solo/testing.
-// When you host bridge_server.py online, put its address here, e.g.
-//   const BRIDGE_URL = "https://amal-bridge.onrender.com";
-// Every pilot using this same URL will see every other active flight.
-// ===================================================================
 const BRIDGE_URL = "http://52.3.240.140";
 
-// ===================================================================
-// WEEKLY CHALLENGE — edit this each week. The whole crew sees it on
-// the Live Map. Change the three lines below, save, done.
-// ===================================================================
-const WEEKLY_CHALLENGE = {
-  title: "Butter Week",
-  detail: "Grease it in. Log the most Butter-rated landings (0 to \u201160 FPM) this week. Every butter counts \u2014 smoothest crew wins.",
-  reward: "Butter Week Champion role in Discord"
-};
-// ===================================================================
-
-// ---- fleet + shop state (in-memory; persists in this session) ----
-const CATALOG = [
-  {type:"A320",  name:"Airbus A320",      cat:"Narrow-body", desc:"Workhorse single-aisle for short and medium haul."},
-  {type:"A321",  name:"Airbus A321neo",   cat:"Narrow-body", desc:"Stretched A320 family, great range and capacity."},
-  {type:"B738",  name:"Boeing 737-800",   cat:"Narrow-body", desc:"The backbone of most short-haul networks."},
-  {type:"B39M",  name:"Boeing 737 MAX 9", cat:"Narrow-body", desc:"Modern MAX efficiency for busy trunk routes."},
-  {type:"E175",  name:"Embraer E175",     cat:"Regional",    desc:"Regional jet ideal for hub feeder legs."},
-  {type:"CRJ7",  name:"Bombardier CRJ700","cat":"Regional",  desc:"Nimble regional jet for thinner routes."},
-  {type:"B788",  name:"Boeing 787-8",     cat:"Wide-body",   desc:"Long-haul Dreamliner for intercontinental ops."},
-  {type:"A359",  name:"Airbus A350-900",  cat:"Wide-body",   desc:"Flagship long-haul, quiet and efficient."},
-  {type:"B77W",  name:"Boeing 777-300ER", cat:"Wide-body",   desc:"High-capacity long-haul heavy."},
-  {type:"C172",  name:"Cessna 172",       cat:"GA",          desc:"Light trainer for GA and short hops."}
+// Weekly challenge cycle. Butter Week runs until 12 AM Monday Jul 13 2026,
+// then the rotation below begins — one challenge per week, resetting each Monday.
+const CHALLENGE_CYCLE = [
+  {title:"Butter Week", detail:"Grease it in. Log the most Butter-rated landings (0 to \u201160 FPM) this week. Every butter counts \u2014 smoothest crew wins.", reward:"Butter Week Champion role in Discord", metric:"butters"},
+  {title:"Iron Crew Week", detail:"Fly clean. The pilot with the most flights logging zero SOP violations this week takes it. Precision over everything.", reward:"Iron Crew Champion role in Discord", metric:"clean"},
+  {title:"Long-Haul Week", detail:"Go the distance. Most block hours flown this week wins. Rack up the miles and outlast the crew.", reward:"Long-Haul Champion role in Discord", metric:"hours"},
+  {title:"Frequent Flyer Week", detail:"Wheels up, often. Most completed flights this week takes the crown \u2014 short hops count as much as long ones.", reward:"Frequent Flyer Champion role in Discord", metric:"flights"},
+  {title:"Top Gun Week", detail:"Highest average flight score this week wins (minimum 3 flights). Fly smooth, fly clean, fly sharp.", reward:"Top Gun Champion role in Discord", metric:"score"},
 ];
+// The Monday the rotation begins (00:00 local). Butter Week shows until this instant.
+const CYCLE_START = new Date(2026, 6, 13, 0, 0, 0); // Jul 13 2026, 00:00 local
+
+// which challenge is active right now, plus when this window ends (next Monday 00:00)
+function activeChallenge(){
+  const now = new Date();
+  if(now < CYCLE_START){
+    // Butter Week is running until the cycle starts
+    return {c: CHALLENGE_CYCLE[0], endsAt: CYCLE_START};
+  }
+  // weeks elapsed since the cycle start
+  const msWeek = 7*24*60*60*1000;
+  const weeksElapsed = Math.floor((now - CYCLE_START)/msWeek);
+  // rotation covers indexes 1..end, looping; Butter Week (0) only runs pre-start
+  const rot = CHALLENGE_CYCLE.slice(1);
+  const c = rot[weeksElapsed % rot.length];
+  const endsAt = new Date(CYCLE_START.getTime() + (weeksElapsed+1)*msWeek);
+  return {c, endsAt};
+}
+
+function countdownText(endsAt){
+  const ms = endsAt - new Date();
+  if(ms <= 0) return "resetting…";
+  const d = Math.floor(ms/86400000);
+  const h = Math.floor((ms%86400000)/3600000);
+  const m = Math.floor((ms%3600000)/60000);
+  if(d>0) return `${d}d ${h}h left`;
+  if(h>0) return `${h}h ${m}m left`;
+  return `${m}m left`;
+}
+
+const CATALOG = [{"type":"A318","name":"Airbus A318","cat":"Narrow-body"},{"type":"A319","name":"Airbus A319","cat":"Narrow-body"},{"type":"A19N","name":"Airbus A319neo","cat":"Narrow-body"},{"type":"A320","name":"Airbus A320","cat":"Narrow-body"},{"type":"A20N","name":"Airbus A320neo","cat":"Narrow-body"},{"type":"A321","name":"Airbus A321","cat":"Narrow-body"},{"type":"A21N","name":"Airbus A321neo","cat":"Narrow-body"},{"type":"A21X","name":"Airbus A321XLR","cat":"Narrow-body"},{"type":"B731","name":"Boeing 737-100","cat":"Narrow-body"},{"type":"B732","name":"Boeing 737-200","cat":"Narrow-body"},{"type":"B733","name":"Boeing 737-300","cat":"Narrow-body"},{"type":"B734","name":"Boeing 737-400","cat":"Narrow-body"},{"type":"B735","name":"Boeing 737-500","cat":"Narrow-body"},{"type":"B736","name":"Boeing 737-600","cat":"Narrow-body"},{"type":"B737","name":"Boeing 737-700","cat":"Narrow-body"},{"type":"B738","name":"Boeing 737-800","cat":"Narrow-body"},{"type":"B739","name":"Boeing 737-900ER","cat":"Narrow-body"},{"type":"B37M","name":"Boeing 737 MAX 7","cat":"Narrow-body"},{"type":"B38M","name":"Boeing 737 MAX 8","cat":"Narrow-body"},{"type":"B39M","name":"Boeing 737 MAX 9","cat":"Narrow-body"},{"type":"B3XM","name":"Boeing 737 MAX 10","cat":"Narrow-body"},{"type":"MD81","name":"McDonnell Douglas MD-81","cat":"Narrow-body"},{"type":"MD82","name":"McDonnell Douglas MD-82","cat":"Narrow-body"},{"type":"MD83","name":"McDonnell Douglas MD-83","cat":"Narrow-body"},{"type":"MD88","name":"McDonnell Douglas MD-88","cat":"Narrow-body"},{"type":"MD90","name":"McDonnell Douglas MD-90","cat":"Narrow-body"},{"type":"B712","name":"Boeing 717-200","cat":"Narrow-body"},{"type":"T204","name":"Tupolev Tu-204","cat":"Narrow-body"},{"type":"A306","name":"Airbus A300-600","cat":"Wide-body"},{"type":"A310","name":"Airbus A310","cat":"Wide-body"},{"type":"A332","name":"Airbus A330-200","cat":"Wide-body"},{"type":"A333","name":"Airbus A330-300","cat":"Wide-body"},{"type":"A338","name":"Airbus A330-800neo","cat":"Wide-body"},{"type":"A339","name":"Airbus A330-900neo","cat":"Wide-body"},{"type":"A342","name":"Airbus A340-200","cat":"Wide-body"},{"type":"A343","name":"Airbus A340-300","cat":"Wide-body"},{"type":"A345","name":"Airbus A340-500","cat":"Wide-body"},{"type":"A346","name":"Airbus A340-600","cat":"Wide-body"},{"type":"A359","name":"Airbus A350-900","cat":"Wide-body"},{"type":"A35K","name":"Airbus A350-1000","cat":"Wide-body"},{"type":"A388","name":"Airbus A380-800","cat":"Wide-body"},{"type":"B741","name":"Boeing 747-100","cat":"Wide-body"},{"type":"B742","name":"Boeing 747-200","cat":"Wide-body"},{"type":"B743","name":"Boeing 747-300","cat":"Wide-body"},{"type":"B744","name":"Boeing 747-400","cat":"Wide-body"},{"type":"B748","name":"Boeing 747-8I","cat":"Wide-body"},{"type":"B752","name":"Boeing 757-200","cat":"Wide-body"},{"type":"B753","name":"Boeing 757-300","cat":"Wide-body"},{"type":"B762","name":"Boeing 767-200","cat":"Wide-body"},{"type":"B763","name":"Boeing 767-300ER","cat":"Wide-body"},{"type":"B764","name":"Boeing 767-400ER","cat":"Wide-body"},{"type":"B772","name":"Boeing 777-200","cat":"Wide-body"},{"type":"B77L","name":"Boeing 777-200LR","cat":"Wide-body"},{"type":"B77W","name":"Boeing 777-300ER","cat":"Wide-body"},{"type":"B778","name":"Boeing 777-8","cat":"Wide-body"},{"type":"B779","name":"Boeing 777-9","cat":"Wide-body"},{"type":"B788","name":"Boeing 787-8","cat":"Wide-body"},{"type":"B789","name":"Boeing 787-9","cat":"Wide-body"},{"type":"B78X","name":"Boeing 787-10","cat":"Wide-body"},{"type":"MD11","name":"McDonnell Douglas MD-11","cat":"Wide-body"},{"type":"DC10","name":"McDonnell Douglas DC-10","cat":"Wide-body"},{"type":"L101","name":"Lockheed L-1011 TriStar","cat":"Wide-body"},{"type":"A225","name":"Antonov An-225 (special)","cat":"Wide-body"},{"type":"E170","name":"Embraer E170","cat":"Regional"},{"type":"E175","name":"Embraer E175","cat":"Regional"},{"type":"E75L","name":"Embraer E175-E2","cat":"Regional"},{"type":"E190","name":"Embraer E190","cat":"Regional"},{"type":"E195","name":"Embraer E195","cat":"Regional"},{"type":"E290","name":"Embraer E190-E2","cat":"Regional"},{"type":"E295","name":"Embraer E195-E2","cat":"Regional"},{"type":"CRJ2","name":"Bombardier CRJ200","cat":"Regional"},{"type":"CRJ7","name":"Bombardier CRJ700","cat":"Regional"},{"type":"CRJ9","name":"Bombardier CRJ900","cat":"Regional"},{"type":"CRJX","name":"Bombardier CRJ1000","cat":"Regional"},{"type":"SU95","name":"Sukhoi Superjet 100","cat":"Regional"},{"type":"AR21","name":"COMAC ARJ21","cat":"Regional"},{"type":"F70","name":"Fokker 70","cat":"Regional"},{"type":"F100","name":"Fokker 100","cat":"Regional"},{"type":"BE40","name":"Bombardier Challenger (regional)","cat":"Regional"},{"type":"DH8A","name":"De Havilland Dash 8-100","cat":"Turboprop"},{"type":"DH8B","name":"De Havilland Dash 8-200","cat":"Turboprop"},{"type":"DH8C","name":"De Havilland Dash 8-300","cat":"Turboprop"},{"type":"DH8D","name":"De Havilland Dash 8-400","cat":"Turboprop"},{"type":"AT43","name":"ATR 42-300","cat":"Turboprop"},{"type":"AT45","name":"ATR 42-500","cat":"Turboprop"},{"type":"AT46","name":"ATR 42-600","cat":"Turboprop"},{"type":"AT72","name":"ATR 72-500","cat":"Turboprop"},{"type":"AT76","name":"ATR 72-600","cat":"Turboprop"},{"type":"SF34","name":"Saab 340","cat":"Turboprop"},{"type":"SB20","name":"Saab 2000","cat":"Turboprop"},{"type":"JS41","name":"BAe Jetstream 41","cat":"Turboprop"},{"type":"B190","name":"Beechcraft 1900D","cat":"Turboprop"},{"type":"SW4","name":"Fairchild Metroliner","cat":"Turboprop"},{"type":"E110","name":"Embraer Bandeirante","cat":"Turboprop"},{"type":"E120","name":"Embraer Brasilia","cat":"Turboprop"},{"type":"D228","name":"Dornier 228","cat":"Turboprop"},{"type":"D328","name":"Dornier 328","cat":"Turboprop"},{"type":"AN24","name":"Antonov An-24","cat":"Turboprop"},{"type":"C152","name":"Cessna 152","cat":"GA"},{"type":"C172","name":"Cessna 172","cat":"GA"},{"type":"C182","name":"Cessna 182 Skylane","cat":"GA"},{"type":"C206","name":"Cessna 206 Stationair","cat":"GA"},{"type":"C208","name":"Cessna 208 Caravan","cat":"GA"},{"type":"C210","name":"Cessna 210 Centurion","cat":"GA"},{"type":"P28A","name":"Piper PA-28 Cherokee","cat":"GA"},{"type":"PA34","name":"Piper Seneca","cat":"GA"},{"type":"PA44","name":"Piper Seminole","cat":"GA"},{"type":"BE36","name":"Beechcraft Bonanza","cat":"GA"},{"type":"BE58","name":"Beechcraft Baron","cat":"GA"},{"type":"DA40","name":"Diamond DA40","cat":"GA"},{"type":"DA42","name":"Diamond DA42 Twin Star","cat":"GA"},{"type":"SR22","name":"Cirrus SR22","cat":"GA"},{"type":"TBM9","name":"Daher TBM 930","cat":"GA"},{"type":"PC12","name":"Pilatus PC-12","cat":"GA"},{"type":"M20P","name":"Mooney M20","cat":"GA"},{"type":"RV10","name":"Van's RV-10","cat":"GA"},{"type":"DHC2","name":"De Havilland Beaver","cat":"GA"},{"type":"DHC6","name":"De Havilland Twin Otter","cat":"GA"},{"type":"C25A","name":"Cessna Citation CJ2","cat":"Business"},{"type":"C56X","name":"Cessna Citation Excel","cat":"Business"},{"type":"C68A","name":"Cessna Citation Latitude","cat":"Business"},{"type":"C750","name":"Cessna Citation X","cat":"Business"},{"type":"LJ35","name":"Learjet 35","cat":"Business"},{"type":"LJ45","name":"Learjet 45","cat":"Business"},{"type":"LJ75","name":"Learjet 75","cat":"Business"},{"type":"GLF4","name":"Gulfstream IV","cat":"Business"},{"type":"GLF5","name":"Gulfstream V","cat":"Business"},{"type":"GLF6","name":"Gulfstream G650","cat":"Business"},{"type":"GL5T","name":"Bombardier Global 5000","cat":"Business"},{"type":"GL7T","name":"Bombardier Global 7500","cat":"Business"},{"type":"CL30","name":"Bombardier Challenger 300","cat":"Business"},{"type":"CL60","name":"Bombardier Challenger 605","cat":"Business"},{"type":"F2TH","name":"Dassault Falcon 2000","cat":"Business"},{"type":"FA7X","name":"Dassault Falcon 7X","cat":"Business"},{"type":"FA8X","name":"Dassault Falcon 8X","cat":"Business"},{"type":"E50P","name":"Embraer Phenom 100","cat":"Business"},{"type":"E55P","name":"Embraer Phenom 300","cat":"Business"},{"type":"PRM1","name":"Beechcraft Premier","cat":"Business"},{"type":"HDJT","name":"Honda HA-420 HondaJet","cat":"Business"},{"type":"B74F","name":"Boeing 747-400F","cat":"Cargo"},{"type":"B748F","name":"Boeing 747-8F","cat":"Cargo"},{"type":"B77F","name":"Boeing 777F","cat":"Cargo"},{"type":"B76F","name":"Boeing 767-300F","cat":"Cargo"},{"type":"B73F","name":"Boeing 737-800BCF","cat":"Cargo"},{"type":"MD1F","name":"McDonnell Douglas MD-11F","cat":"Cargo"},{"type":"DC1F","name":"McDonnell Douglas DC-10F","cat":"Cargo"},{"type":"A33F","name":"Airbus A330-200F","cat":"Cargo"},{"type":"A32F","name":"Airbus A321P2F","cat":"Cargo"},{"type":"AT7F","name":"ATR 72-600F","cat":"Cargo"},{"type":"C8F","name":"Cessna 208B Super Cargomaster","cat":"Cargo"},{"type":"AN12","name":"Antonov An-12","cat":"Cargo"},{"type":"A124","name":"Antonov An-124","cat":"Cargo"},{"type":"IL76","name":"Ilyushin Il-76","cat":"Cargo"},{"type":"C130","name":"Lockheed C-130 Hercules","cat":"Special"},{"type":"C17","name":"Boeing C-17 Globemaster III","cat":"Special"},{"type":"KC35","name":"Boeing KC-135 Stratotanker","cat":"Special"},{"type":"A400","name":"Airbus A400M Atlas","cat":"Special"},{"type":"E3TF","name":"Boeing E-3 Sentry (AWACS)","cat":"Special"},{"type":"P8","name":"Boeing P-8 Poseidon","cat":"Special"},{"type":"V22","name":"Bell Boeing V-22 Osprey","cat":"Special"},{"type":"A21P","name":"Airbus A321P2F (ext)","cat":"Cargo"},{"type":"B722","name":"Boeing 727-200","cat":"Narrow-body"},{"type":"B721","name":"Boeing 727-100","cat":"Narrow-body"},{"type":"DC93","name":"Douglas DC-9-30","cat":"Narrow-body"},{"type":"DC95","name":"Douglas DC-9-50","cat":"Narrow-body"},{"type":"BA46","name":"BAe 146-200","cat":"Regional"},{"type":"B461","name":"BAe 146-100","cat":"Regional"},{"type":"RJ85","name":"Avro RJ85","cat":"Regional"},{"type":"RJ1H","name":"Avro RJ100","cat":"Regional"},{"type":"YK42","name":"Yakovlev Yak-42","cat":"Regional"},{"type":"T154","name":"Tupolev Tu-154","cat":"Narrow-body"},{"type":"T134","name":"Tupolev Tu-134","cat":"Narrow-body"},{"type":"IL62","name":"Ilyushin Il-62","cat":"Wide-body"},{"type":"IL96","name":"Ilyushin Il-96","cat":"Wide-body"},{"type":"CONC","name":"Aérospatiale/BAC Concorde","cat":"Special"},{"type":"TU44","name":"Tupolev Tu-144","cat":"Special"},{"type":"SB1","name":"Boeing 2707 (concept)","cat":"Special"},{"type":"SF50","name":"Cirrus Vision Jet","cat":"Business"},{"type":"EA50","name":"Eclipse 500","cat":"Business"},{"type":"PC24","name":"Pilatus PC-24","cat":"Business"},{"type":"G280","name":"Gulfstream G280","cat":"Business"},{"type":"GA5C","name":"Gulfstream G500","cat":"Business"},{"type":"GA6C","name":"Gulfstream G600","cat":"Business"},{"type":"CL35","name":"Bombardier Challenger 350","cat":"Business"},{"type":"GL6T","name":"Bombardier Global 6000","cat":"Business"},{"type":"FA50","name":"Dassault Falcon 50","cat":"Business"},{"type":"FA90","name":"Dassault Falcon 900","cat":"Business"},{"type":"F900","name":"Dassault Falcon 900EX","cat":"Business"},{"type":"BE20","name":"Beechcraft King Air 200","cat":"Turboprop"},{"type":"BE30","name":"Beechcraft King Air 350","cat":"Turboprop"},{"type":"BE9L","name":"Beechcraft King Air 90","cat":"Turboprop"},{"type":"C441","name":"Cessna Conquest II","cat":"Turboprop"},{"type":"P180","name":"Piaggio Avanti","cat":"Turboprop"},{"type":"TBM8","name":"Daher TBM 850","cat":"GA"},{"type":"EPIC","name":"Epic E1000","cat":"GA"},{"type":"M600","name":"Piper M600","cat":"GA"},{"type":"PA46","name":"Piper Malibu","cat":"GA"},{"type":"C310","name":"Cessna 310","cat":"GA"},{"type":"C337","name":"Cessna 337 Skymaster","cat":"GA"},{"type":"C402","name":"Cessna 402","cat":"GA"},{"type":"C404","name":"Cessna 404 Titan","cat":"GA"},{"type":"BN2P","name":"Britten-Norman Islander","cat":"GA"},{"type":"TRIS","name":"Britten-Norman Trislander","cat":"GA"},{"type":"PC6","name":"Pilatus PC-6 Porter","cat":"GA"},{"type":"AC68","name":"Aero Commander 680","cat":"GA"},{"type":"BE18","name":"Beechcraft Model 18","cat":"GA"},{"type":"DHC3","name":"De Havilland Otter","cat":"GA"},{"type":"DHC7","name":"De Havilland Dash 7","cat":"Turboprop"},{"type":"L410","name":"Let L-410 Turbolet","cat":"Turboprop"},{"type":"AN2","name":"Antonov An-2","cat":"GA"},{"type":"WT9","name":"Aerospool WT9 Dynamic","cat":"GA"},{"type":"C42","name":"Ikarus C42","cat":"GA"},{"type":"EUFR","name":"Eurofox","cat":"GA"},{"type":"SAV","name":"Zlin Savage Cub","cat":"GA"},{"type":"XCUB","name":"CubCrafters XCub","cat":"GA"},{"type":"HUSK","name":"Aviat Husky","cat":"GA"},{"type":"DR40","name":"Robin DR400","cat":"GA"},{"type":"TL2K","name":"TL Ultralight Sting","cat":"GA"},{"type":"VL3","name":"JMB VL-3","cat":"GA"},{"type":"A18N","name":"Airbus A318neo","cat":"Narrow-body"},{"type":"B734F","name":"Boeing 737-400F","cat":"Cargo"},{"type":"B733F","name":"Boeing 737-300F","cat":"Cargo"},{"type":"MD87","name":"McDonnell Douglas MD-87","cat":"Narrow-body"},{"type":"DC91","name":"Douglas DC-9-10","cat":"Narrow-body"},{"type":"DC92","name":"Douglas DC-9-20","cat":"Narrow-body"},{"type":"DC94","name":"Douglas DC-9-40","cat":"Narrow-body"},{"type":"CVLT","name":"Convair CV-580","cat":"Turboprop"},{"type":"CV24","name":"Convair CV-240","cat":"Narrow-body"},{"type":"VISC","name":"Vickers Viscount","cat":"Turboprop"},{"type":"VANG","name":"Vickers Vanguard","cat":"Turboprop"},{"type":"COMT","name":"de Havilland Comet 4","cat":"Narrow-body"},{"type":"CRV","name":"Sud Aviation Caravelle","cat":"Narrow-body"},{"type":"TRDT","name":"Hawker Siddeley Trident","cat":"Narrow-body"},{"type":"VC10","name":"Vickers VC10","cat":"Wide-body"},{"type":"B720","name":"Boeing 720","cat":"Narrow-body"},{"type":"B703","name":"Boeing 707-300","cat":"Wide-body"},{"type":"DC85","name":"Douglas DC-8-50","cat":"Wide-body"},{"type":"DC86","name":"Douglas DC-8-60","cat":"Wide-body"},{"type":"DC87","name":"Douglas DC-8-70","cat":"Wide-body"},{"type":"IL18","name":"Ilyushin Il-18","cat":"Turboprop"},{"type":"IL86","name":"Ilyushin Il-86","cat":"Wide-body"},{"type":"T204C","name":"Tupolev Tu-204C","cat":"Cargo"},{"type":"SSJ7","name":"Sukhoi Superjet 100-95B","cat":"Regional"},{"type":"MC21","name":"Irkut MC-21","cat":"Narrow-body"},{"type":"C919","name":"COMAC C919","cat":"Narrow-body"},{"type":"C909","name":"COMAC ARJ21-700","cat":"Regional"},{"type":"CS10","name":"Airbus A220-100","cat":"Narrow-body"},{"type":"CS30","name":"Airbus A220-300","cat":"Narrow-body"},{"type":"E135","name":"Embraer ERJ-135","cat":"Regional"},{"type":"E140","name":"Embraer ERJ-140","cat":"Regional"},{"type":"E145","name":"Embraer ERJ-145","cat":"Regional"},{"type":"E45X","name":"Embraer ERJ-145XR","cat":"Regional"},{"type":"F28","name":"Fokker F28 Fellowship","cat":"Regional"},{"type":"F27","name":"Fokker F27 Friendship","cat":"Turboprop"},{"type":"F50","name":"Fokker 50","cat":"Turboprop"},{"type":"HS48","name":"Hawker Siddeley HS 748","cat":"Turboprop"},{"type":"ATP","name":"BAe ATP","cat":"Turboprop"},{"type":"SH36","name":"Short 360","cat":"Turboprop"},{"type":"SH33","name":"Short 330","cat":"Turboprop"},{"type":"SC7","name":"Short Skyvan","cat":"Turboprop"},{"type":"N262","name":"Nord 262","cat":"Turboprop"},{"type":"CN35","name":"CASA CN-235","cat":"Turboprop"},{"type":"C295","name":"Airbus C295","cat":"Turboprop"},{"type":"AN26","name":"Antonov An-26","cat":"Cargo"},{"type":"AN32","name":"Antonov An-32","cat":"Cargo"},{"type":"AN72","name":"Antonov An-72","cat":"Cargo"},{"type":"AN140","name":"Antonov An-140","cat":"Turboprop"},{"type":"AN148","name":"Antonov An-148","cat":"Regional"},{"type":"AN158","name":"Antonov An-158","cat":"Regional"},{"type":"YK40","name":"Yakovlev Yak-40","cat":"Regional"},{"type":"IL114","name":"Ilyushin Il-114","cat":"Turboprop"},{"type":"DHC5","name":"de Havilland Buffalo","cat":"Turboprop"},{"type":"C123","name":"Fairchild C-123 Provider","cat":"Special"},{"type":"C5M","name":"Lockheed C-5 Galaxy","cat":"Special"},{"type":"C141","name":"Lockheed C-141 Starlifter","cat":"Special"},{"type":"KC10","name":"McDonnell Douglas KC-10","cat":"Special"},{"type":"KC46","name":"Boeing KC-46 Pegasus","cat":"Special"},{"type":"E767","name":"Boeing E-767 AWACS","cat":"Special"},{"type":"VC25","name":"Boeing VC-25 (Air Force One)","cat":"Special"},{"type":"A310M","name":"Airbus A310 MRTT","cat":"Special"},{"type":"A330M","name":"Airbus A330 MRTT","cat":"Special"},{"type":"BE12","name":"Beechcraft Twin Bonanza","cat":"GA"},{"type":"BE55","name":"Beechcraft Baron 55","cat":"GA"},{"type":"BE76","name":"Beechcraft Duchess","cat":"GA"},{"type":"BE95","name":"Beechcraft Travel Air","cat":"GA"},{"type":"PA31","name":"Piper Navajo","cat":"GA"},{"type":"PA23","name":"Piper Aztec","cat":"GA"},{"type":"PA30","name":"Piper Twin Comanche","cat":"GA"},{"type":"PA32","name":"Piper Cherokee Six","cat":"GA"},{"type":"PA38","name":"Piper Tomahawk","cat":"GA"},{"type":"PA18","name":"Piper Super Cub","cat":"GA"},{"type":"C170","name":"Cessna 170","cat":"GA"},{"type":"C180","name":"Cessna 180 Skywagon","cat":"GA"},{"type":"C185","name":"Cessna 185 Skywagon","cat":"GA"},{"type":"C195","name":"Cessna 195","cat":"GA"},{"type":"C140","name":"Cessna 140","cat":"GA"},{"type":"C120","name":"Cessna 120","cat":"GA"},{"type":"MXS","name":"MX Aircraft MXS","cat":"GA"},{"type":"EDGE","name":"Zivko Edge 540","cat":"GA"},{"type":"EXTR","name":"Extra 300","cat":"GA"},{"type":"PTS2","name":"Pitts Special S-2","cat":"GA"},{"type":"DCAT","name":"Decathlon","cat":"GA"},{"type":"YAK5","name":"Yakovlev Yak-52","cat":"GA"},{"type":"SBACH","name":"XtremeAir Sbach 342","cat":"GA"},{"type":"B701","name":"Boeing 707-100","cat":"Wide-body"},{"type":"B720B","name":"Boeing 720B","cat":"Narrow-body"},{"type":"B307","name":"Boeing 307 Stratoliner","cat":"Wide-body"},{"type":"B377","name":"Boeing 377 Stratocruiser","cat":"Wide-body"},{"type":"B314","name":"Boeing 314 Clipper","cat":"Special"},{"type":"B247","name":"Boeing 247","cat":"Turboprop"},{"type":"B367","name":"Boeing 367-80 Dash 80","cat":"Wide-body"},{"type":"B752F","name":"Boeing 757-200F","cat":"Cargo"},{"type":"B753F","name":"Boeing 757-300PCF","cat":"Cargo"},{"type":"B762F","name":"Boeing 767-200F","cat":"Cargo"},{"type":"B764F","name":"Boeing 767-400F","cat":"Cargo"},{"type":"B788F","name":"Boeing 787-8 (conv)","cat":"Cargo"},{"type":"B742F","name":"Boeing 747-200F","cat":"Cargo"},{"type":"B743F","name":"Boeing 747-300F","cat":"Cargo"},{"type":"B744M","name":"Boeing 747-400M Combi","cat":"Wide-body"},{"type":"B74S","name":"Boeing 747SP","cat":"Wide-body"},{"type":"B74D","name":"Boeing 747-400D","cat":"Wide-body"},{"type":"B462","name":"BAe 146-300","cat":"Regional"},{"type":"A30B","name":"Airbus A300B4","cat":"Wide-body"},{"type":"A30F","name":"Airbus A300-600F","cat":"Cargo"},{"type":"A31F","name":"Airbus A310-300F","cat":"Cargo"},{"type":"A337","name":"Airbus A330-300 (Trent)","cat":"Wide-body"},{"type":"A33X","name":"Airbus A330-900 (long)","cat":"Wide-body"},{"type":"A359F","name":"Airbus A350F","cat":"Cargo"},{"type":"A388F","name":"Airbus A380F (concept)","cat":"Cargo"},{"type":"A3ST","name":"Airbus A300-600ST Beluga","cat":"Cargo"},{"type":"BLGX","name":"Airbus BelugaXL (A330-743L)","cat":"Cargo"},{"type":"A400C","name":"Airbus A400M (civil)","cat":"Special"},{"type":"DC3","name":"Douglas DC-3","cat":"Turboprop"},{"type":"DC4","name":"Douglas DC-4","cat":"Turboprop"},{"type":"DC6","name":"Douglas DC-6","cat":"Turboprop"},{"type":"DC7","name":"Douglas DC-7","cat":"Turboprop"},{"type":"C47","name":"Douglas C-47 Skytrain","cat":"Turboprop"},{"type":"C54","name":"Douglas C-54 Skymaster","cat":"Turboprop"},{"type":"R4D","name":"Douglas R4D","cat":"Turboprop"},{"type":"DC8F","name":"Douglas DC-8-73F","cat":"Cargo"},{"type":"MD1C","name":"McDonnell Douglas MD-11C Combi","cat":"Cargo"},{"type":"L188","name":"Lockheed L-188 Electra","cat":"Turboprop"},{"type":"L049","name":"Lockheed Constellation","cat":"Turboprop"},{"type":"L749","name":"Lockheed L-749 Constellation","cat":"Turboprop"},{"type":"L104","name":"Lockheed L-1049 Super Constellation","cat":"Turboprop"},{"type":"L18","name":"Lockheed Model 18 Lodestar","cat":"Turboprop"},{"type":"L10E","name":"Lockheed Model 10 Electra","cat":"Turboprop"},{"type":"P3","name":"Lockheed P-3 Orion","cat":"Special"},{"type":"SR71","name":"Lockheed SR-71 (heritage)","cat":"Special"},{"type":"U2","name":"Lockheed U-2 (heritage)","cat":"Special"},{"type":"F104","name":"Lockheed F-104 (heritage)","cat":"Special"},{"type":"CV34","name":"Convair CV-340","cat":"Narrow-body"},{"type":"CV44","name":"Convair CV-440","cat":"Narrow-body"},{"type":"CV60","name":"Convair CV-600","cat":"Turboprop"},{"type":"CV64","name":"Convair CV-640","cat":"Turboprop"},{"type":"CV88","name":"Convair 880","cat":"Narrow-body"},{"type":"CV99","name":"Convair 990 Coronado","cat":"Narrow-body"},{"type":"C131","name":"Convair C-131 Samaritan","cat":"Turboprop"},{"type":"BR12","name":"Bristol Britannia","cat":"Turboprop"},{"type":"BR17","name":"Bristol 170 Freighter","cat":"Cargo"},{"type":"ARGO","name":"Armstrong Whitworth Argosy","cat":"Cargo"},{"type":"HP42","name":"Handley Page HP.42","cat":"Special"},{"type":"HERA","name":"Handley Page Herald","cat":"Turboprop"},{"type":"BE14","name":"BAe 748 Andover","cat":"Turboprop"},{"type":"ATRA","name":"ATR 42 Cargo","cat":"Cargo"},{"type":"NIM","name":"Hawker Siddeley Nimrod","cat":"Special"},{"type":"BAC1","name":"BAC One-Eleven","cat":"Narrow-body"},{"type":"MERC","name":"Dassault Mercure","cat":"Narrow-body"},{"type":"SE21","name":"Sud Aviation SE 210","cat":"Narrow-body"},{"type":"F406","name":"Reims F406 Caravan II","cat":"Turboprop"},{"type":"N260","name":"Nord 260","cat":"Turboprop"},{"type":"N250","name":"IPTN N-250","cat":"Turboprop"},{"type":"R135","name":"Aérospatiale N 262","cat":"Turboprop"},{"type":"TU95","name":"Tupolev Tu-95 (heritage)","cat":"Special"},{"type":"TU16","name":"Tupolev Tu-16 (heritage)","cat":"Special"},{"type":"TU114","name":"Tupolev Tu-114","cat":"Turboprop"},{"type":"TU124","name":"Tupolev Tu-124","cat":"Narrow-body"},{"type":"IL14","name":"Ilyushin Il-14","cat":"Turboprop"},{"type":"IL12","name":"Ilyushin Il-12","cat":"Turboprop"},{"type":"IL62M","name":"Ilyushin Il-62M","cat":"Wide-body"},{"type":"IL76T","name":"Ilyushin Il-76TD","cat":"Cargo"},{"type":"IL96T","name":"Ilyushin Il-96-400T","cat":"Cargo"},{"type":"AN10","name":"Antonov An-10","cat":"Turboprop"},{"type":"AN22","name":"Antonov An-22 Antei","cat":"Cargo"},{"type":"AN28","name":"Antonov An-28","cat":"Turboprop"},{"type":"AN30","name":"Antonov An-30","cat":"Special"},{"type":"AN38","name":"Antonov An-38","cat":"Turboprop"},{"type":"AN70","name":"Antonov An-70","cat":"Cargo"},{"type":"AN74","name":"Antonov An-74","cat":"Cargo"},{"type":"YK18","name":"Yakovlev Yak-18","cat":"GA"},{"type":"YK12","name":"Yakovlev Yak-12","cat":"GA"},{"type":"YK55","name":"Yakovlev Yak-55","cat":"GA"},{"type":"SU26","name":"Sukhoi Su-26","cat":"GA"},{"type":"SU29","name":"Sukhoi Su-29","cat":"GA"},{"type":"SU31","name":"Sukhoi Su-31","cat":"GA"},{"type":"BE200","name":"Beriev Be-200 (amphibian)","cat":"Special"},{"type":"EMB2","name":"Embraer EMB 120 Brasilia (ext)","cat":"Turboprop"},{"type":"E121","name":"Embraer EMB 121 Xingu","cat":"Turboprop"},{"type":"E326","name":"Embraer Tucano","cat":"GA"},{"type":"E314","name":"Embraer Super Tucano","cat":"Special"},{"type":"E390","name":"Embraer C-390 Millennium","cat":"Special"},{"type":"LEG","name":"Embraer Legacy 600","cat":"Business"},{"type":"LEG5","name":"Embraer Legacy 500","cat":"Business"},{"type":"PRAE","name":"Embraer Praetor 600","cat":"Business"},{"type":"PRA5","name":"Embraer Praetor 500","cat":"Business"},{"type":"LIN","name":"Embraer Lineage 1000","cat":"Business"},{"type":"DHC1","name":"de Havilland Chipmunk","cat":"GA"},{"type":"DHC8","name":"de Havilland Dash 8-400 Cargo","cat":"Cargo"},{"type":"CL41","name":"Canadair CL-41 Tutor","cat":"GA"},{"type":"CL44","name":"Canadair CL-44","cat":"Cargo"},{"type":"CL21","name":"Canadair CL-215 (water bomber)","cat":"Special"},{"type":"CL41A","name":"Canadair CL-415 (water bomber)","cat":"Special"},{"type":"BD70","name":"Bombardier Global 8000","cat":"Business"},{"type":"BD10","name":"Bombardier Learjet 60","cat":"Business"},{"type":"BD31","name":"Bombardier Challenger 3500","cat":"Business"},{"type":"C150","name":"Cessna 150","cat":"GA"},{"type":"C162","name":"Cessna 162 Skycatcher","cat":"GA"},{"type":"C175","name":"Cessna 175 Skylark","cat":"GA"},{"type":"C177","name":"Cessna 177 Cardinal","cat":"GA"},{"type":"C188","name":"Cessna 188 Agwagon","cat":"GA"},{"type":"C205","name":"Cessna 205","cat":"GA"},{"type":"C207","name":"Cessna 207","cat":"GA"},{"type":"C303","name":"Cessna 303 Crusader","cat":"GA"},{"type":"C320","name":"Cessna 320 Skyknight","cat":"GA"},{"type":"C335","name":"Cessna 335","cat":"GA"},{"type":"C340","name":"Cessna 340","cat":"GA"},{"type":"C401","name":"Cessna 401","cat":"GA"},{"type":"C411","name":"Cessna 411","cat":"GA"},{"type":"C414","name":"Cessna 414 Chancellor","cat":"GA"},{"type":"C421","name":"Cessna 421 Golden Eagle","cat":"GA"},{"type":"C425","name":"Cessna 425 Conquest I","cat":"Turboprop"},{"type":"C500","name":"Cessna Citation I","cat":"Business"},{"type":"C525","name":"Cessna CitationJet CJ1","cat":"Business"},{"type":"C25B","name":"Cessna Citation CJ3","cat":"Business"},{"type":"C25C","name":"Cessna Citation CJ4","cat":"Business"},{"type":"C510","name":"Cessna Citation Mustang","cat":"Business"},{"type":"C550","name":"Cessna Citation II","cat":"Business"},{"type":"C551","name":"Cessna Citation II/SP","cat":"Business"},{"type":"C560","name":"Cessna Citation V","cat":"Business"},{"type":"C650","name":"Cessna Citation III","cat":"Business"},{"type":"C680","name":"Cessna Citation Sovereign","cat":"Business"},{"type":"C700","name":"Cessna Citation Longitude","cat":"Business"},{"type":"C72R","name":"Cessna 172RG Cutlass","cat":"GA"},{"type":"C82R","name":"Cessna 182RG","cat":"GA"},{"type":"CT206","name":"Cessna Turbo 206","cat":"GA"},{"type":"CT210","name":"Cessna Turbo 210","cat":"GA"},{"type":"CGCAR","name":"Cessna Grand Caravan EX","cat":"Cargo"},{"type":"PA11","name":"Piper Cub Special","cat":"GA"},{"type":"PA12","name":"Piper Super Cruiser","cat":"GA"},{"type":"PA15","name":"Piper Vagabond","cat":"GA"},{"type":"PA16","name":"Piper Clipper","cat":"GA"},{"type":"PA20","name":"Piper Pacer","cat":"GA"},{"type":"PA22","name":"Piper Tri-Pacer","cat":"GA"},{"type":"PA24","name":"Piper Comanche","cat":"GA"},{"type":"PA25","name":"Piper Pawnee","cat":"GA"},{"type":"PA28R","name":"Piper Arrow","cat":"GA"},{"type":"PA28D","name":"Piper Dakota","cat":"GA"},{"type":"PA36","name":"Piper Brave","cat":"GA"},{"type":"PA46T","name":"Piper Meridian","cat":"Turboprop"},{"type":"PA47","name":"Piper PiperJet","cat":"Business"},{"type":"PACH","name":"Piper Cheyenne","cat":"Turboprop"},{"type":"PACH4","name":"Piper Cheyenne 400LS","cat":"Turboprop"},{"type":"PJ31","name":"Piper Mojave","cat":"GA"},{"type":"PAML","name":"Piper Matrix","cat":"GA"},{"type":"BE33","name":"Beechcraft Debonair","cat":"GA"},{"type":"BE35","name":"Beechcraft V-Tail Bonanza","cat":"GA"},{"type":"BE23","name":"Beechcraft Musketeer","cat":"GA"},{"type":"BE24","name":"Beechcraft Sierra","cat":"GA"},{"type":"BE77","name":"Beechcraft Skipper","cat":"GA"},{"type":"BE99","name":"Beechcraft Model 99","cat":"Turboprop"},{"type":"BE10","name":"Beechcraft King Air 100","cat":"Turboprop"},{"type":"BE60","name":"Beechcraft Duke","cat":"GA"},{"type":"BE65","name":"Beechcraft Queen Air","cat":"Turboprop"},{"type":"BE80","name":"Beechcraft Queen Air 80","cat":"Turboprop"},{"type":"BE40A","name":"Beechcraft Beechjet 400A","cat":"Business"},{"type":"BE45","name":"Beechcraft T-34 Mentor","cat":"GA"},{"type":"BSTR","name":"Beechcraft Starship","cat":"Turboprop"},{"type":"BPRE","name":"Beechcraft Premier IA","cat":"Business"},{"type":"M20J","name":"Mooney M20J 201","cat":"GA"},{"type":"M20K","name":"Mooney M20K 231","cat":"GA"},{"type":"M20R","name":"Mooney Ovation","cat":"GA"},{"type":"M20T","name":"Mooney Acclaim","cat":"GA"},{"type":"SR20","name":"Cirrus SR20","cat":"GA"},{"type":"SR22T","name":"Cirrus SR22T","cat":"GA"},{"type":"DA20","name":"Diamond DA20 Katana","cat":"GA"},{"type":"DA50","name":"Diamond DA50 RG","cat":"GA"},{"type":"DA62","name":"Diamond DA62","cat":"GA"},{"type":"DV20","name":"Diamond DV20","cat":"GA"},{"type":"HK36","name":"Diamond HK36 Super Dimona","cat":"GA"},{"type":"GROB","name":"Grob G115","cat":"GA"},{"type":"G109","name":"Grob G109 motorglider","cat":"GA"},{"type":"AQIL","name":"Aquila A210","cat":"GA"},{"type":"TECN","name":"Tecnam P2008","cat":"GA"},{"type":"TP10","name":"Tecnam P2010","cat":"GA"},{"type":"TP12","name":"Tecnam P2012 Traveller","cat":"Turboprop"},{"type":"TWIN","name":"Tecnam P2006T","cat":"GA"},{"type":"VANRV","name":"Van's RV-7","cat":"GA"},{"type":"RV4","name":"Van's RV-4","cat":"GA"},{"type":"RV6","name":"Van's RV-6","cat":"GA"},{"type":"RV8","name":"Van's RV-8","cat":"GA"},{"type":"RV9","name":"Van's RV-9","cat":"GA"},{"type":"RV12","name":"Van's RV-12","cat":"GA"},{"type":"RV14","name":"Van's RV-14","cat":"GA"},{"type":"GLAS","name":"Glasair III","cat":"GA"},{"type":"LANC","name":"Lancair IV","cat":"GA"},{"type":"LEG2","name":"Lancair Legacy","cat":"GA"},{"type":"VELO","name":"Velocity XL","cat":"GA"},{"type":"KITF","name":"Kitfox","cat":"GA"},{"type":"RANS","name":"RANS S-6","cat":"GA"},{"type":"ZEN","name":"Zenith CH 750","cat":"GA"},{"type":"SONX","name":"Sonex","cat":"GA"},{"type":"BEAR","name":"Christen A-1 Husky","cat":"GA"},{"type":"MAUL","name":"Maule M-7","cat":"GA"},{"type":"HELIO","name":"Helio Courier","cat":"GA"},{"type":"FOUG","name":"Fouga Magister","cat":"Special"},{"type":"SPIT","name":"Supermarine Spitfire","cat":"Special"},{"type":"HURR","name":"Hawker Hurricane","cat":"Special"},{"type":"P51","name":"North American P-51 Mustang","cat":"Special"},{"type":"P47","name":"Republic P-47 Thunderbolt","cat":"Special"},{"type":"P38","name":"Lockheed P-38 Lightning","cat":"Special"},{"type":"F4U","name":"Vought F4U Corsair","cat":"Special"},{"type":"A6M","name":"Mitsubishi A6M Zero","cat":"Special"},{"type":"BF109","name":"Messerschmitt Bf 109","cat":"Special"},{"type":"FW190","name":"Focke-Wulf Fw 190","cat":"Special"},{"type":"B17","name":"Boeing B-17 Flying Fortress","cat":"Special"},{"type":"B24","name":"Consolidated B-24 Liberator","cat":"Special"},{"type":"B25","name":"North American B-25 Mitchell","cat":"Special"},{"type":"B29","name":"Boeing B-29 Superfortress","cat":"Special"},{"type":"LANCB","name":"Avro Lancaster","cat":"Special"},{"type":"MOSQ","name":"de Havilland Mosquito","cat":"Special"},{"type":"SPAD","name":"SPAD S.XIII","cat":"Special"},{"type":"FOK","name":"Fokker Dr.I Triplane","cat":"Special"},{"type":"SE5","name":"Royal Aircraft Factory S.E.5","cat":"Special"},{"type":"CAMEL","name":"Sopwith Camel","cat":"Special"},{"type":"JN4","name":"Curtiss JN-4 Jenny","cat":"GA"},{"type":"STEAR","name":"Boeing Stearman","cat":"GA"},{"type":"T6","name":"North American T-6 Texan","cat":"GA"},{"type":"AT6","name":"North American AT-6","cat":"GA"},{"type":"WACO","name":"Waco YMF-5","cat":"GA"},{"type":"PT17","name":"Boeing PT-17 Kaydet","cat":"GA"},{"type":"TIGM","name":"de Havilland Tiger Moth","cat":"GA"},{"type":"STMP","name":"SNCAN Stampe","cat":"GA"},{"type":"BUCK","name":"Bücker Jungmann","cat":"GA"},{"type":"JUNG","name":"Bücker Jungmeister","cat":"GA"},{"type":"YAK3","name":"Yakovlev Yak-3","cat":"Special"},{"type":"YAK9","name":"Yakovlev Yak-9","cat":"Special"},{"type":"LA5","name":"Lavochkin La-5","cat":"Special"},{"type":"IL2","name":"Ilyushin Il-2 Shturmovik","cat":"Special"},{"type":"JU52","name":"Junkers Ju 52","cat":"Turboprop"},{"type":"JU87","name":"Junkers Ju 87 Stuka","cat":"Special"},{"type":"HE111","name":"Heinkel He 111","cat":"Special"},{"type":"F86","name":"North American F-86 Sabre","cat":"Special"},{"type":"MIG15","name":"Mikoyan MiG-15","cat":"Special"},{"type":"MIG21","name":"Mikoyan MiG-21","cat":"Special"},{"type":"HUNT","name":"Hawker Hunter","cat":"Special"},{"type":"VAMP","name":"de Havilland Vampire","cat":"Special"},{"type":"METE","name":"Gloster Meteor","cat":"Special"},{"type":"SABR","name":"Canadair Sabre","cat":"Special"},{"type":"T33","name":"Lockheed T-33 Shooting Star","cat":"Special"},{"type":"A4","name":"Douglas A-4 Skyhawk","cat":"Special"},{"type":"F5","name":"Northrop F-5","cat":"Special"},{"type":"L39","name":"Aero L-39 Albatros","cat":"Special"},{"type":"L29","name":"Aero L-29 Delfín","cat":"Special"},{"type":"BAC","name":"BAC Jet Provost","cat":"Special"},{"type":"STRIK","name":"BAC Strikemaster","cat":"Special"},{"type":"PC7","name":"Pilatus PC-7","cat":"GA"},{"type":"PC9","name":"Pilatus PC-9","cat":"GA"},{"type":"PC21","name":"Pilatus PC-21","cat":"GA"},{"type":"T28","name":"North American T-28 Trojan","cat":"GA"},{"type":"SF260","name":"SIAI-Marchetti SF.260","cat":"GA"},{"type":"PBY","name":"Consolidated PBY Catalina","cat":"Special"},{"type":"GOOSE","name":"Grumman Goose","cat":"Special"},{"type":"MALL","name":"Grumman Mallard","cat":"Special"},{"type":"WIDG","name":"Grumman Widgeon","cat":"Special"},{"type":"ALB","name":"Grumman Albatross","cat":"Special"},{"type":"CARP","name":"Piaggio P.136","cat":"Special"},{"type":"ICON","name":"ICON A5","cat":"GA"},{"type":"SEAM","name":"SeaMax M-22","cat":"GA"},{"type":"SREY","name":"Searey","cat":"GA"},{"type":"LAKE","name":"Lake LA-4 Buccaneer","cat":"GA"},{"type":"CESA","name":"Cessna 208 Amphibian","cat":"GA"},{"type":"DHC2T","name":"DHC-2 Turbo Beaver","cat":"GA"},{"type":"DHC3T","name":"DHC-3T Turbo Otter","cat":"GA"},{"type":"KODI","name":"Quest Kodiak 100","cat":"Turboprop"},{"type":"KODX","name":"Daher Kodiak 900","cat":"Turboprop"},{"type":"CARV","name":"GippsAero GA8 Airvan","cat":"GA"},{"type":"PORT","name":"Pilatus PC-6 Turbo Porter","cat":"GA"},{"type":"STOL","name":"Zenith STOL CH 701","cat":"GA"},{"type":"BRAV","name":"American Champion Scout","cat":"GA"},{"type":"R22","name":"Robinson R22","cat":"GA"},{"type":"R44","name":"Robinson R44","cat":"GA"},{"type":"R66","name":"Robinson R66","cat":"GA"},{"type":"B06","name":"Bell 206 JetRanger","cat":"GA"},{"type":"B407","name":"Bell 407","cat":"GA"},{"type":"B412","name":"Bell 412","cat":"GA"},{"type":"B429","name":"Bell 429","cat":"GA"},{"type":"B47","name":"Bell 47","cat":"GA"},{"type":"UH1","name":"Bell UH-1 Huey","cat":"Special"},{"type":"AS50","name":"Airbus H125 (AStar)","cat":"GA"},{"type":"EC30","name":"Airbus H130","cat":"GA"},{"type":"EC35","name":"Airbus H135","cat":"GA"},{"type":"EC45","name":"Airbus H145","cat":"GA"},{"type":"EC55","name":"Airbus H155","cat":"GA"},{"type":"H160","name":"Airbus H160","cat":"GA"},{"type":"PU","name":"Airbus H225 Super Puma","cat":"Special"},{"type":"AW09","name":"Leonardo AW09","cat":"GA"},{"type":"AW139","name":"Leonardo AW139","cat":"GA"},{"type":"AW169","name":"Leonardo AW169","cat":"GA"},{"type":"AW189","name":"Leonardo AW189","cat":"GA"},{"type":"S76","name":"Sikorsky S-76","cat":"GA"},{"type":"S92","name":"Sikorsky S-92","cat":"Special"},{"type":"S61","name":"Sikorsky S-61","cat":"Special"},{"type":"UH60","name":"Sikorsky UH-60 Black Hawk","cat":"Special"},{"type":"CH47","name":"Boeing CH-47 Chinook","cat":"Special"},{"type":"MD50","name":"MD Helicopters MD 500","cat":"GA"},{"type":"MD9","name":"MD Helicopters MD 902","cat":"GA"},{"type":"EN28","name":"Enstrom 280","cat":"GA"},{"type":"SCHW","name":"Schweizer 300","cat":"GA"},{"type":"GAZ","name":"Aérospatiale Gazelle","cat":"GA"},{"type":"ALLT","name":"Aérospatiale Alouette III","cat":"GA"},{"type":"KA32","name":"Kamov Ka-32","cat":"Special"},{"type":"MI8","name":"Mil Mi-8","cat":"Special"},{"type":"MI17","name":"Mil Mi-17","cat":"Special"},{"type":"ASK21","name":"Schleicher ASK 21","cat":"GA"},{"type":"ASW28","name":"Schleicher ASW 28","cat":"GA"},{"type":"DG10","name":"DG Flugzeugbau DG-1000","cat":"GA"},{"type":"DUO","name":"Schempp-Hirth Duo Discus","cat":"GA"},{"type":"VENT","name":"Schempp-Hirth Ventus","cat":"GA"},{"type":"ARCS","name":"Pipistrel Archer","cat":"GA"},{"type":"VIRUS","name":"Pipistrel Virus","cat":"GA"},{"type":"SINU","name":"Pipistrel Sinus","cat":"GA"},{"type":"TAUR","name":"Pipistrel Taurus","cat":"GA"},{"type":"ALPI","name":"Pipistrel Alpha Trainer","cat":"GA"},{"type":"VELIS","name":"Pipistrel Velis Electro","cat":"GA"},{"type":"SILE","name":"Sonaca 200","cat":"GA"},{"type":"BLKS","name":"Blackshape Prime","cat":"GA"},{"type":"SHRK","name":"Shark Aero","cat":"GA"},{"type":"BRIS","name":"BRM Aero Bristell","cat":"GA"},{"type":"FLTD","name":"Flight Design CTLS","cat":"GA"},{"type":"REMO","name":"Remos GX","cat":"GA"},{"type":"EVEK","name":"Evektor SportStar","cat":"GA"},{"type":"ALTO","name":"Direct Fly Alto","cat":"GA"},{"type":"ATEC","name":"ATEC Zephyr","cat":"GA"},{"type":"JOBY","name":"Joby S4 eVTOL","cat":"Special"},{"type":"LILM","name":"Lilium Jet","cat":"Special"},{"type":"ARCH","name":"Archer Midnight","cat":"Special"},{"type":"VOLO","name":"Volocopter VoloCity","cat":"Special"},{"type":"EHNG","name":"EHang 216","cat":"Special"},{"type":"VYAR","name":"Vertical Aerospace VX4","cat":"Special"},{"type":"BETA","name":"BETA ALIA-250","cat":"Special"},{"type":"EVIA","name":"Eviation Alice (electric)","cat":"Special"},{"type":"HRTA","name":"Heart ES-30 (hybrid)","cat":"Regional"},{"type":"AURA","name":"Aura Aero ERA","cat":"Regional"},{"type":"BLBD","name":"Bye Aerospace eFlyer","cat":"GA"},{"type":"RGX0","name":"Dornier 328JET","cat":"Turboprop"},{"type":"RGX1","name":"Fairchild Metro III","cat":"Turboprop"},{"type":"RGX2","name":"Fairchild Metro 23","cat":"Turboprop"},{"type":"RGX3","name":"Jetstream 31","cat":"Turboprop"},{"type":"RGX4","name":"Jetstream 32","cat":"Turboprop"},{"type":"RGX5","name":"EMB 110P1","cat":"Turboprop"},{"type":"RGX6","name":"EMB 110P2","cat":"Turboprop"},{"type":"RGX7","name":"Let L-610","cat":"Turboprop"},{"type":"RGX8","name":"Xian MA60","cat":"Turboprop"},{"type":"RGX9","name":"Xian MA600","cat":"Turboprop"},{"type":"RGX10","name":"Xian MA700","cat":"Turboprop"},{"type":"RGX11","name":"Harbin Y-12","cat":"Turboprop"},{"type":"RGX12","name":"Nanchang Y-5","cat":"Turboprop"},{"type":"RGX13","name":"AVIC MA-700","cat":"Turboprop"},{"type":"RGX14","name":"Twin Otter Series 400","cat":"Turboprop"},{"type":"RGX15","name":"Viking Air DHC-6-400","cat":"Turboprop"},{"type":"RGX16","name":"Dornier Do 24","cat":"Turboprop"},{"type":"RGX17","name":"Dornier Do 27","cat":"Turboprop"},{"type":"RGX18","name":"Dornier Do 31","cat":"Turboprop"},{"type":"RGX19","name":"GAF Nomad","cat":"Turboprop"},{"type":"RGX20","name":"PZL M28 Skytruck","cat":"Turboprop"},{"type":"RGX21","name":"PZL-104 Wilga","cat":"Turboprop"},{"type":"RGX22","name":"PZL An-2 (licence)","cat":"Turboprop"},{"type":"RGX23","name":"Antonov An-2R","cat":"Turboprop"},{"type":"RGX24","name":"LET L-200 Morava","cat":"Turboprop"},{"type":"BJX0","name":"Cessna Citation M2","cat":"Business"},{"type":"BJX1","name":"Cessna Citation XLS+","cat":"Business"},{"type":"BJX2","name":"Cessna Citation Encore","cat":"Business"},{"type":"BJX3","name":"Gulfstream G150","cat":"Business"},{"type":"BJX4","name":"Gulfstream G200","cat":"Business"},{"type":"BJX5","name":"Gulfstream G350","cat":"Business"},{"type":"BJX6","name":"Gulfstream G450","cat":"Business"},{"type":"BJX7","name":"Gulfstream G550","cat":"Business"},{"type":"BJX8","name":"Gulfstream G700","cat":"Business"},{"type":"BJX9","name":"Gulfstream G800","cat":"Business"},{"type":"BJX10","name":"Bombardier Learjet 31","cat":"Business"},{"type":"BJX11","name":"Bombardier Learjet 40","cat":"Business"},{"type":"BJX12","name":"Bombardier Learjet 55","cat":"Business"},{"type":"BJX13","name":"Bombardier Learjet 70","cat":"Business"},{"type":"BJX14","name":"Dassault Falcon 10","cat":"Business"},{"type":"BJX15","name":"Dassault Falcon 20","cat":"Business"},{"type":"BJX16","name":"Dassault Falcon 30","cat":"Business"},{"type":"BJX17","name":"Dassault Falcon 200","cat":"Business"},{"type":"BJX18","name":"Dassault Falcon 900LX","cat":"Business"},{"type":"BJX19","name":"Dassault Falcon 6X","cat":"Business"},{"type":"BJX20","name":"Dassault Falcon 10X","cat":"Business"},{"type":"BJX21","name":"Hawker 400XP","cat":"Business"},{"type":"BJX22","name":"Hawker 800XP","cat":"Business"},{"type":"BJX23","name":"Hawker 900XP","cat":"Business"},{"type":"BJX24","name":"Hawker 4000","cat":"Business"},{"type":"BJX25","name":"IAI Westwind","cat":"Business"},{"type":"BJX26","name":"IAI Astra","cat":"Business"},{"type":"BJX27","name":"Nextant 400XTi","cat":"Business"},{"type":"BJX28","name":"Pilatus PC-24 (ext)","cat":"Business"},{"type":"BJX29","name":"Embraer Legacy 450","cat":"Business"},{"type":"BJX30","name":"Grob G180 SPn","cat":"Business"},{"type":"BJX31","name":"Cirrus Vision Jet G2","cat":"Business"},{"type":"BJX32","name":"HondaJet Elite II","cat":"Business"},{"type":"BJX33","name":"Syberjet SJ30","cat":"Business"},{"type":"BJX34","name":"Spectrum S-40","cat":"Business"},{"type":"GAX0","name":"Grumman AA-5 Tiger","cat":"GA"},{"type":"GAX1","name":"Grumman AA-1 Yankee","cat":"GA"},{"type":"GAX2","name":"American General Tiger","cat":"GA"},{"type":"GAX3","name":"Commander 112","cat":"GA"},{"type":"GAX4","name":"Commander 114","cat":"GA"},{"type":"GAX5","name":"Socata TB-9 Tampico","cat":"GA"},{"type":"GAX6","name":"Socata TB-10 Tobago","cat":"GA"},{"type":"GAX7","name":"Socata TB-20 Trinidad","cat":"GA"},{"type":"GAX8","name":"Socata TB-21","cat":"GA"},{"type":"GAX9","name":"Socata Rallye","cat":"GA"},{"type":"GAX10","name":"Robin HR200","cat":"GA"},{"type":"GAX11","name":"Robin R2160","cat":"GA"},{"type":"GAX12","name":"Robin DR401","cat":"GA"},{"type":"GAX13","name":"Jodel D11","cat":"GA"},{"type":"GAX14","name":"Jodel D18","cat":"GA"},{"type":"GAX15","name":"CAP 10","cat":"GA"},{"type":"GAX16","name":"CAP 232","cat":"GA"},{"type":"GAX17","name":"Mudry CAP 20","cat":"GA"},{"type":"GAX18","name":"Aerobat 150","cat":"GA"},{"type":"GAX19","name":"Bellanca Citabria","cat":"GA"},{"type":"GAX20","name":"Bellanca Super Decathlon","cat":"GA"},{"type":"GAX21","name":"Bellanca Viking","cat":"GA"},{"type":"GAX22","name":"Luscombe 8","cat":"GA"},{"type":"GAX23","name":"Ercoupe 415","cat":"GA"},{"type":"GAX24","name":"Taylorcraft BC-12","cat":"GA"},{"type":"GAX25","name":"Aeronca Champ","cat":"GA"},{"type":"GAX26","name":"Aeronca Chief","cat":"GA"},{"type":"GAX27","name":"Stinson 108","cat":"GA"},{"type":"GAX28","name":"Stinson Reliant","cat":"GA"},{"type":"GAX29","name":"Navion","cat":"GA"},{"type":"GAX30","name":"Ryan Navion","cat":"GA"},{"type":"GAX31","name":"Meyers 200","cat":"GA"},{"type":"GAX32","name":"Globe Swift","cat":"GA"},{"type":"GAX33","name":"Culver Cadet","cat":"GA"},{"type":"GAX34","name":"Funk B","cat":"GA"},{"type":"GAX35","name":"Interstate Cadet","cat":"GA"},{"type":"GAX36","name":"Rearwin Cloudster","cat":"GA"},{"type":"GAX37","name":"Fairchild 24","cat":"GA"},{"type":"GAX38","name":"Howard DGA-15","cat":"GA"},{"type":"GAX39","name":"Spartan Executive","cat":"GA"},{"type":"GAX40","name":"Beech Staggerwing","cat":"GA"},{"type":"GAX41","name":"Waco UPF-7","cat":"GA"},{"type":"GAX42","name":"Great Lakes 2T","cat":"GA"},{"type":"GAX43","name":"Pitts S-1","cat":"GA"},{"type":"GAX44","name":"Pitts Model 12","cat":"GA"},{"type":"GAX45","name":"Skybolt","cat":"GA"},{"type":"GAX46","name":"Starduster Too","cat":"GA"},{"type":"GAX47","name":"Marquart Charger","cat":"GA"},{"type":"GAX48","name":"Smith Miniplane","cat":"GA"},{"type":"GAX49","name":"Fly Baby","cat":"GA"},{"type":"GAX50","name":"Corben Baby Ace","cat":"GA"},{"type":"EXX0","name":"Rutan VariEze","cat":"GA"},{"type":"EXX1","name":"Rutan Long-EZ","cat":"GA"},{"type":"EXX2","name":"Rutan Defiant","cat":"GA"},{"type":"EXX3","name":"Cozy Mark IV","cat":"GA"},{"type":"EXX4","name":"Berkut 360","cat":"GA"},{"type":"EXX5","name":"Express 2000","cat":"GA"},{"type":"EXX6","name":"Wheeler Express","cat":"GA"},{"type":"EXX7","name":"Questair Venture","cat":"GA"},{"type":"EXX8","name":"Swearingen SX-300","cat":"GA"},{"type":"EXX9","name":"Prescott Pusher","cat":"GA"},{"type":"EXX10","name":"BD-5","cat":"GA"},{"type":"EXX11","name":"Bede BD-4","cat":"GA"},{"type":"EXX12","name":"Thorp T-18","cat":"GA"},{"type":"EXX13","name":"Wittman Tailwind","cat":"GA"},{"type":"EXX14","name":"Sonerai II","cat":"GA"},{"type":"EXX15","name":"Pietenpol Air Camper","cat":"GA"},{"type":"EXX16","name":"GP-4","cat":"GA"},{"type":"EXX17","name":"Falco F8L","cat":"GA"},{"type":"EXX18","name":"KIS TR-1","cat":"GA"},{"type":"EXX19","name":"Europa XS","cat":"GA"},{"type":"EXX20","name":"Jabiru J230","cat":"GA"},{"type":"EXX21","name":"Jabiru J430","cat":"GA"},{"type":"EXX22","name":"Zenith CH 601","cat":"GA"},{"type":"EXX23","name":"Zenith CH 640","cat":"GA"},{"type":"EXX24","name":"Zenith CH 750 Cruzer","cat":"GA"},{"type":"EXX25","name":"Murphy Rebel","cat":"GA"},{"type":"EXX26","name":"Murphy Moose","cat":"GA"},{"type":"EXX27","name":"Bearhawk","cat":"GA"},{"type":"EXX28","name":"Just Highlander","cat":"GA"},{"type":"EXX29","name":"Rans S-7 Courier","cat":"GA"},{"type":"EXX30","name":"Rans S-20","cat":"GA"},{"type":"EXX31","name":"Kolb Firefly","cat":"GA"},{"type":"EXX32","name":"Quicksilver MX","cat":"GA"},{"type":"EXX33","name":"Challenger II","cat":"GA"},{"type":"EXX34","name":"Airborne XT-912","cat":"GA"},{"type":"EXX35","name":"Aeropro Eurofox","cat":"GA"},{"type":"EXX36","name":"TL Sting S4","cat":"GA"},{"type":"EXX37","name":"TL Sirius","cat":"GA"},{"type":"EXX38","name":"Blackwing BW635","cat":"GA"},{"type":"EXX39","name":"Risen 916","cat":"GA"},{"type":"EXX40","name":"Vashon Ranger R7","cat":"GA"},{"type":"ALX0","name":"Airbus A321neo LR","cat":"Narrow-body"},{"type":"ALX1","name":"Airbus A321neo XLR (ext)","cat":"Narrow-body"},{"type":"ALX2","name":"Boeing 737-700C Combi","cat":"Narrow-body"},{"type":"ALX3","name":"Boeing 737-900","cat":"Narrow-body"},{"type":"ALX4","name":"Boeing 757-200PF","cat":"Narrow-body"},{"type":"ALX5","name":"Boeing 767-300BCF","cat":"Narrow-body"},{"type":"ALX6","name":"Boeing 777-200ERSF","cat":"Narrow-body"},{"type":"ALX7","name":"McDonnell Douglas MD-11 Combi","cat":"Narrow-body"},{"type":"ALX8","name":"Ilyushin Il-96-300","cat":"Narrow-body"},{"type":"ALX9","name":"Tupolev Tu-204-100","cat":"Narrow-body"},{"type":"ALX10","name":"Tupolev Tu-214","cat":"Narrow-body"},{"type":"ALX11","name":"Sukhoi Superjet New","cat":"Narrow-body"},{"type":"ALX12","name":"COMAC C929 (concept)","cat":"Narrow-body"},{"type":"ALX13","name":"COMAC C939 (concept)","cat":"Narrow-body"},{"type":"ALX14","name":"Irkut MC-21-300","cat":"Narrow-body"},{"type":"ALX15","name":"Irkut MC-21-400","cat":"Narrow-body"},{"type":"ALX16","name":"Mitsubishi SpaceJet M90","cat":"Narrow-body"},{"type":"ALX17","name":"Mitsubishi SpaceJet M100","cat":"Narrow-body"},{"type":"ALX18","name":"Bombardier CRJ550","cat":"Narrow-body"},{"type":"ALX19","name":"Embraer E175-E1 Cargo","cat":"Narrow-body"}];
 let fleet = [];  // starts empty — add from Fleet Shop
 const HUBS = ["KLAX", "CYVR", "KJFK", "CYYT", "KATL", "CYYZ", "KMIA", "CYUL", "KDFW", "CYEG", "EGKK", "KMEM", "VHHH", "PANC", "ZSPD", "TJSJ", "MKJS", "CYQM", "KSDF", "CYHM", "KTUS", "KTEB", "KVNY", "KPBI", "KAPF", "LFPB", "EGGW", "UUWW"];
+const HUB_NAMES = {KLAX:"Los Angeles",CYVR:"Vancouver",KJFK:"New York JFK",CYYT:"St. John's",KATL:"Atlanta",CYYZ:"Toronto",KMIA:"Miami",CYUL:"Montréal",KDFW:"Dallas–Fort Worth",CYEG:"Edmonton",EGKK:"London Gatwick",KMEM:"Memphis",VHHH:"Hong Kong",PANC:"Anchorage",ZSPD:"Shanghai",TJSJ:"San Juan",MKJS:"Montego Bay",CYQM:"Moncton",KSDF:"Louisville",CYHM:"Hamilton",KTUS:"Tucson",KTEB:"Teterboro",KVNY:"Van Nuys",KPBI:"West Palm Beach",KAPF:"Naples",LFPB:"Paris Le Bourget",EGGW:"London Luton",UUWW:"Moscow Vnukovo"};
 const MAINT_INTERVAL = 100;
 
 function initMap(){
@@ -737,9 +982,6 @@ function planeIcon(hdg){
   return L.divIcon({className:'',html:`<div style="transform:rotate(${hdg}deg)">${PLANE}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
 }
 
-// ============ AIRPORT DATABASE ============
-// window.AIRPORTS is loaded from airports.js (bundled full world list, ~28k).
-// If that file isn't present, this starter set of hubs + majors keeps it working.
 window.AIRPORTS = window.AIRPORTS || {};
 const STARTER_AIRPORTS = {
   KLAX:["Los Angeles Intl",33.9416,-118.4085], CYVR:["Vancouver Intl",49.1947,-123.1792],
@@ -766,7 +1008,6 @@ const STARTER_AIRPORTS = {
 };
 function apt(code){
   code=(code||"").toUpperCase();
-  // bundled full DB (object form: {name, lat, lon, city, country})
   if(window.AIRPORTS && window.AIRPORTS[code]){
     const a=window.AIRPORTS[code];
     if(Array.isArray(a)) return a;
@@ -779,7 +1020,6 @@ function apt(code){
 let airportPin = null;
 function clearAirportPin(){ if(airportPin){ layer.removeLayer(airportPin); airportPin=null; } }
 
-// header gold search bar — jump to Live Map and pin the airport
 function globalSearch(){
   const code=(document.getElementById('gsearch').value||"").toUpperCase().trim();
   if(!code) return;
@@ -795,19 +1035,16 @@ function globalSearch(){
     map.setView([a[1],a[2]],7);
   }, 120);
 }
-// ==========================================
 
 async function refresh(){
   const st = document.getElementById('status');
   let mine = [];
-  // 1) VATSIM online pilots
   try{
     const r = await fetch('https://data.vatsim.net/v3/vatsim-data.json',{cache:'no-store'});
     const data = await r.json();
     mine = (data.pilots||[]).filter(p => (p.callsign||'').toUpperCase().startsWith(prefix));
   }catch(e){ /* offline or blocked — bridge may still have flights */ }
 
-  // 2) local ACARS bridge (offline flights + your own flight)
   try{
     const br = await fetch(`${BRIDGE_URL}/live`,{cache:'no-store'});
     const bd = await br.json();
@@ -847,16 +1084,22 @@ function setPrefix(){
   refresh();
 }
 
-// ---- fleet render ----
+function isGrounded(a){
+  return (a.maint||0) >= MAINT_INTERVAL || (a.status||'').toLowerCase().includes('grounded');
+}
 function renderFleet(){
   const b = document.getElementById('fleet-body');
-  if(!fleet.length){ b.innerHTML='<tr><td colspan="7" class="empty">No aircraft yet — add some from the Fleet Shop.</td></tr>'; }
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  const sub = document.querySelector('#fleet .sub');
+  if(sub) sub.textContent = staff
+    ? 'Track status, location, health, and maintenance so dispatch eligibility matches your operational realism. Add aircraft from the Fleet Shop.'
+    : 'The airline fleet — status, location, hours, and maintenance. A grounded aircraft can\u2019t be dispatched until staff service it.';
+  if(!fleet.length){ b.innerHTML=`<tr><td colspan="7" class="empty">${staff?'No aircraft yet — add some from the Fleet Shop.':'No aircraft in the fleet yet.'}</td></tr>`; }
   else{
     b.innerHTML = fleet.map((a,i)=>{
       const sinceMaint = a.maint||0;
       const due = sinceMaint >= MAINT_INTERVAL;
       const soon = !due && sinceMaint >= MAINT_INTERVAL*0.8;
-      // overdue aircraft are automatically grounded until serviced
       let status = a.status;
       if(due) status = "Grounded — maintenance";
       const maintCell = due
@@ -875,8 +1118,8 @@ function renderFleet(){
   document.getElementById('k-fleet').textContent = fleet.length;
 }
 
-// perform maintenance — resets the hours-since-maintenance and returns to service
 function doMaint(i){
+  if(!(SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager'))) return;
   const a = fleet[i];
   if(!a) return;
   a.maint = 0;
@@ -885,15 +1128,30 @@ function doMaint(i){
   saveToBridge('/maintenance', {reg:a.reg, at:new Date().toISOString().slice(0,10), note:'Scheduled check'});
 }
 
-// ---- shop render ----
 function renderShop(){
-  document.getElementById('shop-cards').innerHTML = CATALOG.map((a,i)=>`
+  const q = (document.getElementById('shop-search')?.value||'').toLowerCase().trim();
+  const cat = document.getElementById('shop-cat')?.value||'';
+  const list = CATALOG.filter(a=>{
+    if(cat && a.cat!==cat) return false;
+    if(!q) return true;
+    return (a.name.toLowerCase().includes(q) || a.type.toLowerCase().includes(q)
+            || a.cat.toLowerCase().includes(q));
+  });
+  const countEl = document.getElementById('shop-count');
+  if(countEl) countEl.textContent = `${list.length} of ${CATALOG.length} aircraft`;
+  const cards = document.getElementById('shop-cards');
+  if(!list.length){ cards.innerHTML = '<div class="featnote" style="grid-column:1/-1">No aircraft match your search. Try a different term.</div>'; return; }
+  cards.innerHTML = list.map(a=>`
     <div class="card">
       <div class="type">${a.cat}</div>
       <h3>${a.name}</h3>
-      <p>${a.desc}</p>
-      <button class="buy" onclick="buy(${i})">Add to fleet</button>
+      <p class="ac-code">${a.type}</p>
+      <button class="buy" onclick="buyByType('${a.type}')">Add to fleet</button>
     </div>`).join('');
+}
+function buyByType(type){
+  const i = CATALOG.findIndex(a=>a.type===type);
+  if(i>=0) buy(i);
 }
 function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function randLetters(n){ const A="ABCDEFGHJKLMNPQRSTUVWXYZ"; let s=""; for(let k=0;k<n;k++) s+=A[Math.floor(Math.random()*A.length)]; return s; }
@@ -911,22 +1169,24 @@ function makeReg(ac){
   return reg;
 }
 function buy(i){
-  // open the hub picker for this aircraft
   const a = CATALOG[i];
-  const opts = HUBS.map(h=>`<option value="${h}">${h}</option>`).join('');
+  const opts = HUBS.map(h=>`<option value="${h}">${h}${HUB_NAMES[h]?' — '+HUB_NAMES[h]:''}</option>`).join('');
   const box = document.createElement('div');
   box.id = 'hubpick';
   box.innerHTML = `
     <div class="hubpick-inner">
-      <h3>Assign ${a.name} to a hub</h3>
-      <p>Choose the home base for this aircraft:</p>
+      <div class="hp-badge">${a.cat}</div>
+      <h3>${a.name}</h3>
+      <p>Choose this aircraft's home hub. It'll be based there, ready for dispatch.</p>
+      <label class="hp-label">Home hub</label>
       <select id="hub-sel">${opts}</select>
       <div class="hubpick-btns">
         <button class="hp-cancel" onclick="closeHubPick()">Cancel</button>
-        <button class="hp-ok" onclick="confirmBuy(${i})">Add to fleet</button>
+        <button class="hp-ok" onclick="confirmBuy(${i})">✓ Add to fleet</button>
       </div>
     </div>`;
   document.body.appendChild(box);
+  setTimeout(()=>{ const inner=box.querySelector('.hubpick-inner'); if(inner) inner.style.transform='translateY(0)'; box.style.opacity='1'; },10);
 }
 function closeHubPick(){
   const b = document.getElementById('hubpick'); if(b) b.remove();
@@ -943,7 +1203,6 @@ function confirmBuy(i){
   document.querySelector('nav button[data-view="fleet"]').click();
 }
 
-// ---- persistence: talk to the shared bridge ----
 async function saveToBridge(path, obj){
   try{
     await fetch(`${BRIDGE_URL}${path}`, {method:'POST',
@@ -960,21 +1219,17 @@ async function loadState(){
     if(s.routes){ window.BRIDGE_ROUTES = s.routes; }
     if(s.schedule){ window.SCHEDULE = s.schedule; }
     renderRoster();
-    // refresh route/schedule views so reloaded data actually shows
     if(typeof renderSchedule==='function') renderSchedule();
     if(typeof renderRoutes==='function') renderRoutes();
   }catch(e){ /* bridge not running yet */ }
 }
 
 const REAL_ROSTER = {"CEO01": {"name": "Aveek Amal - CEO", "role": "CEO", "type": "—", "flights": 0, "hours": 0}, "FM01": {"name": "Jadon", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "FM02": {"name": "Angus Preston", "role": "Fleet Manager", "type": "—", "flights": 0, "hours": 0}, "KLA002": {"name": "Luko the pilot", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA003": {"name": "Benny", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA004": {"name": "BrayBray", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA005": {"name": "Capitan Trell", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA006": {"name": "Pepe Garcia", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA007": {"name": "Sammy Binchasin", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA008": {"name": "Silver Inhaler", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA009": {"name": "67 Diego Fortnite King", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA010": {"name": "Nomad Avi", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA011": {"name": "Ace P", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA012": {"name": "Ben T", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA013": {"name": "Junior", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA014": {"name": "Matt Mods10", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA015": {"name": "Oliver T10_", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA016": {"name": "Pilot Booy", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA017": {"name": "SSeguyaa", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}, "KLA018": {"name": "spookydoa123_024216", "role": "Pilot", "type": "—", "flights": 0, "hours": 0}};
-// real airline roster (names loaded from Amal Airways)
 function baseRoster(){ return JSON.parse(JSON.stringify(REAL_ROSTER)); }
 function renderRoster(){
   const body = document.getElementById('roster-body');
   if(!body) return;
   const base = baseRoster();
-  // only merge live hours/flights for pilots who are in the CURRENT roster.
-  // ignore any stale entries from the bridge (e.g. old ALA pilots).
   const merged = {...base};
   if(window.PILOTS){
     for(const u in window.PILOTS){
@@ -984,6 +1239,8 @@ function renderRoster(){
     }
   }
   const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  const adminEl = document.getElementById('roster-admin');
+  if(adminEl) adminEl.style.display = staff ? 'block' : 'none';
   const rows = Object.keys(merged).sort().map(u=>{
     const p = merged[u];
     const hrs = p.hours||0;
@@ -1007,19 +1264,72 @@ function renderRoster(){
   }).join('');
   body.innerHTML = rows || '<tr><td colspan="7" class="empty">No pilots yet.</td></tr>';
 }
-// staff assigns a pilot's type — saves to the shared bridge
 function setPilotTypeFor(user, type){
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  if(!staff) return;
   if(!window.PILOTS) window.PILOTS = {};
   window.PILOTS[user] = {...(window.PILOTS[user]||{}), ptype: type};
   saveToBridge('/pilot', {username:user, ptype:type});
 }
 
-// ---- ROUTE CREATOR (SimBrief-powered) ----
-// Saved routes the user builds. Persist in memory for the session.
+function nextCallsign(){
+  const seen = new Set();
+  Object.keys(CREDS||{}).forEach(u=>seen.add(u.toUpperCase()));
+  Object.keys(REAL_ROSTER||{}).forEach(u=>seen.add(u.toUpperCase()));
+  if(window.PILOTS) Object.keys(window.PILOTS).forEach(u=>seen.add(u.toUpperCase()));
+  let max = 0;
+  seen.forEach(u=>{ const m=u.match(/^KLA(\d{3})$/); if(m){ const n=parseInt(m[1],10); if(n>max) max=n; } });
+  return 'KLA'+String(max+1).padStart(3,'0');
+}
+function genCode(){
+  const chars='ABCDEFGHIJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I ambiguity
+  let c=''; for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+function addPilotPrompt(){
+  const area = document.getElementById('addpilot-area');
+  if(!area) return;
+  const cs = nextCallsign();
+  area.style.display='block';
+  area.innerHTML = `
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px">New pilot — ${cs}</div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:4px">Pilot name</div>
+      <input id="np-name" placeholder="e.g. John Smith" style="width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:14px">
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:#7387a4;text-transform:uppercase;margin-bottom:4px">Pilot type</div>
+      <select id="np-type" style="width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font-size:14px;background:#fff">
+        <option value="commercial">Commercial</option><option value="cargo">Cargo</option>
+        <option value="charter">Charter</option><option value="tour">Tour</option>
+      </select>
+    </div>
+    <button onclick="createPilot('${cs}')" class="buy" style="max-width:200px">Create ${cs}</button>
+    <div id="np-out"></div>`;
+}
+function createPilot(callsign){
+  if(!(SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager'))) return;
+  const name = (document.getElementById('np-name').value||'').trim();
+  const ptype = document.getElementById('np-type').value;
+  if(!name){ document.getElementById('np-out').innerHTML='<p style="color:#c33;margin-top:8px">Enter a pilot name.</p>'; return; }
+  const code = genCode();
+  saveToBridge('/newpilot', {username:callsign, name, ptype, passcode:code});
+  if(!window.PILOTS) window.PILOTS={};
+  window.PILOTS[callsign] = {name, role:'Pilot', ptype, flights:0, hours:0};
+  document.getElementById('np-out').innerHTML = `
+    <div class="featnote" style="border-left-color:#1a8a4a;margin-top:12px">
+      <b>${callsign} created ✓</b><br>
+      Name: <b>${name}</b> · Type: <b>${ptype[0].toUpperCase()+ptype.slice(1)}</b><br>
+      Login code: <b style="font-size:16px;letter-spacing:1px">${code}</b>
+      <div style="color:var(--sub);font-size:12px;margin-top:8px;line-height:1.5">
+        Their Discord <b>${callsign}</b> role is being created automatically, and their login works right away — ${name} can sign in with the code above, or type <b>/getcode</b> in Discord to have it sent to them.
+      </div>
+    </div>`;
+  renderRoster();
+}
+
 let SAVED_ROUTES = [];
 
-// Step 1: open SimBrief pre-filled. Omitting the route makes SimBrief pick
-// the best routing from its database automatically.
 function buildOnSimBrief(){
   const dep=(document.getElementById('rb-dep').value||'').toUpperCase().trim();
   const arr=(document.getElementById('rb-arr').value||'').toUpperCase().trim();
@@ -1031,7 +1341,6 @@ function buildOnSimBrief(){
   out.innerHTML='SimBrief opened for <b>'+dep+' → '+arr+'</b>. Click <b>Generate</b> there, then come back and press <b>Pull route &amp; save</b>.';
 }
 
-// Step 2: fetch the user's latest generated OFP back from SimBrief and save it.
 async function pullRoute(){
   const user=(document.getElementById('sb-user').value||'').trim();
   const out=document.getElementById('rb-out');
@@ -1062,7 +1371,6 @@ async function pullRoute(){
 function renderRoutes(){
   const body=document.getElementById('routes-body');
   if(!body) return;
-  // combine bot-created routes (from Discord) with saved SimBrief routes
   const botRoutes = (window.BRIDGE_ROUTES||[]).map(r=>({
     f:r.f||'KLA', dep:r.dep, arr:r.arr, ac:'', cruise:'', route:'DCT', callsign:r.f, by:r.by
   }));
@@ -1072,10 +1380,8 @@ function renderRoutes(){
     `<tr><td><b>${r.f}</b></td><td>${r.dep} → ${r.arr}${r.by?` <span style="color:var(--sub);font-size:11px">· ${r.by}</span>`:''}</td><td>${r.ac||'—'}</td><td>${r.cruise||'—'}</td>
       <td><button class="planbtn vat" style="padding:6px 12px;font-size:12px" onclick="prefileSavedRoute(${i})">Prefile on VATSIM</button></td></tr>`
   ).join('');
-  // keep prefile working against the combined list
   window.__ALL_ROUTES = all;
 }
-// prefile a saved route to VATSIM using the REAL SimBrief route string
 function prefileSavedRoute(i){
   const list = window.__ALL_ROUTES || SAVED_ROUTES;
   const r=list[i]; if(!r) return;
@@ -1092,8 +1398,8 @@ function renderHubsList(){
   el.innerHTML = `<b>Network hubs (${HUBS.length}):</b> ` + HUBS.join(' · ');
 }
 
-// ---- SCHEDULED ROUTES ----
 function createSchedule(){
+  if(!(SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager'))) return;
   const dep=(document.getElementById('sc-dep').value||'').toUpperCase().trim();
   const arr=(document.getElementById('sc-arr').value||'').toUpperCase().trim();
   const ac=(document.getElementById('sc-ac').value||'').toUpperCase().trim();
@@ -1102,7 +1408,6 @@ function createSchedule(){
   if(dep.length!==4||arr.length!==4){ alert('Enter valid 4-letter ICAO codes.'); return; }
   const sched={dep,arr,ac,cls,time};
   saveToBridge('/schedule', sched);
-  // optimistic local add
   if(!window.SCHEDULE) window.SCHEDULE=[];
   window.SCHEDULE.unshift({id:Date.now(),dep,arr,ac,cls,time,claimed_by:'',claimed_name:'',status:'Open'});
   renderSchedule();
@@ -1113,8 +1418,8 @@ function renderSchedule(){
   const body=document.getElementById('sched-body');
   if(!body) return;
   const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
-  // show/hide the staff create form
   const cr=document.getElementById('sched-create'); if(cr) cr.style.display = staff?'block':'none';
+  const rb=document.getElementById('route-builder'); if(rb) rb.style.display = staff?'block':'none';
   const list = window.SCHEDULE||[];
   if(!list.length){ body.innerHTML='<tr><td colspan="6" class="empty">No scheduled routes yet.</td></tr>'; return; }
   const myType = PILOT_TYPE;
@@ -1147,7 +1452,9 @@ function claimRoute(id){
   const r=(window.SCHEDULE||[]).find(x=>x.id===id); if(!r) return;
   r.status='Claimed'; r.claimed_by=SESSION.user; r.claimed_name=displayName(SESSION.user);
   saveToBridge('/claim', {id, by:SESSION.user, name:displayName(SESSION.user)});
-  renderSchedule();
+  if(document.getElementById('sched-body')) renderSchedule();
+  const cv=document.getElementById('create');
+  if(cv && cv.classList.contains('on') && typeof renderCreate==='function') renderCreate();
 }
 function removeSchedule(id){
   window.SCHEDULE=(window.SCHEDULE||[]).filter(x=>x.id!==id);
@@ -1155,7 +1462,6 @@ function removeSchedule(id){
   renderSchedule();
 }
 
-// ---- nav ----
 document.querySelectorAll('nav button').forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
@@ -1165,6 +1471,8 @@ document.querySelectorAll('nav button').forEach(b=>{
     if(b.dataset.view==='mapview' && map) setTimeout(()=>map.invalidateSize(),50);
     if(b.dataset.view==='create') renderCreate();
     if(b.dataset.view==='roster') renderRoster();
+    if(b.dataset.view==='scoring') renderPireps();
+    if(b.dataset.view==='leaderboard') renderLeaderboard();
     if(b.dataset.view==='routes'){ renderRoutes(); renderHubsList(); renderSchedule(); }
   };
 });
@@ -1176,7 +1484,6 @@ function toggleDark(){
   if(map) setTimeout(()=>map.invalidateSize(),60);
 }
 
-// ---- SOP alert box (fed by the ACARS bridge) ----
 let lastAlertTs = 0;
 function beep(){
   try{
@@ -1196,7 +1503,6 @@ async function pollAlerts(){
     box.classList.add(a.level||'clear');
     document.getElementById('alert-msg').textContent = a.msg || 'All clear';
     box.classList.add('show');
-    // beep only on a NEW non-clear alert
     if(a.ts && a.ts!==lastAlertTs && a.level && a.level!=='clear'){ beep(); }
     lastAlertTs = a.ts||0;
   }catch(e){ /* bridge not running: hide box */
@@ -1210,15 +1516,130 @@ loadState();
 renderChallenge();
 tryAutoLogin();
 
+// ---- LEADERBOARD ----
+let LB_METRIC = 'butters';
+const LB_METRICS = [
+  {key:'butters', label:'Butter Landings', unit:'butters'},
+  {key:'hours',   label:'Block Hours',     unit:'h'},
+  {key:'flights', label:'Flights',         unit:'flights'},
+  {key:'clean',   label:'Clean Flights',   unit:'clean'},
+  {key:'score',   label:'Avg Score',       unit:'avg'},
+];
+// start of the current challenge week (Monday 00:00) — flights before this don't count
+function weekStart(){
+  const {endsAt} = activeChallenge();
+  return new Date(endsAt.getTime() - 7*24*60*60*1000);
+}
+function renderLeaderboard(){
+  const tabs = document.getElementById('lb-tabs');
+  const body = document.getElementById('lb-body');
+  if(!tabs || !body) return;
+  tabs.innerHTML = LB_METRICS.map(m=>
+    `<button onclick="LB_METRIC='${m.key}';renderLeaderboard()" style="padding:7px 14px;font-size:12px;border-radius:8px;cursor:pointer;border:1px solid ${m.key===LB_METRIC?'#1a6fa8':'var(--line)'};background:${m.key===LB_METRIC?'#1a6fa8':'#fff'};color:${m.key===LB_METRIC?'#fff':'var(--sub)'};font-weight:${m.key===LB_METRIC?'700':'400'}">${m.label}</button>`
+  ).join('');
+
+  const start = weekStart();
+  const flights = (window.FLIGHTS||[]).filter(f=>{
+    if(!f.filed_at) return false;
+    return new Date(f.filed_at) >= start;
+  });
+
+  // aggregate per pilot
+  const agg = {};
+  flights.forEach(f=>{
+    const u = (f.pilot||'').toUpperCase(); if(!u) return;
+    const a = agg[u] || (agg[u] = {butters:0, hours:0, flights:0, clean:0, scoreSum:0});
+    a.flights += 1;
+    a.hours += (f.hours||0);
+    if((f.tier||'').toLowerCase()==='butter') a.butters += 1;
+    if((f.violations||0)===0) a.clean += 1;
+    a.scoreSum += (f.score||0);
+  });
+
+  // build rankable rows
+  let rows = Object.keys(agg).map(u=>{
+    const a = agg[u];
+    let val;
+    if(LB_METRIC==='butters') val = a.butters;
+    else if(LB_METRIC==='hours') val = Math.round(a.hours*10)/10;
+    else if(LB_METRIC==='flights') val = a.flights;
+    else if(LB_METRIC==='clean') val = a.clean;
+    else if(LB_METRIC==='score') val = a.flights>=3 ? Math.round(a.scoreSum/a.flights) : null; // min 3 flights
+    return {u, name:displayName(u), val, flights:a.flights};
+  }).filter(r=>r.val!==null && r.val>0);
+
+  rows.sort((x,y)=> y.val - x.val);
+
+  const unit = (LB_METRICS.find(m=>m.key===LB_METRIC)||{}).unit||'';
+  const me = SESSION && SESSION.user;
+  if(!rows.length){
+    const hint = LB_METRIC==='score' ? 'Fly at least 3 flights to appear on the average-score board.' : 'Fly a flight and you will show up here.';
+    body.innerHTML = '<div class="featnote">No qualifying flights yet this week. ' + hint + '</div>';
+    return;
+  }
+  const medal = i => i===0?'\ud83e\udd47':i===1?'\ud83e\udd48':i===2?'\ud83e\udd49':`<span style="color:var(--sub)">${i+1}</span>`;
+  body.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:14px">
+    <thead><tr style="text-align:left;color:var(--sub);font-size:11px;text-transform:uppercase;letter-spacing:.4px">
+      <th style="padding:8px 10px;width:50px">Rank</th><th style="padding:8px 10px">Pilot</th>
+      <th style="padding:8px 10px;text-align:right">${(LB_METRICS.find(m=>m.key===LB_METRIC)||{}).label}</th>
+    </tr></thead><tbody>` +
+    rows.map((r,i)=>`<tr style="border-top:1px solid var(--line);${r.u===(me||'').toUpperCase()?'background:rgba(26,111,168,.08)':''}">
+      <td style="padding:9px 10px;font-size:16px">${medal(i)}</td>
+      <td style="padding:9px 10px"><b>${r.name}</b>${r.u===(me||'').toUpperCase()?' <span style="color:#1a6fa8;font-size:11px">(you)</span>':''}</td>
+      <td style="padding:9px 10px;text-align:right"><b>${r.val}</b> <span style="color:var(--sub);font-size:12px">${unit}</span></td>
+    </tr>`).join('') + `</tbody></table>`;
+}
+
+// ---- SCORING & PIREPS ----
+// Staff see every pilot's flights; a pilot sees only their own.
+function renderPireps(){
+  const body = document.getElementById('pirep-body');
+  if(!body) return;
+  const staff = SESSION && (SESSION.role==='ceo'||SESSION.role==='fleet_manager');
+  const me = (SESSION && SESSION.user || '').toUpperCase();
+  let flights = (window.FLIGHTS||[]).slice();
+  if(!staff) flights = flights.filter(f=>(f.pilot||'').toUpperCase()===me);
+  flights.reverse(); // newest first
+
+  // update the subtitle to reflect scope
+  const sub = document.querySelector('#scoring .sub');
+  if(sub) sub.textContent = staff
+    ? 'Turn flights into trusted records. Scoring goes beyond landing rate — procedure compliance and aircraft care count too. Every pilot\u2019s flights appear here.'
+    : 'Your filed flight reports. Scoring goes beyond landing rate — procedure compliance and aircraft care count too.';
+
+  if(!flights.length){
+    body.innerHTML = `<tr><td colspan="7" class="empty">${staff?'No PIREPs filed yet. Completed flights will appear here.':'You haven\u2019t filed any flights yet. Fly a route and your report will appear here.'}</td></tr>`;
+    return;
+  }
+  const tierColor = t=>{ const x=(t||'').toLowerCase();
+    return x==='butter'?'#1a8a4a':x==='smooth'?'#4a9e5c':x==='firm'?'#a07d1a':x==='hard'?'#c46a1a':(x==='unsafe'||x.includes('void'))?'#c33':'var(--sub)'; };
+  body.innerHTML = flights.map((f,i)=>{
+    const grade = f.tier ? `<span style="color:${tierColor(f.tier)};font-weight:700">${f.tier}</span>${f.landing_fpm!=null?` <span style="color:var(--sub);font-size:11px">(${f.landing_fpm} fpm)</span>`:''}` : '—';
+    return `<tr>
+      <td>${i+1}</td>
+      <td><b>${staff?displayName(f.pilot||''):(f.pilot||'')}</b></td>
+      <td>${f.dep||'—'} → ${f.arr||'—'}</td>
+      <td>${f.aircraft||f.reg||'—'}</td>
+      <td>${f.hours!=null?f.hours+' h':'—'}</td>
+      <td>${grade}</td>
+      <td><b>${f.score!=null?f.score:'—'}</b></td>
+    </tr>`;
+  }).join('');
+}
+
 function renderChallenge(){
   const b = document.getElementById('challenge-banner');
   if(!b) return;
-  const c = WEEKLY_CHALLENGE;
-  if(!c || !c.title || c.title==="PUT_TITLE_HERE"){ b.style.display='none'; return; }
+  const {c, endsAt} = activeChallenge();
+  if(!c || !c.title){ b.style.display='none'; return; }
+  b.style.display='';
   b.innerHTML = `<div class="ct">\u2605 Weekly Challenge</div>
-    <h4>${c.title}</h4><p>${c.detail}</p>` +
+    <h4>${c.title}</h4><p>${c.detail}</p>
+    <div class="cd">\u23f1 ${countdownText(endsAt)}</div>` +
     (c.reward ? `<div class="rw">\ud83c\udfc6 ${c.reward}</div>` : '');
 }
+// keep the countdown fresh
+setInterval(()=>{ if(document.getElementById('challenge-banner')) renderChallenge(); }, 60000);
 renderFleet();
 renderShop();
 renderRoutes();
@@ -1226,14 +1647,11 @@ refresh();
 setInterval(refresh, 20000);
 setInterval(loadState, 15000);   // keep schedule/routes/roster synced across pilots
 
-// ===== LIVE FLIGHT PANEL =====
-// Appears when ACARS detects THIS pilot is in an active flight in the sim.
 async function checkActiveFlight(){
   if(!SESSION) return;
   try{
     const r = await fetch(`${BRIDGE_URL}/live`,{cache:'no-store'});
     const d = await r.json();
-    // find this pilot's flight (their username IS their callsign, e.g. KLA772)
     const me = SESSION.user;
     const mine = (d.flights||[]).find(f =>
       (f.callsign||'').toUpperCase()===me.toUpperCase() ||

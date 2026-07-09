@@ -173,6 +173,7 @@ class Sim:
         alt = self._q("PLANE_ALTITUDE")
         return {
             "title": title,
+            "tail": self._q("ATC_ID","") or "",
             "alt": alt,
             "alt_agl": self._q("PLANE_ALT_ABOVE_GROUND", alt),
             "ias": self._q("AIRSPEED_INDICATED"),
@@ -254,7 +255,7 @@ def haversine_nm(lat1, lon1, lat2, lon2):
         return 0.0
 
 # ---- push live telemetry to the bridge server so the dashboard can draw it ----
-BRIDGE = os.environ.get("BRIDGE_URL", "https://amal-airways-fms.onrender.com")
+BRIDGE = os.environ.get("BRIDGE_URL", "http://52.3.240.140")
 def bridge_post(path, payload):
     try:
         import urllib.request
@@ -431,6 +432,7 @@ def run_flight(sim, overlay, callsign, dep, arr):
     # persist the completed flight so it shows in history + rolls pilot totals
     bridge_post("/flight", {
         "pilot": callsign, "dep": dep, "arr": arr, "aircraft": title,
+        "reg": sim.state().get("tail",""),
         "hours": round(block_min/60, 2), "landing_fpm": fpm, "tier": tier,
         "score": final, "violations": len(logged), "filed_at": now()
     })

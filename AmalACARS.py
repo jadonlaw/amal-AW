@@ -254,7 +254,7 @@ def haversine_nm(lat1, lon1, lat2, lon2):
         return 0.0
 
 # ---- push live telemetry to the bridge server so the dashboard can draw it ----
-BRIDGE = os.environ.get("BRIDGE_URL", "https://amal-airways-fms.onrender.com")
+BRIDGE = os.environ.get("BRIDGE_URL", "http://52.3.240.140")
 def bridge_post(path, payload):
     try:
         import urllib.request

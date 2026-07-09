@@ -17,7 +17,7 @@ STEP 2 — build the single .exe
 ------------------------------
 Run this ONE command (all on one line):
 
-    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." AmalAirways.py
+    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." --add-data "airports.js;." AmalAirways.py
 
   -> produces  dist\AmalAirways.exe
   This is the whole system in one file. Double-click = native app window with

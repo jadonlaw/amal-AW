@@ -1,53 +1,34 @@
 #!/usr/bin/env python3
 """
-Amal Airways — Flight Management System (fused client)
-======================================================
-ONE app. Native window (not a browser). Everything welded together:
+Amal Airways — Flight Management System
 
-  • The dashboard (map, login, fleet, create-flight, dark mode, SOP alert box)
-  • The live bridge (feeds your flight to the map, on or off VATSIM)
-  • The ACARS engine (SimConnect preflight checklist, violation siren,
-    landing capture, slew detection) — started from the Create Flight screen
-
-This is the file PyInstaller turns into AmalAirways.exe.
-
-RUN (dev):
-    pip install pywebview
-    python AmalAirways.py
-
-BUILD THE STANDALONE .EXE (one line, all free):
-    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." AmalAirways.py
-
-Then wrap dist\\AmalAirways.exe in a free Windows installer with Inno Setup
-(see BUILD_DESKTOP_APP.txt). Pilots double-click it — no Python, no browser,
-no terminal. Opens as a native app; SimConnect is bundled inside.
+Run (dev):   pip install pywebview  &&  python AmalAirways.py
+Build .exe:  python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." --add-data "airports.js;." AmalAirways.py
+See BUILD_DESKTOP_APP.txt for the installer steps.
 """
 
 import os, sys, threading, time, json
 
-# ---------- locate bundled files (works both as .py and as PyInstaller .exe) ----------
 def resource_path(name):
     base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base, name)
 
 HTML_PATH = resource_path("AmalAirways.html")
 
-# ---------- bring in the bridge server (embedded, same process) ----------
-# We reuse the standalone bridge logic but run it in a background thread.
 import http.server, socketserver
 
 PORT = 8770
 LIVE = {}
-# live shared bridge — the desktop app relays flights here so everyone sees them
-RENDER_BRIDGE = os.environ.get("RENDER_BRIDGE", "https://amal-airways-fms.onrender.com")
 
-def relay_to_render(path, payload):
+AMAZON_BRIDGE = os.environ.get("AMAZON_BRIDGE", "http://52.3.240.140")
+
+def relay_to_amazon(path, payload):
     """Forward a local update up to the hosted bridge so the whole airline sees it."""
     def _go():
         try:
             import urllib.request
             urllib.request.urlopen(urllib.request.Request(
-                RENDER_BRIDGE + path, data=json.dumps(payload).encode(),
+                AMAZON_BRIDGE + path, data=json.dumps(payload).encode(),
                 method="POST", headers={"Content-Type": "application/json"}), timeout=8)
         except Exception:
             pass
@@ -108,12 +89,12 @@ class _Handler(http.server.SimpleHTTPRequestHandler):
             cs = (data.get("callsign") or "UNKNOWN").upper()
             data["_ts"] = time.time(); data["source"] = "acars"
             with LOCK: LIVE[cs] = data
-            relay_to_render("/update", data)   # share with the whole airline
+            relay_to_amazon("/update", data)
             self._send(200, json.dumps({"ok": True})); return
         if self.path == "/end":
             cs = (data.get("callsign") or "").upper()
             with LOCK: LIVE.pop(cs, None)
-            relay_to_render("/end", {"callsign": cs})
+            relay_to_amazon("/end", {"callsign": cs})
             self._send(200, json.dumps({"ok": True})); return
         self._send(404, json.dumps({"error": "not found"}))
     def log_message(self, *a): pass
@@ -123,15 +104,12 @@ def start_bridge():
     try:
         httpd = socketserver.TCPServer(("127.0.0.1", PORT), _Handler)
     except OSError:
-        return  # already running
+        return
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
-# ---------- ACARS engine bridge (optional; used by Create Flight "Start ACARS") ----------
-# The heavy SimConnect engine lives in acars_client.py. We import it lazily so the
-# app still opens even if SimConnect isn't installed (e.g. no MSFS on this PC yet).
 def start_acars(callsign, dep, arr, demo=False):
-    # the engine posts to the local in-process bridge, which relays up to Render
-    os.environ["BRIDGE_URL"] = f"http://127.0.0.1:{PORT}"
+
+    os.environ["BRIDGE_URL"] = AMAZON_BRIDGE
     def run():
         try:
             import acars_client as ac
@@ -141,7 +119,7 @@ def start_acars(callsign, dep, arr, demo=False):
                 ac.run_preflight(sim, overlay)
             ac.run_flight(sim, overlay, callsign, dep, arr)
         except Exception as e:
-            # push the error to the dashboard alert box instead of crashing the app
+
             try:
                 import urllib.request
                 urllib.request.urlopen(urllib.request.Request(
@@ -152,7 +130,6 @@ def start_acars(callsign, dep, arr, demo=False):
                 pass
     threading.Thread(target=run, daemon=True).start()
 
-# ---------- JS <-> Python bridge exposed to the dashboard ----------
 class Api:
     def start_flight(self, callsign, dep, arr):
         start_acars(callsign or "KLA000", dep or "----", arr or "----", demo=False)
@@ -161,7 +138,6 @@ class Api:
         start_acars("KLA123", "KATL", "KMCO", demo=True)
         return {"ok": True, "mode": "demo"}
 
-# ---------- launch the native window ----------
 def main():
     start_bridge()
     time.sleep(0.4)
@@ -174,7 +150,7 @@ def main():
             js_api=Api())
         webview.start()
     except Exception as e:
-        # fallback: if pywebview can't start (rare), open in default browser
+
         print(f"(Native window unavailable: {e} — opening in browser instead.)")
         import webbrowser
         webbrowser.open(f"http://127.0.0.1:{PORT}/")

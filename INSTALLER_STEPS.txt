@@ -1,0 +1,58 @@
+========================================
+AMAL AIRWAYS — BUILD THE INSTALLER
+========================================
+Goal: turn the app into AmalAirways_Setup.exe that pilots download once.
+All free. Do this on your Windows build PC.
+
+FILES YOU NEED (all in one folder, e.g. D:\AmalAirways\):
+    AmalAirways.py
+    AmalAirways.html
+    acars_client.py
+    airports.js
+    AmalAirways_installer.iss
+
+--------------------------------------------------
+STEP 1 — install the build tools (one time only)
+--------------------------------------------------
+Open PowerShell in that folder and run:
+
+    pip install pywebview pyinstaller SimConnect
+
+Wait for it to finish.
+
+--------------------------------------------------
+STEP 2 — build the single .exe
+--------------------------------------------------
+Run this ONE line (copy it exactly):
+
+    python -m PyInstaller --onefile --windowed --name AmalAirways --collect-all SimConnect --add-data "AmalAirways.html;." --add-data "acars_client.py;." --add-data "airports.js;." AmalAirways.py
+
+It runs for 1-3 minutes. When done you'll have:
+    dist\AmalAirways.exe   <- the whole app in one file
+
+TEST IT: double-click dist\AmalAirways.exe. The app window should open
+with the login screen. If it opens, the build worked.
+
+--------------------------------------------------
+STEP 3 — make the installer (free)
+--------------------------------------------------
+1. Download Inno Setup (free): https://jrsoftware.org/isdl.php
+   Install it (just click through).
+2. Open AmalAirways_installer.iss in Inno Setup
+   (right-click the .iss file -> Open with Inno Setup, or open Inno
+    Setup and File -> Open).
+3. Click  Build -> Compile   (or the green ▶ button).
+
+   -> produces:  Output\AmalAirways_Setup.exe
+
+THAT'S YOUR ONE-CLICK INSTALLER. Share it with pilots (Discord, a link).
+They double-click it -> installs -> desktop + Start Menu shortcut -> done.
+
+--------------------------------------------------
+NOTES
+--------------------------------------------------
+- First launch shows Windows "unknown publisher" -> More info -> Run anyway.
+  (Removing that needs a paid code-signing cert — later, optional.)
+- The app points at your server 52.3.240.140 automatically.
+- To UPDATE later: rebuild the .exe (Step 2) and re-share. Pilots reinstall.
+  (Server/dashboard/bot updates still use the easy GitHub git-pull method.)

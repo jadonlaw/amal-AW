@@ -18,28 +18,63 @@ No dependencies — pure Python standard library.
 
 import http.server, socketserver, json, os, threading, time
 
-PORT = int(os.environ.get("PORT", "8770"))   # hosts set PORT; local default 8770
-HOST = os.environ.get("HOST", "0.0.0.0")      # 0.0.0.0 so it's reachable when hosted
+PORT = int(os.environ.get("PORT", "8770"))
+HOST = os.environ.get("HOST", "0.0.0.0")
 HERE = os.path.dirname(os.path.abspath(__file__))
 HTML = os.path.join(HERE, "AmalAirways.html")
 
-# in-memory store of live flights: callsign -> telemetry dict
 LIVE = {}
-ALERT = {"msg": "All clear", "level": "clear", "ts": 0}  # latest SOP alert for the dashboard
+ALERT = {"msg": "All clear", "level": "clear", "ts": 0}
 
-# ---- persistent airline state (saved to disk, shared by everyone) ----
 import json as _json
 STATE_FILE = os.path.join(HERE, "airline_state.json")
 
 def _default_state():
     return {
-        "fleet": [],          # aircraft owned: reg, type, loc, status, hours, maint
-        "maintenance": [],    # maintenance log entries
-        "flights": [],        # completed flight history (PIREPs)
-        "pilots": {},         # username -> {name, role, type, flights, hours}
-        "routes": [],         # live routes anyone can fly: {dep, arr, by, ts}
-        "schedule": [],       # scheduled routes: {id, dep, arr, ac, cls, time, claimed_by, status}
+        "fleet": [],
+        "maintenance": [],
+        "flights": [],
+        "pilots": {},
+        "routes": [],
+        "schedule": [],
+        "new_pilots": [],
     }
+
+CRED_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CREDENTIALS.txt")
+
+def _role_for(username):
+    u = username.upper()
+    if u in ("CEO1", "CEO01"): return "ceo"
+    if u.startswith("FM"): return "fleet_manager"
+    return "pilot"
+
+def load_credentials():
+    creds = {}
+    try:
+        for line in open(CRED_FILE, encoding="utf-8"):
+            if ":" in line and "===" not in line:
+                left = line.split("->")[0]
+                name = ""
+                if "->" in line:
+                    name = line.split("->", 1)[1].strip()
+                u, p = left.split(":", 1)
+                u = u.strip().upper(); p = p.strip()
+                if u and p:
+                    creds[u] = {"pass": p, "role": _role_for(u), "name": name}
+    except FileNotFoundError:
+        pass
+    return creds
+
+CREDS = load_credentials()
+
+def add_credential(username, passcode, name=""):
+    u = username.upper()
+    CREDS[u] = {"pass": passcode, "role": _role_for(u), "name": name}
+    try:
+        with open(CRED_FILE, "a", encoding="utf-8") as f:
+            f.write(f"\n{u} : {passcode}" + (f"  ->  {name}" if name else ""))
+    except Exception as e:
+        print("could not append credential:", e)
 
 def load_state():
     try:
@@ -63,8 +98,6 @@ def save_state(s):
 STATE = load_state()
 LOCK = threading.Lock()
 
-# ---- SCHEDULE ENFORCEMENT ----
-# Parse a time like "3:00 PM EST" into today's epoch (server local time, best-effort).
 def _parse_sched_time(tstr):
     import datetime, re
     if not tstr: return None
@@ -81,30 +114,28 @@ def _parse_sched_time(tstr):
 def evaluate_schedule(state):
     """Flag claimed routes as Delayed / Missed Flight based on show-up vs scheduled time."""
     now = time.time()
-    GRACE_DELAY = 15*60      # 15 min late = Delayed
-    GRACE_MISS  = 60*60      # 60 min late & never showed = Missed Flight
+    GRACE_DELAY = 15*60
+    GRACE_MISS  = 60*60
     for r in state.get("schedule", []):
-        if r.get("status") not in ("Claimed",):  # only pending claims get evaluated
+        if r.get("status") not in ("Claimed",):
             continue
         st = _parse_sched_time(r.get("time",""))
         if not st:
             continue
         if r.get("showed"):
-            continue  # they connected at dep -> handled in /update (marked Flown)
+            continue
         late = now - st
         if late > GRACE_MISS:
             r["status"] = "Missed Flight"
         elif late > GRACE_DELAY:
             r["status"] = "Delayed"
-STALE_SECONDS = 30   # drop a flight if no update in this long
-
+STALE_SECONDS = 30
 
 def prune():
     now = time.time()
     with LOCK:
         for cs in [k for k, v in LIVE.items() if now - v.get("_ts", 0) > STALE_SECONDS]:
             del LIVE[cs]
-
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def _send(self, code, body, ctype="application/json"):
@@ -176,8 +207,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             data["source"] = "acars"
             with LOCK:
                 LIVE[cs] = data
-                # --- ENFORCEMENT: mark a claimed scheduled route as "showed" ---
-                # if this pilot connected at (or near) the departure airport.
+
                 pilot = (data.get("callsign") or "").upper()
                 dep = (data.get("dep") or "").upper()
                 for r in STATE.get("schedule", []):
@@ -201,8 +231,26 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self._send(200, json.dumps({"ok": True, "ended": cs}))
             return
 
-        # ---- persistent airline state saving ----
-        if self.path in ("/buy", "/maintenance", "/flight", "/pilot", "/state", "/route", "/schedule", "/claim", "/accept"):
+        if self.path == "/login":
+            length = int(self.headers.get("Content-Length", 0))
+            try:
+                data = json.loads(self.rfile.read(length) or b"{}")
+            except Exception:
+                self._send(400, json.dumps({"error": "bad json"})); return
+            u = (data.get("username") or "").strip().upper()
+            p = (data.get("passcode") or "").strip()
+            acct = CREDS.get(u)
+            if not acct or acct["pass"].upper() != p.upper():
+                self._send(200, json.dumps({"ok": False})); return
+            with LOCK:
+                pinfo = STATE["pilots"].get(u, {})
+            self._send(200, json.dumps({
+                "ok": True, "username": u, "role": acct["role"],
+                "name": acct.get("name") or pinfo.get("name") or u,
+                "ptype": pinfo.get("ptype", "commercial")}))
+            return
+
+        if self.path in ("/buy", "/maintenance", "/flight", "/pilot", "/state", "/route", "/schedule", "/claim", "/accept", "/newpilot", "/rolemade"):
             length = int(self.headers.get("Content-Length", 0))
             try:
                 data = json.loads(self.rfile.read(length) or b"{}")
@@ -213,17 +261,17 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     STATE["fleet"].append(data)
                 elif self.path == "/maintenance":
                     STATE["maintenance"].append(data)
-                    # update the aircraft's hours_since_maint if reg matches
+
                     for a in STATE["fleet"]:
                         if a.get("reg") == data.get("reg"):
                             a["maint"] = 0
                 elif self.path == "/flight":
-                    # tag with a sequential id so the bot can see what's new
+
                     data["id"] = STATE.get("_flight_seq", 0) + 1
                     STATE["_flight_seq"] = data["id"]
                     STATE["flights"].append(data)
                     fl_hours = data.get("hours", 0)
-                    # roll the pilot's totals + detect rank-up
+
                     u = (data.get("pilot") or "").upper()
                     if u:
                         p = STATE["pilots"].setdefault(u, {"name": u, "role": "Pilot",
@@ -234,14 +282,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                         data["_old_hours"] = old_hours
                         data["_new_hours"] = p["hours"]
                         data["_pilot_name"] = p.get("name", u)
-                    # --- MAINTENANCE: add flight hours to the aircraft that flew ---
+
                     reg = data.get("reg") or data.get("aircraft_reg") or ""
                     if reg:
                         for a in STATE["fleet"]:
                             if a.get("reg")==reg:
                                 a["hours"] = round(a.get("hours",0) + fl_hours, 1)
                                 a["maint"] = round(a.get("maint",0) + fl_hours, 1)
-                                # auto-ground if maintenance interval exceeded
+
                                 if a["maint"] >= 100:
                                     a["status"] = "Grounded — maintenance"
                                 break
@@ -249,8 +297,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     u = (data.get("username") or "").upper()
                     if u:
                         STATE["pilots"][u] = {**STATE["pilots"].get(u, {}), **data}
+                elif self.path == "/newpilot":
+
+                    u = (data.get("username") or "").upper()
+                    if u:
+                        STATE["pilots"][u] = {**STATE["pilots"].get(u, {}),
+                            "name": data.get("name", u), "role": "Pilot",
+                            "ptype": data.get("ptype", "commercial"),
+                            "flights": STATE["pilots"].get(u, {}).get("flights", 0),
+                            "hours": STATE["pilots"].get(u, {}).get("hours", 0)}
+
+                        pc = data.get("passcode")
+                        if pc and u not in CREDS:
+                            add_credential(u, pc, data.get("name", u))
+                        if not any(q.get("username")==u for q in STATE["new_pilots"]):
+                            STATE["new_pilots"].append({"username": u,
+                                "name": data.get("name", u), "made": False, "ts": time.time()})
+                elif self.path == "/rolemade":
+
+                    u = (data.get("username") or "").upper()
+                    for q in STATE["new_pilots"]:
+                        if q.get("username")==u:
+                            q["made"] = True
+                            break
                 elif self.path == "/accept":
-                    # record that a pilot accepted the welcome/ToS letter
+
                     u = (data.get("username") or "").upper()
                     if u:
                         p = STATE["pilots"].setdefault(u, {"name":u,"role":"Pilot","flights":0,"hours":0})
@@ -259,14 +330,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     dep = (data.get("dep") or "").upper()
                     arr = (data.get("arr") or "").upper()
                     if len(dep)==4 and len(arr)==4:
-                        # avoid duplicate routes
+
                         exists = any(r.get("dep")==dep and r.get("arr")==arr for r in STATE["routes"])
                         if not exists:
                             STATE["routes"].insert(0, {"dep":dep, "arr":arr,
                                 "by": data.get("by",""), "ts": time.time(),
                                 "f": "KLA"+str(int(time.time()))[-3:]})
                 elif self.path == "/schedule":
-                    # staff creates a scheduled route
+
                     dep=(data.get("dep") or "").upper(); arr=(data.get("arr") or "").upper()
                     if len(dep)==4 and len(arr)==4:
                         sid = STATE.get("_sched_seq",0)+1; STATE["_sched_seq"]=sid
@@ -276,7 +347,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                             "time": data.get("time",""), "claimed_by": "", "claimed_name":"",
                             "status": "Open"})
                 elif self.path == "/claim":
-                    # a pilot claims (or staff removes) a scheduled route
+
                     sid = data.get("id")
                     for r in STATE["schedule"]:
                         if r.get("id")==sid:
@@ -286,10 +357,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                                 r["claimed_by"]=data.get("by",""); r["claimed_name"]=data.get("name","")
                                 r["status"]="Claimed"
                                 r["claimed_ts"]=time.time()
-                                r["showed"]=False   # set True when they connect at the dep airport
+                                r["showed"]=False
                             break
                 elif self.path == "/state":
-                    # full overwrite (used to seed the roster)
+
                     for k in ("fleet", "maintenance", "flights", "pilots"):
                         if k in data:
                             STATE[k] = data[k]
@@ -300,8 +371,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self._send(404, json.dumps({"error": "not found"}))
 
     def log_message(self, *a):
-        pass  # quiet
-
+        pass
 
 def serve():
     socketserver.TCPServer.allow_reuse_address = True
@@ -310,7 +380,6 @@ def serve():
         print(f"Dashboard:  http://localhost:{PORT}/")
         print(f"Live feed:  http://localhost:{PORT}/live")
         httpd.serve_forever()
-
 
 if __name__ == "__main__":
     serve()
